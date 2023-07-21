@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="@dimen/_10sdp"
+    android:textColor="@color/white"
+    style="?android:attr/spinnerDropDownItemStyle"
+    android:textSize="12dp"
+    android:singleLine="true"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:ellipsize="marquee"
+    android:fontFamily="@font/poppins_light">
+</CheckedTextView>

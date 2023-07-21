@@ -1,0 +1,17 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() // Warning: this repository is going to shut down soon
+        maven { url 'https://artifacts.applovin.com/android' }
+        maven {
+            url "https://jitpack.io"
+        }
+        maven { url 'https://jitpack.io' }
+    }
+}
+rootProject.name = "Stickers"
+include ':app'
+include ':library'
+include ':imageeditlibrary'

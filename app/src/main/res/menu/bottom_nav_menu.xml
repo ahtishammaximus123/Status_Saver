@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/live_statuses"
+        android:icon="@drawable/ic_livestatus"
+        android:title="@string/title_live_status" />
+
+    <item
+        android:id="@+id/sticker_maker"
+        android:icon="@drawable/ic_sticker_ic__2_"
+        android:title="@string/title_sticker_maker" />
+
+    <item
+        android:id="@+id/photo_collage"
+        android:icon="@drawable/ic_collage_ic__2_"
+        android:title="@string/title_photo_collage" />
+
+</menu>

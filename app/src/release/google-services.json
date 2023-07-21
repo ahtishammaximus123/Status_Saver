@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "284425721532",
+    "project_id": "whatsapp-status-saver-3541f",
+    "storage_bucket": "whatsapp-status-saver-3541f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284425721532:android:b7a9c951eb3f5f749262b9",
+        "android_client_info": {
+          "package_name": "com.status.video.saver.for.whatsapp.video.downloader.download.satatuses"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "284425721532-uln6qdbcv0eulgam2rjhgrk1v7vnr01u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbNf5tl63eubyqp1VHjrc_rjGM-vq43fk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "284425721532-uln6qdbcv0eulgam2rjhgrk1v7vnr01u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-8234579426147131~3652699507"
+    }
+  ],
+  "configuration_version": "1"
+}

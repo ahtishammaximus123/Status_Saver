@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/live_statuses">
+
+    <navigation
+        android:id="@+id/photo_collage"
+        app:startDestination="@id/photoCollageFragment">
+        <activity
+            android:id="@+id/CollageProcessActivity"
+            android:name="com.example.stickers.Activities.PhotoCollage.CollageProcessActivity"
+            android:label="Layouts"
+            tools:layout="@layout/activity_collage_process" />
+        <fragment
+            android:id="@+id/photoCollageFragment"
+            android:name="com.example.stickers.Activities.newDashboard.ui.photocollage.PhotoCollageFragment"
+            android:label="@string/title_photo_collage"
+            tools:layout="@layout/fragment_photo_collage">
+
+            <action
+                android:id="@+id/action_photoCollageFragment_to_galleryItemFragment"
+                app:destination="@id/galleryItemFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/galleryItemFragment"
+            android:name="com.example.stickers.Activities.sticker.MultipleGalleryFragment"
+            android:label="Gallery"
+            tools:layout="@layout/fragment_gallery_item_list_new">
+            <action
+                android:id="@+id/action_galleryItemFragment_to_CollageProcessActivity"
+                app:destination="@id/CollageProcessActivity" />
+        </fragment>
+
+    </navigation>
+    <navigation
+        android:id="@+id/sticker_maker"
+        app:startDestination="@id/stickerMakerFragment">
+
+        <fragment
+            android:id="@+id/stickerMakerFragment"
+            android:name="com.example.stickers.WhatsAppBasedCode.StickerPackListActivityN"
+            android:label="@string/title_sticker_maker"
+            tools:layout="@layout/activity_sticker_pack_list">
+
+        </fragment>
+ <!--       <fragment
+            android:id="@+id/stickerMakerFragment"
+            android:name="com.example.stickers.Activities.sticker.StickerMakerFragment"
+            android:label="@string/title_sticker_maker"
+            tools:layout="@layout/fragment_sticker_maker">
+            <action
+                android:id="@+id/action_stickerMakerFragment_to_galleryFragment"
+                app:destination="@id/galleryFragment" />
+        </fragment>-->
+        <fragment
+            android:id="@+id/galleryFragment"
+            android:name="com.example.stickers.Activities.sticker.GalleryFragment"
+            android:label="Gallery"
+            tools:layout="@layout/fragment_gallery_item_list" />
+
+        <activity
+            android:id="@+id/stickerActivity"
+            android:name="com.example.stickers.Activities.sticker.StickerActivity"
+            android:label="StickerActivity"
+            tools:layout="@layout/activity_sticker" />
+    </navigation>
+    <navigation
+        android:id="@+id/live_statuses"
+        app:startDestination="@id/status">
+
+        <fragment
+            android:id="@+id/status"
+            android:name="com.example.stickers.Activities.newDashboard.StatusMainFragment"
+            android:label="@string/status_downloader"
+            tools:layout="@layout/fragment_status_main" />
+        <!--<fragment
+            android:id="@+id/LiveImagesFragment"
+            android:name="com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment"
+            android:label="@string/title_live_status"
+            tools:layout="@layout/fragment_live_images">
+            <action
+                android:id="@+id/action_LiveImagesFragment_to_LiveVideosFragment"
+
+                app:destination="@id/LiveVideosFragment" />
+            <action
+                android:id="@+id/action_LiveImagesFragment_to_SavedStatusesFragment"
+
+                app:destination="@id/SavedStatusesFragment"
+                app:popUpToInclusive="false" />
+        </fragment>
+        <fragment
+            android:id="@+id/LiveVideosFragment"
+            android:name="com.example.stickers.Activities.newDashboard.ui.videos.VideosFragment"
+            android:label="@string/title_live_status"
+
+            tools:layout="@layout/fragment_live_videos">
+
+            <action
+                android:id="@+id/action_LiveVideosFragment_to_LiveImagesFragment"
+
+                app:destination="@id/LiveImagesFragment" />
+            <action
+                android:id="@+id/action_LiveVideosFragment_to_SavedStatusesFragment"
+                app:destination="@id/SavedStatusesFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/SavedStatusesFragment"
+            android:name="com.example.stickers.Activities.newDashboard.ui.savedstatuses.SavedStatusesFragment"
+            android:label="@string/title_live_status"
+            tools:layout="@layout/fragment_saved_statuses">
+
+            <action
+                android:id="@+id/action_SavedStatusesFragment_to_LiveImagesFragment"
+
+                app:destination="@id/LiveImagesFragment" />
+            <action
+                android:id="@+id/action_SavedStatusesFragment_to_LiveVideosFragment"
+
+
+                app:destination="@id/LiveVideosFragment" />
+        </fragment>-->
+
+
+    </navigation>
+
+</navigation>

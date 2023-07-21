@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/SizeFragment"
+        android:icon="@drawable/resize"
+        android:title="Size" />
+
+    <item
+        android:id="@+id/LayoutsFragment"
+        android:icon="@drawable/ic_collage_ic__2_"
+        android:title="Layouts" />
+
+    <item
+        android:id="@+id/BackgroundFragment"
+        android:icon="@drawable/ic_background_ic"
+        android:title="Background" />
+
+</menu>

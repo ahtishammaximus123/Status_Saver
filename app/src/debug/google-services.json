@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "953961555179",
+    "project_id": "statussaver-cf860",
+    "storage_bucket": "statussaver-cf860.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953961555179:android:288804cfc8a4c48e3e8aae",
+        "android_client_info": {
+          "package_name": "status.saver.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "953961555179-8sbh8jjddt1tk2od4koqovt4jf424g23.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaZdokfI5IO2YbI0NdS22-7C4TQ3nRm-4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "953961555179-8sbh8jjddt1tk2od4koqovt4jf424g23.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+<!--    <item-->
+<!--        android:id="@+id/privacy_policy"-->
+<!--        android:icon="@drawable/ic_download"-->
+<!--        android:title="Privacy Policy" />-->
+
+<!--    <item-->
+<!--        android:id="@+id/share_app"-->
+<!--        android:icon="@drawable/ic_download"-->
+<!--        android:title="Share App" />-->
+
+<!--    <item-->
+<!--        android:id="@+id/rate_us"-->
+<!--        android:icon="@drawable/ic_download"-->
+<!--        android:title="Rate Us" />-->
+
+<!--    <item-->
+<!--        android:id="@+id/more_apps"-->
+<!--        android:icon="@drawable/ic_download"-->
+<!--        android:title="More Apps" />-->
+
+<!--    <item-->
+<!--        android:id="@+id/remove_ads"-->
+<!--        android:icon="@drawable/ic_download"-->
+<!--        android:title="Remove Ads" />-->
+
+</menu>

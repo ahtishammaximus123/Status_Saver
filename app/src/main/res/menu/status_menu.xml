@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    tools:context="com.idoideas.stickermaker.Activities.MainActivity">
+
+    <group
+        android:id="@+id/wa_menu"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_wa"
+            android:title="Whatsapp"
+            app:showAsAction="never" />
+
+        <item
+            android:id="@+id/action_ba"
+            android:title="Whatsapp Business"
+            app:showAsAction="never" />
+
+    </group>
+    <item
+        android:id="@+id/folder"
+        android:icon="@drawable/ic_folder"
+        android:title="@string/saved_files"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+</menu>

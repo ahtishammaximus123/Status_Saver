@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_photo_collage"
+    app:startDestination="@id/LayoutsFragment">
+    <fragment
+        android:id="@+id/LayoutsFragment"
+        android:name="com.example.stickers.Activities.newDashboard.ui.photocollage.LayoutsFragment"
+        android:label="Layouts"
+        tools:layout="@layout/photo_collage_layouts" />
+    <fragment
+        android:id="@+id/SizeFragment"
+        android:name="com.example.stickers.Activities.newDashboard.ui.photocollage.SizeFragment"
+        android:label="Size"
+        tools:layout="@layout/photo_collage_size" />
+    <fragment
+        android:id="@+id/BackgroundFragment"
+        android:name="com.example.stickers.Activities.newDashboard.ui.photocollage.BackgroundFragment"
+        android:label="Background"
+        tools:layout="@layout/photo_collage_background" />
+</navigation>

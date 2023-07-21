@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <array name="emojis">
+        <item>@drawable/emoji0</item>
+        <item>@drawable/emoji1</item>
+        <item>@drawable/emoji2</item>
+        <item>@drawable/emoji3</item>
+        <item>@drawable/emoji4</item>
+        <item>@drawable/emoji5</item>
+        <item>@drawable/emoji6</item>
+        <item>@drawable/emoji7</item>
+        <item>@drawable/emoji8</item>
+        <item>@drawable/emoji9</item>
+        <item>@drawable/emoji10</item>
+        <item>@drawable/emoji11</item>
+        <item>@drawable/emoji12</item>
+        <item>@drawable/emoji13</item>
+    </array>
+
+    <array name="base">
+        <item>@drawable/base1</item>
+        <item>@drawable/base2</item>
+        <item>@drawable/base3</item>
+        <item>@drawable/base4</item>
+        <item>@drawable/base5</item>
+        <item>@drawable/base6</item>
+        <item>@drawable/base7</item>
+        <item>@drawable/base8</item>
+        <item>@drawable/base9</item>
+        <item>@drawable/base10</item>
+        <item>@drawable/base11</item>
+        <item>@drawable/base12</item>
+        <item>@drawable/base13</item>
+        <item>@drawable/base14</item>
+        <item>@drawable/base15</item>
+        <item>@drawable/base16</item>
+        <item>@drawable/base17</item>
+        <item>@drawable/base18</item>
+        <item>@drawable/base19</item>
+    </array>
+
+    <array name="colors">
+        <item>@color/color1</item>
+        <item>@color/color2</item>
+        <item>@color/color3</item>
+        <item>@color/color4</item>
+        <item>@color/color5</item>
+        <item>@color/color9</item>
+        <item>@color/color10</item>
+        <item>@color/color11</item>
+        <item>@color/color12</item>
+        <item>@color/color13</item>
+        <item>@color/color14</item>
+        <item>@color/color15</item>
+        <item>@color/color16</item>
+        <item>@color/color17</item>
+        <item>@color/color18</item>
+        <item>@color/color19</item>
+        <item>@color/color20</item>
+        <item>@color/color21</item>
+        <item>@color/color22</item>
+        <item>@color/color23</item>
+        <item>@color/color24</item>
+        <item>@color/color25</item>
+        <item>@color/color26</item>
+        <item>@color/color27</item>
+        <item>@color/color28</item>
+        <item>@color/color29</item>
+        <item>@color/color30</item>
+        <item>@color/color31</item>
+        <item>@color/color32</item>
+        <item>@color/color33</item>
+        <item>@color/color34</item>
+        <item>@color/color35</item>
+        <item>@color/color36</item>
+        <item>@color/color37</item>
+        <item>@color/color38</item>
+        <item>@color/color39</item>
+        <item>@color/color40</item>
+        <item>@color/color41</item>
+        <item>@color/color42</item>
+        <item>@color/color43</item>
+        <item>@color/color44</item>
+        <item>@color/color45</item>
+        <item>@color/color46</item>
+        <item>@color/color47</item>
+        <item>@color/color48</item>
+        <item>@color/color49</item>
+        <item>@color/color50</item>
+    </array>
+
+    <array name="gradients">
+        <item>@drawable/g1</item>
+        <item>@drawable/g2</item>
+        <item>@drawable/g3</item>
+        <item>@drawable/g4</item>
+        <item>@drawable/g5</item>
+        <item>@drawable/g6</item>
+        <item>@drawable/g7</item>
+        <item>@drawable/g8</item>
+        <item>@drawable/g9</item>
+    </array>
+
+    <array name="effects">
+        <item>@drawable/p1</item>
+        <item>@drawable/p2</item>
+        <item>@drawable/p3</item>
+        <item>@drawable/p4</item>
+        <item>@drawable/p5</item>
+        <item>@drawable/p6</item>
+        <item>@drawable/p7</item>
+    </array>
+</resources>

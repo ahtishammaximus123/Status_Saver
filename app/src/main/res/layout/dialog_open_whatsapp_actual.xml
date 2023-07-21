@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:background="@color/black"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="300dp"
+        android:layout_height="540dp"
+        android:background="@drawable/round_dialog_shape"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/close_open_whatsapp_dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20sp"
+            android:src="@drawable/ic_baseline_close_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView27"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:gravity="center"
+            android:text="User Guidelines"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/close_open_whatsapp_dialog" />
+
+<!--        <TextView-->
+<!--            android:id="@+id/textView29"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="@dimen/_8sdp"-->
+<!--            android:background="@drawable/round_btn"-->
+<!--            android:fontFamily="@font/poppins_semi_bold"-->
+<!--            android:gravity="center"-->
+<!--            android:paddingStart="@dimen/_10sdp"-->
+<!--            android:paddingTop="@dimen/_2sdp"-->
+<!--            android:paddingEnd="@dimen/_10sdp"-->
+<!--            android:text="Open WhatsApp Status"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textSize="12dp"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/guideline17"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/textView27" />-->
+
+        <ImageView
+            android:id="@+id/imageView6"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:src="@drawable/open_whatsapp_dialog"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView27" />
+
+<!--        <TextView-->
+<!--            android:id="@+id/textView30"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/round_btn"-->
+<!--            android:fontFamily="@font/poppins_semi_bold"-->
+<!--            android:gravity="center"-->
+<!--            android:paddingStart="@dimen/_10sdp"-->
+<!--            android:paddingTop="@dimen/_2sdp"-->
+<!--            android:paddingEnd="@dimen/_10sdp"-->
+<!--            android:text="View Status from WhatsApp"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textSize="12dp"-->
+<!--            android:layout_marginTop="@dimen/_8sdp"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/guideline17"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/imageView6" />-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/imageView8"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:src="@drawable/second"-->
+<!--            app:layout_constraintEnd_toEndOf="@+id/textView29"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/guideline17"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/textView30" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/textView31"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/round_btn"-->
+<!--            android:fontFamily="@font/poppins_semi_bold"-->
+<!--            android:gravity="center"-->
+<!--            android:paddingStart="@dimen/_10sdp"-->
+<!--            android:paddingTop="@dimen/_2sdp"-->
+<!--            android:paddingEnd="@dimen/_10sdp"-->
+<!--            android:layout_marginTop="@dimen/_8sdp"-->
+<!--            android:text="Open the app to Download"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textSize="12dp"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/guideline17"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/imageView8" />-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/imageView9"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:src="@drawable/third"-->
+<!--            app:layout_constraintEnd_toEndOf="@+id/textView29"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/guideline17"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/textView31" />-->
+
+
+        <ImageView
+            android:id="@+id/open_whatsApp_img"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:background="@drawable/buttonwhatsapp"
+            android:fontFamily="@font/poppins_medium"
+            android:text="Open WhatsApp"
+            android:textColor="@color/white"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:layout_marginStart="@dimen/_10sdp"
+            app:layout_constraintEnd_toEndOf="@+id/imageView6"
+            app:layout_constraintStart_toStartOf="@+id/imageView6"
+            app:layout_constraintTop_toBottomOf="@+id/imageView6" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_regular"
+            android:text="Open WhatsApp"
+            android:lines="1"
+            android:layout_marginEnd="@dimen/_5sdp"
+            android:textColor="@color/white"
+            android:layout_marginStart="@dimen/_35sdp"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toBottomOf="@+id/open_whatsApp_img"
+            app:layout_constraintEnd_toEndOf="@+id/open_whatsApp_img"
+            app:layout_constraintStart_toStartOf="@+id/open_whatsApp_img"
+            app:layout_constraintTop_toTopOf="@+id/open_whatsApp_img" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

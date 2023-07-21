@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <!-- Bonus: if you want to style whole Action Bar, not just the menu -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+
+<item>
+    <shape android:shape="rectangle">
+        <stroke android:width="0.5dp" android:color="#D2D2D2" />
+        <solid android:color="#FFFFFF" />
+    </shape>
+</item>
+
+<item android:top="0.5dp">
+    <shape android:shape="rectangle">
+        <stroke android:width="0.5dp" android:color="#FFFFFF" />
+        <solid android:color="#FFFFFF" />
+        <padding android:top="0.5dp" />
+    </shape>
+</item>
+
+</layer-list>

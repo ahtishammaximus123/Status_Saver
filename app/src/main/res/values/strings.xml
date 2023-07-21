@@ -1,0 +1,108 @@
+<resources>
+    <string name="app_name">Status Saver</string>
+    <string name="app_text">Save Your Friend\'s Status, Short Video &amp; Photos</string>
+    <string name="status_downloader">Status Downloader</string>
+    <string name="title_activity_sticker_pack_details_single_pack">Sticker Pack</string>
+    <string name="title_activity_sticker_pack_details_multiple_pack">Sticker details</string>
+    <string name="error_adding_sticker_pack">"Could not add this sticker pack. Please install the latest version of WhatsApp before adding sticker pack"</string>
+    <string name="title_validation_error">Error with the pack</string>
+    <string name="check_for_update">Check for update</string>
+    <string name="cant_find_whatsapp_dir">Can not find WhatsApp Dir</string>
+    <string name="saved_files">Saved Files</string>
+    <string name="no_files_found">No Files Found</string>
+
+    <string name="privacy_policy">https://sites.google.com/view/asdkahfkhfklsjfklfjklfjskl/home</string>
+    <string name="more_app">https://play.google.com/store/apps/developer?id=Think+Shot+Inc</string>
+    <string name="contact_us">thinkshotinc@gmail.com</string>
+    <string name="lets_start">Lets Start</string>
+    <string name="ad">AD</string>
+    <string name="image">Image</string>
+    <string name="true_">true</string>
+    <string name="false_">false</string>
+
+    <string name="default_notification_channel_id" translatable="false">Message</string>
+    <string name="default_notification_channel_name" translatable="false">Message</string>
+    <string name="no_saved_images">No saved Images Found</string>
+    <string name="please_wait">Please Wait…</string>
+    <string name="loading_ad">Loading AD…</string>
+    <string name="ad_attribution">AD</string>
+    <string name="no_images_available">No Status Images</string>
+    <string name="no_saved_images_available">No Saved Status</string>
+    <string name="no_vids_available">No Status Videos</string>
+    <string name="no_saved_vids_available">No Saved Status</string>
+    <string name="due_to_system_limitation_you_need_to_give_permission_to_access_statuses">Allow access to .Statuses folder.</string>
+    <string name="title_activity_main_dash">MainDashActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="images_fragment_label">Live Images</string>
+    <string name="videos_fragment_label">Live Videos</string>
+    <string name="saved_statuses_fragment_label">Saved Status</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="lorem_ipsum">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
+        volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
+        dui nec risus. Maecenas non sodales nisi, vel dictum dolor. Class aptent taciti sociosqu ad
+        litora torquent per conubia nostra, per inceptos himenaeos. Suspendisse blandit eleifend
+        diam, vel rutrum tellus vulputate quis. Aliquam eget libero aliquet, imperdiet nisl a,
+        ornare ex. Sed rhoncus est ut libero porta lobortis. Fusce in dictum tellus.\n\n
+        Suspendisse interdum ornare ante. Aliquam nec cursus lorem. Morbi id magna felis. Vivamus
+        egestas, est a condimentum egestas, turpis nisl iaculis ipsum, in dictum tellus dolor sed
+        neque. Morbi tellus erat, dapibus ut sem a, iaculis tincidunt dui. Interdum et malesuada
+        fames ac ante ipsum primis in faucibus. Curabitur et eros porttitor, ultricies urna vitae,
+        molestie nibh. Phasellus at commodo eros, non aliquet metus. Sed maximus nisl nec dolor
+        bibendum, vel congue leo egestas.\n\n
+        Sed interdum tortor nibh, in sagittis risus mollis quis. Curabitur mi odio, condimentum sit
+        amet auctor at, mollis non turpis. Nullam pretium libero vestibulum, finibus orci vel,
+        molestie quam. Fusce blandit tincidunt nulla, quis sollicitudin libero facilisis et. Integer
+        interdum nunc ligula, et fermentum metus hendrerit id. Vestibulum lectus felis, dictum at
+        lacinia sit amet, tristique id quam. Cras eu consequat dui. Suspendisse sodales nunc ligula,
+        in lobortis sem porta sed. Integer id ultrices magna, in luctus elit. Sed a pellentesque
+        est.\n\n
+        Aenean nunc velit, lacinia sed dolor sed, ultrices viverra nulla. Etiam a venenatis nibh.
+        Morbi laoreet, tortor sed facilisis varius, nibh orci rhoncus nulla, id elementum leo dui
+        non lorem. Nam mollis ipsum quis auctor varius. Quisque elementum eu libero sed commodo. In
+        eros nisl, imperdiet vel imperdiet et, scelerisque a mauris. Pellentesque varius ex nunc,
+        quis imperdiet eros placerat ac. Duis finibus orci et est auctor tincidunt. Sed non viverra
+        ipsum. Nunc quis augue egestas, cursus lorem at, molestie sem. Morbi a consectetur ipsum, a
+        placerat diam. Etiam vulputate dignissim convallis. Integer faucibus mauris sit amet finibus
+        convallis.\n\n
+        Phasellus in aliquet mi. Pellentesque habitant morbi tristique senectus et netus et
+        malesuada fames ac turpis egestas. In volutpat arcu ut felis sagittis, in finibus massa
+        gravida. Pellentesque id tellus orci. Integer dictum, lorem sed efficitur ullamcorper,
+        libero justo consectetur ipsum, in mollis nisl ex sed nisl. Donec maximus ullamcorper
+        sodales. Praesent bibendum rhoncus tellus nec feugiat. In a ornare nulla. Donec rhoncus
+        libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
+        vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
+    </string>
+
+    <string name="title_live_status">Status Downloader</string>
+    <string name="title_sticker_maker">Sticker Maker</string>
+    <string name="title_photo_collage">Photo Collage</string>
+    <string name="live_images">Live Images</string>
+    <string name="live_videos">Live Videos</string>
+    <string name="saved_status">Saved Status</string>
+    <string name="navigation_drawer_open">open</string>
+    <string name="navigation_drawer_close">close</string>
+    <string name="gallery">Gallery</string>
+    <string name="done">Done</string>
+    <string name="emoji">Emoji</string>
+    <string name="base">Base</string>
+    <string name="sticker_maker">Sticker Maker</string>
+    <string name="image_saved">Image Saved Successfully!</string>
+    <string name="create_sticker_pack_icon">Create Sticker Pack Icon</string>
+    <string name="select_image">Select Image \nto create Sticker</string>
+    <string name="are_you_sure_you_want_to_exit">Are you sure you want to exit?</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_new_sticker_pack">CREATE NEW STICKER PACK</string>
+
+    <string name="color">Colors</string>
+    <string name="gradient">Gradients</string>
+    <string name="pattern">Patterns</string>
+    <string name="add_to_whatsapp">Add to WhatsApp</string>
+    <string name="connect">Connect</string>
+    <string name="connected">Connected</string>
+    <string name="permision_text">On Android 10 and above versions ,you to need to give storage permission manually. Please Click this folder and then allow.</string>
+    <string name="permision_text_">Below Android 10  versions ,you to need to give storage permission. Please Click this folder and then allow.</string>
+</resources>
