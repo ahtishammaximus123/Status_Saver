@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/poppins_semi_bold"
             android:gravity="center"
-            android:text="WhatsApp Permission"
+            android:text="Allow Access"
             android:textColor="@color/black"
             android:textSize="20dp"
             app:layout_constraintEnd_toEndOf="parent"

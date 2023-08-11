@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
@@ -98,10 +99,16 @@ class VideoAdapter30plus(
                         if (mList.size > holder.adapterPosition) {
                             try {
                                 ItemsViewModel = mList[holder.adapterPosition]
+                                try {
+                                    context.saveStatus(v, mList[holder.adapterPosition])
+                                    ItemsViewModel?.setSavedStatus(true)
+                                }
+                                catch (e:Exception)
+                                {
+                                    e.printStackTrace()
+                                    Toast.makeText(context,"Corrupted Video,Can't be Saved", Toast.LENGTH_LONG).show()
 
-                                context.saveStatus(v, mList[holder.adapterPosition])
-                                ItemsViewModel?.setSavedStatus(true)
-
+                                }
                                 notifyItemChanged(position)
                                 downloadListener.invoke()
                             } catch (exp: ArrayIndexOutOfBoundsException) {

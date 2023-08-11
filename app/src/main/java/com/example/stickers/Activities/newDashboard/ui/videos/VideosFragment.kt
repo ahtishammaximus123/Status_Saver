@@ -1,8 +1,11 @@
 package com.example.stickers.Activities.newDashboard.ui.videos
 
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -39,6 +43,7 @@ import com.example.stickers.Models.Status
 import com.example.stickers.Models.StatusDocFile
 import com.example.stickers.R
 import com.example.stickers.Utils.Common
+import com.example.stickers.Utils.WAoptions
 import com.example.stickers.Utils.WAoptions.Companion.appPackage
 import com.example.stickers.ads.InterAdmobClass
 import com.example.stickers.ads.afterDelay
@@ -156,8 +161,44 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         afterDelay(1500) {
             getStatus()
         }
-    }
 
+        _binding?.howToUse?.setOnClickListener {
+            showHowToUse()
+        }
+    }
+    private fun showHowToUse() {
+        val dialog2 = activity?.let {
+            Dialog(
+                it,
+                android.R.style.Theme_Black_NoTitleBar_Fullscreen
+            )
+        }
+        dialog2?.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog2?.setCancelable(false)
+        dialog2?.setContentView(R.layout.dialog_open_whatsapp_actual)
+        dialog2?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        val okButton = dialog2?.findViewById<ImageView>(R.id.open_whatsApp_img)
+        val cancelDialog = dialog2?.findViewById<ImageView>(R.id.close_open_whatsapp_dialog)
+        okButton?.setOnClickListener { //open whatsapp
+            val i = activity?.packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
+            if (i != null) {
+                startActivity(i)
+            } else {
+                Toast.makeText(
+                    activity?.applicationContext,
+                    "whatsApp is not installed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            dialog2.dismiss()
+        }
+        cancelDialog?.setOnClickListener {
+            dialog2.dismiss()
+        }
+        dialog2?.show()
+
+
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -223,10 +264,14 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                 anyImages.postValue(0)
                 imgNoFound!!.visibility = View.VISIBLE
                 messageTextView!!.visibility = View.VISIBLE
+                _binding?.points?.visibility=View.VISIBLE
+                _binding?.howToUse?.visibility=View.VISIBLE
                 _binding?.grantPermission?.visibility = View.GONE
 
             } else {
                 messageTextView!!.visibility = View.GONE
+                _binding?.points?.visibility=View.GONE
+                _binding?.howToUse?.visibility=View.GONE
                 _binding?.grantPermission?.visibility = View.GONE
                 imgNoFound!!.visibility = View.GONE
             }
@@ -266,11 +311,15 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
             if (adp.isEmpty()) {
                 imgNoFound!!.visibility = View.VISIBLE
                 messageTextView!!.visibility = View.VISIBLE
+                _binding?.points?.visibility=View.VISIBLE
+                _binding?.howToUse?.visibility=View.VISIBLE
                 _binding?.grantPermission?.visibility = View.GONE
             } else {
 
                 imgNoFound!!.visibility = View.GONE
                 messageTextView!!.visibility = View.GONE
+                _binding?.points?.visibility=View.GONE
+                _binding?.howToUse?.visibility=View.GONE
                 _binding?.grantPermission?.visibility = View.GONE
             }
             _binding?.shimmerContent?.root?.visibility = View.GONE
@@ -348,6 +397,7 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                 Log.d("tree", "onActivityResult: VERSION.SDK_INT  : 30 or above perm no, now take")
                 anyImages.postValue(0)
                 messageTextView!!.visibility = View.VISIBLE
+                _binding?.points?.visibility=View.VISIBLE
                 _binding?.grantPermission?.visibility = View.VISIBLE
                 imgNoFound!!.visibility = View.VISIBLE
                 swipeRefreshLayout?.isRefreshing = false
@@ -396,10 +446,14 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                         if (videoList.size <= 0) {
                             anyImages.postValue(0)
                             messageTextView!!.visibility = View.VISIBLE
+                            _binding?.points?.visibility=View.VISIBLE
+                            _binding?.howToUse?.visibility=View.VISIBLE
                             _binding?.grantPermission?.visibility = View.GONE
                             imgNoFound!!.visibility = View.VISIBLE
                         } else {
                             messageTextView?.visibility = View.GONE
+                            _binding?.points?.visibility=View.GONE
+                            _binding?.howToUse?.visibility=View.GONE
                             _binding?.grantPermission?.visibility = View.GONE
                             imgNoFound?.visibility = View.GONE
                         }
@@ -413,6 +467,7 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                         messageTextView?.visibility = View.VISIBLE
                         if (MainDashActivity.isStoragePermissionDeny)
                             _binding?.grantPermission?.visibility = View.VISIBLE
+                        _binding?.howToUse?.visibility=View.GONE
                         imgNoFound?.visibility = View.VISIBLE
                     }
                 }

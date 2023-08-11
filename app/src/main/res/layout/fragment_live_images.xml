@@ -55,8 +55,8 @@
             <ImageView
                 android:id="@+id/img_no_saved"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_download__1_"
+                android:layout_height="1dp"
+
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/messageTextImage"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -69,17 +69,52 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/_145sdp"
                 android:fontFamily="@font/poppins_light"
                 android:gravity="center"
+
+                android:visibility="gone"
                 android:text="@string/no_images_available"
                 android:textColor="@color/materialcolorpicker__grey"
-                android:textSize="16dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:textSize="14dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/img_no_saved" />
+
+            <TextView
+                android:id="@+id/points"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/poppins_light"
+                android:text="@string/points"
+                android:visibility="gone"
+                android:lineSpacingExtra="5dp"
+                android:layout_marginTop="@dimen/_3sdp"
+                android:layout_marginStart="@dimen/_60sdp"
+                android:layout_marginEnd="@dimen/_20sdp"
+                android:textColor="@color/materialcolorpicker__grey"
+                android:textSize="14dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/messageTextImage" />
+
+            <Button
+                android:id="@+id/how_to_use"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_bg"
+                android:fontFamily="@font/poppins_medium"
+                android:text="How To Use"
+
+                android:textColor="@color/white"
+                android:textSize="11dp"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/points" />
 
             <Button
                 android:id="@+id/grant_permission"
@@ -93,8 +128,9 @@
                 android:textSize="11dp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/messageTextImage" />
+                app:layout_constraintTop_toBottomOf="@+id/points" />
 
 
             <include

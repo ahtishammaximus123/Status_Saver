@@ -1,0 +1,6 @@
+<inset
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/customback"
+    android:insetRight="@dimen/_10sdp"
+    android:insetLeft="@dimen/_10sdp">
+</inset>

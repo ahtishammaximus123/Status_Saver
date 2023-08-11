@@ -31,13 +31,26 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
 
+            var icon = ""
+            var title = ""
+            var shortDesc = ""
+            var longDesc = ""
+            var image = ""
+            var packageName =""
             //fetch data into variables
-            val icon = remoteMessage.data["icon"]
-            val title = remoteMessage.data["title"]
-            val shortDesc = remoteMessage.data["short_desc"]
-            val longDesc = remoteMessage.data["long_desc"]
-            val image = remoteMessage.data["feature"]
-            val packageName = remoteMessage.data["app_url"]?.split("=")?.get(1)
+            try {
+                icon = remoteMessage.data["icon"].toString()
+                title = remoteMessage.data["title"].toString()
+                shortDesc = remoteMessage.data["short_desc"].toString()
+                longDesc = remoteMessage.data["long_desc"].toString()
+                image = remoteMessage.data["feature"].toString()
+                packageName = remoteMessage.data["app_url"]?.split("=")?.get(1).toString()
+            }
+            catch (e:Exception)
+            {
+                e.printStackTrace()
+            }
+
 
             //Check already installed app
             if (packageName != null) {
@@ -45,7 +58,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 if (alreadyInstalled) return
 
                 //send notification
-                if (icon == null || title == null || shortDesc == null) {
+                if (icon == "" || title == "" || shortDesc == "") {
                     return
                 } else {
                     Handler(this.mainLooper).post {
@@ -114,13 +127,22 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         notificationManager.notify(notificationID, notificationBuilder.build())
 
         //Set Images into remoteViews
-        Picasso.with(this).load(icon)
-            .into(remoteViews, R.id.iv_icon, notificationID, notificationBuilder.build())
-        if (image != null) {
-            remoteViews.setViewVisibility(R.id.iv_feature, View.VISIBLE)
-            Picasso.with(this).load(image)
-                .into(remoteViews, R.id.iv_feature, notificationID, notificationBuilder.build())
+        try {
+            if (icon != "") {
+                Picasso.with(this).load(icon)
+                    .into(remoteViews, R.id.iv_icon, notificationID, notificationBuilder.build())
+            }
+            if (image != "") {
+                remoteViews.setViewVisibility(R.id.iv_feature, View.VISIBLE)
+                Picasso.with(this).load(image)
+                    .into(remoteViews, R.id.iv_feature, notificationID, notificationBuilder.build())
+            }
         }
+        catch (e:Exception)
+        {
+            e.printStackTrace()
+        }
+
     }
 
     private fun isAppInstalled(uri: String, context: Context): Boolean {

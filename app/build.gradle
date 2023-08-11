@@ -6,18 +6,18 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     viewBinding {
         enabled = true
     }
     defaultConfig {
-    // applicationId "com.status.video.saver.for.whatsapp.video.downloader"
-       applicationId "status.saver.debug"
+     applicationId "com.status.video.saver.for.whatsapp.video.downloader"
+     // applicationId "status.saver.debug"
         minSdk 23
-        targetSdk 32
-        versionCode 11
-        versionName "0.0.11"
+        targetSdk 33
+        versionCode 13
+        versionName "0.0.13"
         project.archivesBaseName = "Status Saver " + versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -37,8 +37,8 @@ android {
 
         debug {
 //            applicationIdSuffix ".download.satatuses"
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "admob_app_id", "ca-app-pub-3940256099942544~3347511713"
 

@@ -11,6 +11,8 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.storage.StorageManager
 import android.provider.Settings
 import android.util.Log
@@ -18,10 +20,12 @@ import android.view.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
@@ -37,6 +41,7 @@ import com.example.stickers.Activities.CollageFilesActivity
 import com.example.stickers.Activities.HowToUseActivity
 import com.example.stickers.Activities.ShareActivity
 import com.example.stickers.Activities.SplashActivity
+import com.example.stickers.Activities.SplashActivity.Companion.splashAdLoaded
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModel
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModelFactory
 import com.example.stickers.PremActivity
@@ -47,11 +52,13 @@ import com.example.stickers.Utils.AppCommons.Companion.isAppInstalled
 import com.example.stickers.ads.*
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.BillingBaseActivity
+import com.example.stickers.app.Constants
 import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.SharedPreferenceData
 import com.example.stickers.databinding.ActivityMainDashBinding
 import com.example.stickers.databinding.DialogOpenWhatsappBinding
 import com.example.stickers.dialog.ExitDialog
+import com.example.stickers.dialog.ProgressDialog
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
@@ -65,6 +72,7 @@ class MainDashActivity : BillingBaseActivity() {
     var navView: NavigationView? = null
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE = 5544
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE_2 = 55442
+    private var dialog: ProgressDialog? = null
 
     companion object {
         var isStoragePermissionDeny = true
@@ -78,6 +86,27 @@ class MainDashActivity : BillingBaseActivity() {
         )
         var nativeAdNew1: NativeAd? = null
         var nativeAdNew2: NativeAd? = null
+
+
+
+        val storagePermissions = arrayOf(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+
+        @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+        val storagePermissions33 = arrayOf(
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO
+        )
+
+        fun getPermissions(): Array<String> {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                storagePermissions33
+            } else {
+                storagePermissions
+            }
+        }
     }
 
 
@@ -90,7 +119,50 @@ class MainDashActivity : BillingBaseActivity() {
         super.onCreate(savedInstanceState)
         initDash(SharedPreferenceData(this))
         binding = ActivityMainDashBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
+
+        val firstTime = SharedPreferenceData(this).getBoolean("ComingFirstTime", true)
+        if (firstTime) {
+            selectWhatsAppDialog() {
+                var isAdShown = false
+                model.selected.observe(this) {
+                    Log.e("status*", "selected - $it")
+                    if (it == 0 && isAdShown) {
+                        startPermissions()
+                        nativeAD?.beGone()
+                    } else {
+                        nativeAD?.beVisible()
+                    }
+                }
+                initDrawer()
+                SplashActivity.fbAnalytics = FirebaseAnalytics(this)
+                SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
+                AppOpen.interPreLoadAd = true
+
+                interAdShowFunc(isAdShown)
+            }
+        }
+        else{
+            var isAdShown = false
+            model.selected.observe(this) {
+                Log.e("status*", "selected - $it")
+                if (it == 0 && isAdShown) {
+                    startPermissions()
+                    nativeAD?.beGone()
+                } else {
+                    nativeAD?.beVisible()
+                }
+            }
+            initDrawer()
+            SplashActivity.fbAnalytics = FirebaseAnalytics(this)
+            SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
+            AppOpen.interPreLoadAd = true
+            interAdShowFunc(isAdShown)
+
+        }
+
+
         //binding.content.toolbar.setNavigationIcon(R.drawable.ic_menu)
 
         nativeAD = binding.content.nativeLayout.root
@@ -132,56 +204,46 @@ class MainDashActivity : BillingBaseActivity() {
         }
 
 
-        var isAdShown = false
-        model.selected.observe(this) {
+    }
 
-            Log.e("status*", "selected - $it")
-            if (it == 0 && isAdShown) {
-                startPermissions()
-                nativeAD?.beGone()
-            } else {
+    private fun interAdShowFunc(isAdShown: Boolean) {
+        var isAdShown1 = isAdShown
+        if (isNetworkAvailable() && verifyInstallerId() && !isAlreadyPurchased() && !isInterShown && splashAdLoaded == "ready") {
+            dialog = ProgressDialog(this, "Ad is Loading")
+            dialog?.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                InterAdsClassNew.getInstance().showInterAd(this, {
+                    dialog?.dismiss()
+                    splashAdLoaded = "showed"
+                    isInterShown = true
+                    isAdShown1 = true
+                    AppOpen.interPreLoadAd = false
+                    if (!arePermissionDenied()) {
+                        nativeAD?.beVisible()
+                        val sharedPreferences =
+                            getSharedPreferences("uriTreePref", Context.MODE_PRIVATE)
+                        var ut = "uriTree"
+                        if (WAoptions.appPackage == "com.whatsapp.w4b") ut = "uriTree1"
+                        if (sharedPreferences?.getString(ut, "not present") != "not present") {
+                            model.select(1)
+                        }
+                    } else {
+                        startPermissions()
+                        model.select(0)
 
-                nativeAD?.beVisible()
-            }
-        }
-
-//        showIntro()
-        initDrawer()
-
-
-        SplashActivity.fbAnalytics = FirebaseAnalytics(this)
-        SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
-
-        AppOpen.interPreLoadAd = true
-        if (!isInterShown&& RemoteDateConfig.remoteAdSettings.admob_inter_splash_id.value.isNotEmpty()) {
-            Log.e("max_inter*", "loadMaxSplashInter")
-            showInterDemandAdmob(
-                RemoteDateConfig.remoteAdSettings.inter_splash_ad,
-                RemoteDateConfig.remoteAdSettings.admob_inter_splash_id.value) {
-                isInterShown = true
-                isAdShown = true
-                AppOpen.interPreLoadAd = false
-
-                if (!arePermissionDenied()) {
-                    nativeAD?.beVisible()
-                    val sharedPreferences =
-                        getSharedPreferences("uriTreePref", Context.MODE_PRIVATE)
-                    var ut = "uriTree"
-                    if (WAoptions.appPackage == "com.whatsapp.w4b") ut = "uriTree1"
-                    if (sharedPreferences?.getString(ut, "not present") != "not present") {
-                        model.select(1)
+                        nativeAD?.beGone()
                     }
-                } else {
-                    model.select(0)
 
-                    nativeAD?.beGone()
-                }
-            }
 
-        } else
-        {
+                }, {}, {})
+                Log.e("max_inter*", "loadMaxSplashInter")
+
+            }, 700)
+
+
+        } else {
             isInterShown = true
-            isAdShown = true
+            isAdShown1 = true
             AppOpen.interPreLoadAd = false
 
             if (!arePermissionDenied()) {
@@ -194,13 +256,12 @@ class MainDashActivity : BillingBaseActivity() {
                     model.select(1)
                 }
             } else {
+                startPermissions()
                 model.select(0)
 
                 nativeAD?.beGone()
             }
         }
-
-        //showNativeAd()
     }
 
     private fun showNativeAd() {
@@ -226,6 +287,7 @@ class MainDashActivity : BillingBaseActivity() {
                         adId = RemoteDateConfig.remoteAdSettings.getAdmobSplashNativeId1()
                     )
                 }
+
                 "off" -> {
                     root.beGone()
                 }
@@ -233,15 +295,6 @@ class MainDashActivity : BillingBaseActivity() {
         }
     }
 
-
-    private fun showIntro() {
-        showIntro(
-            binding.content.navViewBottom,
-            "getString(R.string.intoMusicLayout)",
-            "Mic_intro",
-            true
-        ) {}
-    }
 
     override fun onResume() {
         super.onResume()
@@ -253,7 +306,6 @@ class MainDashActivity : BillingBaseActivity() {
         super.onPause()
         isActivityShown = false
     }
-
 
 
     private fun initDrawer() {
@@ -338,11 +390,13 @@ class MainDashActivity : BillingBaseActivity() {
 
     fun specialPermissionDialog() {
         if (WAoptions.appPackage == "com.whatsapp" &&
-            !isAppInstalled(applicationContext, "com.whatsapp")) {
+            !isAppInstalled(applicationContext, "com.whatsapp")
+        ) {
             showToast("WhatsApp Not installed!")
 
         } else if (WAoptions.appPackage == "com.whatsapp.w4b" &&
-            !isAppInstalled(applicationContext, "com.whatsapp.w4b")) {
+            !isAppInstalled(applicationContext, "com.whatsapp.w4b")
+        ) {
             showToast("WhatsApp Business Not installed!")
         } else {
             val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
@@ -403,9 +457,18 @@ class MainDashActivity : BillingBaseActivity() {
                     textView28.text = getString(R.string.permision_text_)
 
                 grantPermission.setOnClickListener {
-                    if (arePermissionDenied()) {
-                        requestPermissions(PERMISSIONS, REQUEST_PERMISSIONS)
-                    } else specialPermissionDialog()
+                    if (arePermissionDenied())
+                    {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            requestPermissions(storagePermissions33, REQUEST_PERMISSIONS)
+                        }
+                        else{
+                            requestPermissions(PERMISSIONS, REQUEST_PERMISSIONS)
+                        }
+
+                    }
+                    else
+                        specialPermissionDialog()
                     dismiss()
                 }
             }
@@ -422,19 +485,15 @@ class MainDashActivity : BillingBaseActivity() {
         if (requestCode == REQUEST_PERMISSIONS && grantResults.isNotEmpty()) {
             if (arePermissionDenied()) {
                 nativeAD?.beGone()
-                /*Toast.makeText(
-                    this,
-                    "Storage permission denied!",
-                    Toast.LENGTH_SHORT
-                ).show()*/
                 val storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
                 if (!storageAccepted) {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
                     ) {
 
                         return
-                    } else {
+                    }
 
+                    else {
                         val intent =
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri: Uri = Uri.fromParts("package", packageName, null)
@@ -442,9 +501,23 @@ class MainDashActivity : BillingBaseActivity() {
                         startActivityForResult(intent, 1023)
                     }
                 }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (arePermissionDenied()) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        getPermissions(),
+                        REQUEST_PERMISSIONS
+                    )
+                }
+                else{
+                    specialPermissionDialog()
+                }
+            }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 specialPermissionDialog()
-            } else {
+            }
+            else {
                 model.select(1)
             }
         }
@@ -580,24 +653,30 @@ class MainDashActivity : BillingBaseActivity() {
     }
 
     private fun arePermissionDenied(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            for (permissions in PERMISSIONS) {
-                if (ActivityCompat.checkSelfPermission(
-                        applicationContext,
-                        permissions
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
+
+         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU)
+        {
+            for (permissions in storagePermissions33) {
+                if (ActivityCompat.checkSelfPermission(applicationContext, permissions) != PackageManager.PERMISSION_GRANTED) {
                     isStoragePermissionDeny = true
                     return true
                 }
             }
-        } else {
+        }
+       else  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Build.VERSION.SDK_INT != Build.VERSION_CODES.TIRAMISU)
+        {
             for (permissions in PERMISSIONS) {
-                if (ActivityCompat.checkSelfPermission(
-                        applicationContext,
-                        permissions
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
+                if (ActivityCompat.checkSelfPermission(applicationContext, permissions) != PackageManager.PERMISSION_GRANTED) {
+                    isStoragePermissionDeny = true
+                    return true
+                }
+            }
+        }
+
+        else
+        {
+            for (permissions in PERMISSIONS) {
+                if (ActivityCompat.checkSelfPermission(applicationContext, permissions) != PackageManager.PERMISSION_GRANTED) {
                     isStoragePermissionDeny = true
                     return true
                 }
@@ -627,22 +706,73 @@ class MainDashActivity : BillingBaseActivity() {
         return true
     }
 
+    private fun selectWhatsAppDialog(proceedListenerr: () -> Unit) {
+        val dialogBuilder = AlertDialog.Builder(this, R.style.CustomPAlertDialog)
+        val inflater = this.layoutInflater
+        val dialogView = inflater.inflate(R.layout.select_whats_app_dialog, null)
+        dialogBuilder.setView(dialogView)
+        val alertDialog = dialogBuilder.create()
+        val simpleBtn = dialogView.findViewById<TextView>(R.id.go_for_simple)
+        val businessBtn = dialogView.findViewById<TextView>(R.id.go_for_business)
+
+        simpleBtn.setOnClickListener {
+            alertDialog.dismiss()
+            SharedPreferenceData(this).putBoolean("ComingFirstTime", false)
+            if (isAppInstalled(applicationContext, "com.whatsapp")) {
+                WAoptions.appPackage = "com.whatsapp"
+                SharedPreferenceData(this).putString(
+                    "apppackage",
+                    WAoptions.appPackage
+                )
+                myMenu?.getItem(0)?.isChecked = true
+                navController?.navigate(R.id.status)
+            } else Toast.makeText(
+                applicationContext,
+                "WhatsApp is not installed",
+                Toast.LENGTH_LONG
+            ).show()
+            alertDialog.dismiss()
+            proceedListenerr.invoke()
+        }
+        businessBtn.setOnClickListener {
+            SharedPreferenceData(this).putBoolean("ComingFirstTime", false)
+
+            if (isAppInstalled(applicationContext, "com.whatsapp.w4b")) {
+                WAoptions.appPackage = "com.whatsapp.w4b"
+                SharedPreferenceData(this).putString(
+                    "apppackage",
+                    WAoptions.appPackage
+                )
+
+                myMenu?.getItem(1)?.isChecked = true
+                navController?.navigate(R.id.status)
+            } else Toast.makeText(
+                applicationContext,
+                "WhatsApp Business is not installed",
+                Toast.LENGTH_LONG
+            ).show()
+            proceedListenerr.invoke()
+            alertDialog.dismiss()
+
+        }
+        alertDialog.setCancelable(false)
+        alertDialog.show()
+
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_ba -> {
-                if (isAppInstalled(
-                        applicationContext, "com.whatsapp.w4b"
-                    )
-                ) {
+                if (isAppInstalled(applicationContext, "com.whatsapp.w4b")) {
                     WAoptions.appPackage = "com.whatsapp.w4b"
-                    SharedPreferenceData(this).putString(
-                        "apppackage",
-                        WAoptions.appPackage
-                    )
+                    SharedPreferenceData(this).putString("apppackage", WAoptions.appPackage)
 
                     myMenu?.getItem(1)?.isChecked = true
                     navController?.navigate(R.id.status)
+
+
+
+
                 } else Toast.makeText(
                     applicationContext,
                     "WhatsApp Business is not installed",
@@ -660,6 +790,7 @@ class MainDashActivity : BillingBaseActivity() {
                     )
                     myMenu?.getItem(0)?.isChecked = true
                     navController?.navigate(R.id.status)
+
                 } else Toast.makeText(
                     applicationContext,
                     "WhatsApp is not installed",
@@ -667,10 +798,12 @@ class MainDashActivity : BillingBaseActivity() {
                 ).show()
                 true
             }
+
             R.id.folder -> {
                 openActivity<CollageFilesActivity>()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -698,6 +831,7 @@ class MainDashActivity : BillingBaseActivity() {
             R.id.galleryFragment -> {
                 navController?.navigate(R.id.photoCollageFragment)
             }
+
             else -> super.onBackPressed()
         }
     }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -94,7 +95,15 @@ class ImageAdapter30plus(
             if (holder.save.tag != "saved")
                 context.showInterAd(remoteAdSettings.inter_download_status) {
                     ItemsViewModel = status
-                    context.saveStatus(v, status)
+                    try {
+                        context.saveStatus(v, status)
+                    }
+                    catch (e:Exception)
+                    {
+                        e.printStackTrace()
+                        Toast.makeText(context,"Corrupted Image,Can't be saved",Toast.LENGTH_LONG).show()
+
+                    }
 
                     ItemsViewModel?.setSavedStatus(true)
                     notifyItemChanged(position)

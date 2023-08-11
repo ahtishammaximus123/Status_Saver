@@ -5,18 +5,24 @@ import ai.lib.billing.DataWrappers
 import ai.lib.billing.IapConnector
 import ai.lib.billing.PurchaseServiceListener
 import android.annotation.SuppressLint
+import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.airbnb.lottie.LottieAnimationView
 import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Activities.sticker.LoadSticker
 import com.example.stickers.R
 import com.example.stickers.Utils.FirebaseAnalytics
+import com.example.stickers.Utils.WAoptions
 import com.example.stickers.ads.*
 import com.example.stickers.app.*
 import com.example.stickers.app.Constants.Companion.subsList
@@ -28,6 +34,7 @@ import com.google.gson.Gson
 import java.util.*
 
 @SuppressLint("CustomSplashScreen")
+@Keep
 class SplashActivity : BillingBaseActivity() {
 
     companion object {
@@ -36,6 +43,8 @@ class SplashActivity : BillingBaseActivity() {
         var isActivityShown = false
         var isNativeAdShowed1 = false
         var isNativeAdLoaded1 = false
+        var splashAdLoaded = ""
+
 
     }
 
@@ -78,13 +87,13 @@ class SplashActivity : BillingBaseActivity() {
 //            AppLovinSdk.getInstance(this).showMediationDebugger()
         }
 
+
         resetAds()
 
         Ads.loadBannerAd(applicationContext)
         MobileAds.initialize(this)
 
-        val firstTime = SharedPreferenceData(this).getBoolean(
-            Constants.FIRST_TIME,
+        val firstTime = SharedPreferenceData(this).getBoolean(Constants.FIRST_TIME,
             true
         )
         isRemoteFetched = false
@@ -115,27 +124,24 @@ class SplashActivity : BillingBaseActivity() {
             val data = Gson().toJson(remoteAdSettings)
             Log.e("RemoteConfig", data)
             AppOpen(application)
-
-
-            RemoteDateConfig.remoteAdSettings.apply {
-                if (inter_splash_ad.value != "off"
-                ) {
-//                    InterAdmobClass.getInstance().loadAndShowInter(this@SplashActivity, RemoteDateConfig.remoteAdSettings.getAdmobSplashInterId(),ProgressDialog(this@SplashActivity)) {}
-
-                }
-
+            loadingInterAd()
+            {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (firstTime)
+                    {
+                    val layout = findViewById<ConstraintLayout>(R.id.layout)
+                    val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
+                    runOnUiThread {
+                        layout.beVisible()
+                        loading.beGone()
+                    }
+                } else
+                {
+                    gotoNextScreen()
+                }},400)
 
             }
 
-            if (firstTime) {
-                val layout = findViewById<ConstraintLayout>(R.id.layout)
-                val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
-                runOnUiThread {
-                    layout.beVisible()
-                    loading.beGone()
-                }
-            } else
-                gotoNextScreen()
 
         }
         val lottieAnimationView = findViewById<LottieAnimationView>(R.id.animationView)
@@ -154,10 +160,8 @@ class SplashActivity : BillingBaseActivity() {
                 SharedPreferenceData(this).putBoolean(Constants.KEY_IS_PRIVACY, true)
             } else this.showToast("Kindly Accept the Terms.")*/
 
-            SharedPreferenceData(this).putBoolean(
-                Constants.FIRST_TIME,
-                false
-            )
+            SharedPreferenceData(this).putBoolean(Constants.FIRST_TIME, false)
+            SharedPreferenceData(this).putBoolean("ComingFirstTime", true)
             gotoNextScreen()
         }
         val txtTerms = findViewById<TextView>(R.id.txtTerms)
@@ -286,10 +290,8 @@ class SplashActivity : BillingBaseActivity() {
     }
 
     override fun gotoNextScreen() {
-        val firstTime = SharedPreferenceData(this).getBoolean(
-            Constants.FIRST_TIME,
-            true
-        )
+
+        val firstTime = SharedPreferenceData(this).getBoolean(Constants.FIRST_TIME, true)
         if (firstTime) {
             val layout = findViewById<ConstraintLayout>(R.id.layout)
             val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
@@ -377,5 +379,29 @@ class SplashActivity : BillingBaseActivity() {
                 }
             }
         })
+    }
+
+
+    private fun loadingInterAd(loadListener: () -> Unit)
+    {
+        if (isNetworkAvailable() && verifyInstallerId() &&!isAlreadyPurchased()&& RemoteDateConfig.remoteAdSettings.admob_inter_splash_id.value.isNotEmpty()
+        ) {
+
+            InterAdsClassNew.isInterstitialShown = true
+            InterAdsClassNew.getInstance()
+                .loadInterAds(this,RemoteDateConfig.remoteAdSettings.admob_inter_splash_id.value , {
+                    loadListener.invoke()
+                    splashAdLoaded = "ready"
+                  //  showToast("Splash Ad is Loaded")
+
+                }, {
+
+                })
+
+
+        }
+        else{
+        }
+
     }
 }

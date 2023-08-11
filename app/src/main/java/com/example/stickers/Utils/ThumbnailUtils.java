@@ -60,7 +60,7 @@ public class ThumbnailUtils {
             // Assume this is a corrupt video file.
         } finally {
             try {
-                retriever.release();
+              //  retriever.release();
             } catch (RuntimeException ex) {
                 // Ignore failures while cleaning up.
             }

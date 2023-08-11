@@ -21,18 +21,6 @@ fun View.beGone() {
     visibility = View.GONE
 }
 
-fun Activity.showInterMax(
-    adInterId: String,
-    listener: () -> Unit
-) {
-    if (!isAlreadyPurchased() && !AppOpen.isShowingAd) {
-//        MaxInterClass.getInstance()
-//            .showMaxInterstitial(this, adInterId, listener)
-    } else {
-        listener.invoke()
-    }
-}
-
 var lastClickTime: Long = 0
 fun Activity.showInterAd(
     remote: RemoteAdDetails,

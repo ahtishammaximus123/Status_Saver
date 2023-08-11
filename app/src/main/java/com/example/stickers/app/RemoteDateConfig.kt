@@ -79,9 +79,6 @@ data class RemoteAdSettings(
     val admob_inter_download_btn_id: RemoteAdDetails = RemoteAdDetails(),
 
 
-
-
-
     @SerializedName("appOpen")
     val appOpen: RemoteAdDetails = RemoteAdDetails(),
 

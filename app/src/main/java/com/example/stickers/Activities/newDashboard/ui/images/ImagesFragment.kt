@@ -1,8 +1,11 @@
 package com.example.stickers.Activities.newDashboard.ui.images
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -131,7 +134,9 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         }
 
 
-
+        _binding?.howToUse?.setOnClickListener {
+            showHowToUse()
+        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             imageAdapter = ImageAdapter(container, this)
@@ -179,7 +184,39 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         super.onDestroyView()
         _binding = null
     }
+    private fun showHowToUse() {
+        val dialog2 = activity?.let {
+            Dialog(
+                it,
+                android.R.style.Theme_Black_NoTitleBar_Fullscreen
+            )
+        }
+        dialog2?.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog2?.setCancelable(false)
+        dialog2?.setContentView(R.layout.dialog_open_whatsapp_actual)
+        dialog2?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        val okButton = dialog2?.findViewById<ImageView>(R.id.open_whatsApp_img)
+        val cancelDialog = dialog2?.findViewById<ImageView>(R.id.close_open_whatsapp_dialog)
+        okButton?.setOnClickListener { //open whatsapp
+            val i = activity?.packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
+            if (i != null) {
+                startActivity(i)
+            } else {
+                Toast.makeText(
+                    activity?.applicationContext,
+                    "whatsApp is not installed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            dialog2.dismiss()
+        }
+        cancelDialog?.setOnClickListener {
+            dialog2.dismiss()
+        }
+        dialog2?.show()
 
+
+    }
     private fun status() {
 
         _binding?.messageTextImage?.visibility = View.GONE
@@ -220,6 +257,8 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                 _binding?.grantPermission?.visibility = View.VISIBLE
                 _binding?.shimmerContent?.root?.visibility = View.GONE
                 messageTextView!!.visibility = View.VISIBLE
+                binding.points.visibility=View.VISIBLE
+                binding.howToUse.visibility=View.GONE
                 imgNoFound!!.visibility = View.VISIBLE
                 recyclerView!!.visibility = View.GONE
                 anyImages.postValue(0)
@@ -335,14 +374,21 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
             if (imagesList.size <= 0) {
                 anyImages.postValue(0)
                 messageTextView?.visibility = View.VISIBLE
-                if (MainDashActivity.isStoragePermissionDeny)
+                binding.points.visibility=View.VISIBLE
+
+                if (MainDashActivity.isStoragePermissionDeny) {
+                    binding.howToUse.visibility = View.GONE
                     _binding?.grantPermission?.visibility = View.VISIBLE
+                }
                 else
                     _binding?.grantPermission?.visibility = View.GONE
+                binding.howToUse.visibility=View.VISIBLE
                 imgNoFound?.visibility = View.VISIBLE
                 recyclerView?.visibility = View.GONE
             } else {
                 messageTextView?.visibility = View.GONE
+                binding.points.visibility=View.GONE
+                binding.howToUse.visibility=View.GONE
                 _binding?.grantPermission?.visibility = View.GONE
                 imgNoFound?.visibility = View.GONE
                 recyclerView?.visibility = View.VISIBLE
@@ -378,14 +424,21 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                     }
                     if ((adp?.itemCount ?: 0) <= 0) {
                         messageTextView?.visibility = View.VISIBLE
-                        if (MainDashActivity.isStoragePermissionDeny)
+                        binding.points.visibility=View.VISIBLE
+
+                        if (MainDashActivity.isStoragePermissionDeny) {
+                            binding.howToUse.visibility = View.GONE
                             _binding?.grantPermission?.visibility = View.VISIBLE
+                        }
                         else
+                            binding.howToUse.visibility=View.VISIBLE
                             _binding?.grantPermission?.visibility = View.GONE
                         imgNoFound?.visibility = View.VISIBLE
 //                recyclerView?.visibility = View.GONE
                     } else {
                         messageTextView?.visibility = View.GONE
+                        binding.points.visibility=View.GONE
+                        binding.howToUse.visibility=View.GONE
                         _binding?.grantPermission?.visibility = View.GONE
                         imgNoFound?.visibility = View.GONE
 //                recyclerView?.visibility = View.VISIBLE
@@ -435,11 +488,15 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
             if (imagesList30plus.size <= 0) {
                 anyImages.postValue(0)
                 messageTextView?.visibility = View.VISIBLE
+                binding.points.visibility=View.VISIBLE
+                binding.howToUse.visibility=View.VISIBLE
                 _binding?.grantPermission?.visibility = View.GONE
                 imgNoFound?.visibility = View.VISIBLE
                 recyclerView?.visibility = View.GONE
             } else {
                 messageTextView?.visibility = View.GONE
+                binding.points.visibility=View.GONE
+                binding.howToUse.visibility=View.GONE
                 _binding?.grantPermission?.visibility = View.GONE
                 imgNoFound?.visibility = View.GONE
                 recyclerView?.visibility = View.VISIBLE
