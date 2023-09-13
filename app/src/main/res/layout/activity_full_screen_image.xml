@@ -128,9 +128,6 @@
         android:id="@+id/constraintLayout5"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="13dp"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginEnd="13dp"
         app:layout_constraintBottom_toTopOf="@+id/nativeLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -142,7 +139,7 @@
             android:layout_height="0dp"
             android:layout_margin="1dp"
             android:adjustViewBounds="true"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -155,6 +152,21 @@
             app:zoomage_restrictBounds="false"
             app:zoomage_translatable="true"
             app:zoomage_zoomable="true" />
+
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+        </androidx.viewpager.widget.ViewPager>
 
         <ImageView
             android:id="@+id/imageView25"

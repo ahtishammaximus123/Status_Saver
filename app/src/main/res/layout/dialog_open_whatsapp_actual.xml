@@ -53,17 +53,7 @@
 <!--            app:layout_constraintStart_toStartOf="@+id/guideline17"-->
 <!--            app:layout_constraintTop_toBottomOf="@+id/textView27" />-->
 
-        <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="180dp"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:src="@drawable/open_whatsapp_dialog"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView27" />
-
-<!--        <TextView-->
+        <!--        <TextView-->
 <!--            android:id="@+id/textView30"-->
 <!--            android:layout_width="wrap_content"-->
 <!--            android:layout_height="wrap_content"-->
@@ -117,10 +107,20 @@
 
 
         <ImageView
+            android:id="@+id/imageView6"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:src="@drawable/open_whatsapp_dialog"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView27" />
+
+        <ImageView
             android:id="@+id/open_whatsApp_img"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            android:background="@drawable/buttonwhatsapp"
+            android:background="@drawable/btn_shape"
             android:fontFamily="@font/poppins_medium"
             android:text="Open WhatsApp"
             android:textColor="@color/white"
@@ -131,14 +131,16 @@
             app:layout_constraintTop_toBottomOf="@+id/imageView6" />
 
         <TextView
+            android:id="@+id/open_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:drawableStart="@mipmap/ic_launcher"
+            android:textAlignment="gravity"
+            android:gravity="center_vertical"
             android:fontFamily="@font/poppins_regular"
-            android:text="Open WhatsApp"
             android:lines="1"
-            android:layout_marginEnd="@dimen/_5sdp"
+            android:text="Open WhatsApp"
             android:textColor="@color/white"
-            android:layout_marginStart="@dimen/_35sdp"
             android:textSize="12dp"
             app:layout_constraintBottom_toBottomOf="@+id/open_whatsApp_img"
             app:layout_constraintEnd_toEndOf="@+id/open_whatsApp_img"

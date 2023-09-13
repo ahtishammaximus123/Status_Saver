@@ -13,6 +13,15 @@ public class StatusDocFile implements Serializable {
     private boolean isVideo;
     public boolean isSavedStatus;
 
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public boolean isSelected;
     public StatusDocFile(DocumentFile file, String title, String path) {
         this.file = file;
         this.title = title;

@@ -5,23 +5,17 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.stickers.Activities.PhotoCollage.FileUtils
 import com.example.stickers.Adapter.CollageFilesAdaptor
 import com.example.stickers.Models.FileModel
-import com.example.stickers.ads.showToast
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.BillingBaseActivity
-import com.example.stickers.app.getUriPath
 import com.example.stickers.databinding.ActivityCollageFilesBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -97,7 +91,7 @@ class CollageFilesActivity : BillingBaseActivity() {
 
     private fun initAdapter() {
         checkFiles()
-        adapter = CollageFilesAdaptor(this, fileList, object : CollageFilesAdaptor.FileListener {
+        adapter = CollageFilesAdaptor(this, supportFragmentManager, fileList, object : CollageFilesAdaptor.FileListener {
             override fun onFileClick(fileModel: FileModel) {
                 AppClass.fileListCollage = fileList
                 val intent = Intent(

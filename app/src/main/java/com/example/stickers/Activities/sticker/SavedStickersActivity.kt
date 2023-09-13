@@ -37,7 +37,7 @@ class SavedStickersActivity : AppCompatActivity() {
 
     private fun initAdapter() {
         checkFiles()
-        adapter = CollageFilesAdaptor(this, fileList, object : CollageFilesAdaptor.FileListener {
+        adapter = CollageFilesAdaptor(this,supportFragmentManager, fileList, object : CollageFilesAdaptor.FileListener {
             override fun onFileClick(fileModel: FileModel) {
                 val intent = Intent(
                     this@SavedStickersActivity,

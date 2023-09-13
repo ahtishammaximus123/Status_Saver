@@ -2,12 +2,12 @@ package com.example.stickers.app
 
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import androidx.core.content.FileProvider
+import androidx.fragment.app.FragmentManager
 import com.example.stickers.app.Constants.Companion.providerWhatsApp
+import com.example.stickers.dialog.ShareFragment
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -62,22 +62,12 @@ fun Context.getUriPathNew(path: String): Uri {
         File(path)
     )
 }
+fun Context.shareFile(path: Uri, supportFragmentManager: FragmentManager) {
 
-fun Context.shareFile(uri: Uri) {
-    try {
-        val share = Intent(Intent.ACTION_SEND)
-        share.type = "*/*"
-        val link = "http://play.google.com/store/apps/details?id=$packageName"
-        share.putExtra(
-            Intent.EXTRA_TEXT,
-            "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
-        )
-        share.putExtra(Intent.EXTRA_STREAM, uri)
-        share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        val chooser = Intent.createChooser(share, "Share image")
-        chooser.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-        startActivity(share)
-    } catch (e: Exception) {
-        Log.e("error__", e.toString())
-    }
+
+    var exitDialogFragment: ShareFragment? = null
+    exitDialogFragment = ShareFragment(path)
+    exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
+
+
 }

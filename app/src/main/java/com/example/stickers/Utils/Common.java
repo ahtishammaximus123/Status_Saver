@@ -334,5 +334,29 @@ public class Common {
         return false;
     }
 
+    public static boolean deleteSavedFile(String name) {
+        final File appDir = new File(Common.APP_DIR);
+
+        if (appDir.exists()) {
+            File[] savedFiles = appDir.listFiles();
+
+            if (savedFiles != null && savedFiles.length > 0) {
+                Arrays.sort(savedFiles);
+                for (File file : savedFiles) {
+                    if (name.equals(file.getName())) {
+                        boolean deleted = file.delete();
+                        if (deleted) {
+                            return true; // File successfully deleted
+                        } else {
+                            return false; // File deletion failed
+                        }
+                    }
+                }
+            }
+        }
+
+        return false; // File not found or directory doesn't exist
+    }
+
 
 }

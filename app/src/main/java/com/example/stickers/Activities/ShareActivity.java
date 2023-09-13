@@ -26,7 +26,7 @@ public class ShareActivity extends BillingBaseActivity {
         if (SplashActivity.getFbAnalytics() != null)
             SplashActivity.getFbAnalytics().sendEvent("SharedActivity: Open");
 
-        String link = "http://play.google.com/store/apps/details?id=" + getPackageName();
+        String link = "http://play.googlee.com/store/apps/details?id=" + getPackageName();
         binding.shareback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,7 +67,7 @@ public class ShareActivity extends BillingBaseActivity {
         intent.setType("text/plain");
         intent.setPackage(packageName);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        String link = "http://play.google.com/store/apps/details?id=" + getPackageName();
+        String link = "http://play.googlee.com/store/apps/details?id=" + getPackageName();
         intent.putExtra(Intent.EXTRA_TEXT, "You can save all WhatsApp Status for free and fast. \n Download it here: " + link + "");
         startActivity(Intent.createChooser(intent, "Share APP"));
     }

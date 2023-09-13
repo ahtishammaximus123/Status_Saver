@@ -23,7 +23,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.stickers.Activities.FullScreenImageActivity.Companion.savedStatusListFiles29
+import com.example.stickers.Activities.FullScreenImageActivity.Companion.savedVideoStatusListFiles29
 import com.example.stickers.Activities.SplashActivity
+import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Activities.newDashboard.base.BaseLiveStatusFragment
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModel
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModelFactory
@@ -33,6 +36,7 @@ import com.example.stickers.DeletedCallback
 import com.example.stickers.Models.Status
 import com.example.stickers.Models.StatusesHeaders
 import com.example.stickers.R
+import com.example.stickers.SavedMultiSelectCallback
 import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.WAoptions
 import com.example.stickers.app.AppClass
@@ -43,7 +47,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
+class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback,SavedMultiSelectCallback {
 
     private var _binding: FragmentSavedStatusesBinding? = null
 
@@ -54,6 +58,7 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
     private var recyclerView: RecyclerView? = null
     private var progressBar: ProgressBar? = null
     private val savedFilesList: ArrayList<Status> = ArrayList()
+    private val savedVideoFilesList: ArrayList<Status> = ArrayList()
     private val savedFilesWithHeadersList: ArrayList<StatusesHeaders> = ArrayList()
     private val handler = Handler()
     private var filesAdapter: SavedStatusAdapter? = null
@@ -62,6 +67,7 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
     private var imgNoFound: ImageView? = null
     private val s: Status? = null
     private var countIsSaved = 0
+    private var loadImages =true
     var anyImages = MutableLiveData<Int>()
 
     //private val imagesViewModel: ImagesViewModel by activityViewModels()
@@ -93,12 +99,23 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
                 android.R.style.Theme_Black_NoTitleBar_Fullscreen
             )
         }
+
         dialog2?.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog2?.setCancelable(false)
         dialog2?.setContentView(R.layout.dialog_open_whatsapp_actual)
         dialog2?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val okButton = dialog2?.findViewById<ImageView>(R.id.open_whatsApp_img)
         val cancelDialog = dialog2?.findViewById<ImageView>(R.id.close_open_whatsapp_dialog)
+        val etxt = dialog2?.findViewById<TextView>(R.id.open_text)
+        val i = activity?.packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
+        if (i != null&&i.`package`=="com.whatsapp") {
+            Log.e("showHowToUse", "showHowToUse: ${i.`package`}", )
+            etxt?.setText("WhatsApp")
+        }
+        else if (i != null&&i.`package`=="com.whatsapp.w4b")
+        {
+            etxt?.setText("WA Business")
+        }
         okButton?.setOnClickListener { //open whatsapp
             val i = activity?.packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
             if (i != null) {
@@ -130,7 +147,25 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
         messageTextView = view.findViewById<TextView>(R.id.messageTextImage)
         countIsSaved = 0
 
+        binding.loadVideos.setOnClickListener {
+            binding.loadImages.setBackgroundResource(R.drawable.whitestrokes)
+            binding.loadVideos.setBackgroundResource(R.drawable.btn_back_green)
+            binding.loadVideos.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            binding.loadImages.setTextColor(ContextCompat.getColor(requireContext(), R.color.main_backgroud))
+            loadImages=false
+            getFiles()
 
+        }
+
+        binding.loadImages.setOnClickListener {
+          //  openSingleTranslateFragment()
+            binding.loadVideos.setBackgroundResource(R.drawable.whitestrokes)
+            binding.loadImages.setBackgroundResource(R.drawable.btn_back_green)
+            binding.loadVideos.setTextColor(ContextCompat.getColor(requireContext(), R.color.main_backgroud))
+            binding.loadImages.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            loadImages=true
+            getFiles()
+        }
         swipeRefreshLayout?.setColorSchemeColors(
             ContextCompat.getColor(requireActivity(), android.R.color.holo_orange_dark),
             ContextCompat.getColor(requireActivity(), android.R.color.holo_green_dark),
@@ -192,6 +227,18 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
 
 
     private fun getFiles() {
+        if(loadImages==true)
+        {
+            getImages()
+        }
+        else{
+            getVideos()
+        }
+
+
+    }
+
+    private fun getVideos() {
         showDialog()
         val app_dir = File(Common.APP_DIR)
         if (app_dir.exists()) {
@@ -200,9 +247,11 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
             _binding?.grantPermission?.visibility = View.GONE
             _binding?.imgNoSaved?.visibility = View.GONE
 
-
             Coroutines.ioThenMain({
                 savedFilesList.clear()
+                savedVideoFilesList.clear()
+                savedStatusListFiles29.clear()
+                savedVideoStatusListFiles29.clear()
                 savedFilesWithHeadersList.clear()
                 app_dir.listFiles()?.forEach { file ->
                     val status =
@@ -212,12 +261,21 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
                             file.absolutePath
                         )
 
-                    savedFilesList.add(status)
+                    if(status.isVideo)
+                    {
+                        savedVideoStatusListFiles29.add(status)
+                        savedVideoFilesList.add(status)
+                    }
+                    else{
+                        savedStatusListFiles29.add(status)
+                        savedFilesList.add(status)
+                    }
+
                     countIsSaved++
                 }
                 try {
-                    savedFilesList.reverse()
-                    savedFilesList.distinct().forEach { status ->
+                    savedVideoFilesList.reversed()
+                    savedVideoFilesList.distinct().forEach { status ->
 
                         val time = status.file.lastModified()
                         val date = getDate(status.file.lastModified())
@@ -254,7 +312,121 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
                     }
                 }
 //                savedFilesWithHeadersList.reverse()
-                filesAdapter = SavedStatusAdapter(savedFilesWithHeadersList, this)
+                filesAdapter = SavedStatusAdapter(
+                    savedVideoFilesList,
+                    this,
+                    this,
+                    requireActivity().supportFragmentManager
+                )
+                recyclerView!!.adapter = filesAdapter
+                val g = GridLayoutManager(activity, Common.GRID_COUNT)
+                recyclerView?.setLayoutManager(g)
+                g.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        return when (filesAdapter?.getItemViewType(position)) {
+                            0 -> 2
+                            else -> 1
+                        }
+                    }
+                }
+                filesAdapter?.notifyDataSetChanged()
+                progressBar!!.visibility = View.GONE
+                checkFiles()
+
+                progressBar!!.visibility = View.GONE
+                messageTextView!!.visibility = View.VISIBLE
+                _binding?.grantPermission?.visibility = View.VISIBLE
+                imgNoFound!!.visibility = View.VISIBLE
+                anyImages.postValue(0)
+
+                swipeRefreshLayout!!.isRefreshing = false
+                fileList = savedFilesList
+                file30List = null
+                checkFiles()
+            })
+        } else {
+            messageTextView?.visibility = View.VISIBLE
+            _binding?.grantPermission?.visibility = View.VISIBLE
+            progressBar?.visibility = View.GONE
+            imgNoFound?.visibility = View.VISIBLE
+            anyImages.postValue(0)
+            checkFiles()
+        }
+    }
+
+    private fun getImages() {
+        showDialog()
+        val app_dir = File(Common.APP_DIR)
+        if (app_dir.exists()) {
+            messageTextView!!.visibility = View.GONE
+            _binding?.messageTextImage?.visibility = View.GONE
+            _binding?.grantPermission?.visibility = View.GONE
+            _binding?.imgNoSaved?.visibility = View.GONE
+
+            Coroutines.ioThenMain({
+                savedFilesList.clear()
+                savedVideoFilesList.clear()
+                savedStatusListFiles29.clear()
+                savedVideoStatusListFiles29.clear()
+                savedFilesWithHeadersList.clear()
+                app_dir.listFiles()?.forEach { file ->
+                    val status =
+                        Status(
+                            file,
+                            file.name,
+                            file.absolutePath
+                        )
+
+                    if (status.isVideo) {
+                        savedVideoStatusListFiles29.add(status)
+                        savedVideoFilesList.add(status)
+                    } else {
+                        savedStatusListFiles29.add(status)
+                        savedFilesList.add(status)
+                    }
+
+                    countIsSaved++
+                }
+                try {
+
+                    savedFilesList.distinct().forEach { status ->
+
+                        val time = status.file.lastModified()
+                        val date = getDate(status.file.lastModified())
+                        val title = time.millisToDate().formatToDMY()
+    //                                if (isToday(date) && isRecent(time)) "Recent" else if (isToday(date)) "Today" else date
+
+                        val sh = StatusesHeaders(title, null)
+                        val i =
+                            savedFilesWithHeadersList.firstOrNull { f -> f.title.equals(title) }
+                        if (i == null) {
+                            savedFilesWithHeadersList.add(sh)
+    //                                savedFilesList.forEach { statuso ->
+                            val sh1 = StatusesHeaders(title, status)
+                            savedFilesWithHeadersList.add(sh1)
+    //                                }
+                        } else {
+                            val sh1 = StatusesHeaders(title, status)
+                            savedFilesWithHeadersList.add(sh1)
+                        }
+
+                    }
+                } catch (exp: Exception) {
+                }
+            }, {
+
+
+                activity?.runOnUiThread {
+                    if (countIsSaved <= 0) {
+                        progressBar!!.visibility = View.GONE
+                        messageTextView!!.visibility = View.VISIBLE
+                        _binding?.grantPermission?.visibility = View.VISIBLE
+                        imgNoFound!!.visibility = View.VISIBLE
+                        anyImages.postValue(0)
+                    }
+                }
+                savedFilesList.reverse()
+                filesAdapter = SavedStatusAdapter(savedFilesList, this, this,requireActivity().supportFragmentManager)
                 recyclerView!!.adapter = filesAdapter
                 val g = GridLayoutManager(activity, Common.GRID_COUNT)
                 recyclerView?.setLayoutManager(g)
@@ -336,5 +508,21 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback {
         super.onResume()
 
         getFiles()
+    }
+
+    override fun onSavedMultiSelectModeActivated() {
+        val parentActivity = activity as? MainDashActivity
+        parentActivity?.onSavedMultiSelectMode(
+            {
+                getFiles()
+            },
+            {
+                //deleteListener
+
+            },
+            {
+                //ShareListener
+
+            })
     }
 }

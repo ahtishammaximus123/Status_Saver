@@ -1,0 +1,16 @@
+
+Akotlin:S108ê")Either remove or fill this block of code.(å¥‡
+Fkotlin:S108ò")Either remove or fill this block of code.(Î†üŒøÿÿÿÿ
+Ikotlin:S1481Ï"0Remove this unused "statusFiles" local variable.(—«üŠ
+`kotlin:S1192¬"HDefine a constant instead of duplicating this literal "status*" 6 times.(îÙ³
+@kotlin:S1874F"#Deprecated code should not be used.(¸¼Ë°şÿÿÿÿ
+pkotlin:S3776§"RRefactor this method to reduce its Cognitive Complexity from 43 to the 15 allowed.(ºŠ—øÿÿÿÿ
+kkotlin:S3776"RRefactor this method to reduce its Cognitive Complexity from 22 to the 15 allowed.(–¡”¬
+kkotlin:S117 "SRename this local variable to match the regular expression ^`?[_a-z][a-zA-Z0-9]*`?$(ãóòé
+5kotlin:S6310‘"Avoid hardcoded dispatchers.(Í¡·Ş
+Qkotlin:S1144"8Remove this unused private "arePermissionDenied" method.(…¼„ü
+Lkotlin:S1066±".Merge this "if" statement with the nested one.(ôßˆ€ùÿÿÿÿ
+Lkotlin:S1066¸".Merge this "if" statement with the nested one.(ö¡¢¿úÿÿÿÿ
+Gkotlin:S1066À".Merge this "if" statement with the nested one.(İÙ¡»
+Lkotlin:S1066Ç".Merge this "if" statement with the nested one.(–»Ğ›úÿÿÿÿ
+Lkotlin:S1066©".Merge this "if" statement with the nested one.(¶¦“Ñÿÿÿÿÿ

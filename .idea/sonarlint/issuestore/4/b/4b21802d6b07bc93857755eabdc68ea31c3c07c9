@@ -1,0 +1,14 @@
+
+Akotlin:S108“")Either remove or fill this block of code.(á¢–¬
+Fkotlin:S108®")Either remove or fill this block of code.(ÍÖ¥ºÿÿÿÿÿ
+_kotlin:S1172—"AUse "_" instead of this unused lambda parameter "compoundButton".(­éŒæÿÿÿÿÿ
+Ukotlin:S1172"7Use "_" instead of this unused lambda parameter "view".(‚÷¼˜ûÿÿÿÿ
+Ukotlin:S1172©"7Use "_" instead of this unused lambda parameter "view".(Üºšÿÿÿÿÿ
+Pkotlin:S1172±"7Use "_" instead of this unused lambda parameter "view".(Â¯ş˜
+Qkotlin:S1481“"8Remove this unused "lottieAnimationView" local variable.(İÒß›
+2kotlin:S1128"Remove this unused import.(ıºÎà
+2kotlin:S1128	"Remove this unused import.(üƒŠ¸
+7kotlin:S1128 "Remove this unused import.(™»Õöùÿÿÿÿ
+`kotlin:S1192Ú"GDefine a constant instead of duplicating this literal "tagV4*" 4 times.(Øìáé
+okotlin:S3776K"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(¶Á»¬şÿÿÿÿ
+skotlin:S1186ì"ZAdd a nested comment explaining why this function is empty or complete the implementation.(Ş÷Äö

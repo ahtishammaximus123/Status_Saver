@@ -107,7 +107,7 @@ public class StickerPackListActivity extends BaseActivity {
     ProgressDialog progressOfTray;
     boolean isBreak = false;
 
-    public ImageView ic_back, imageView_cast;
+    public ImageView ic_back, imageView_cast,openWhat;
     MaterialButton imageViewCreateNewpack;
 
 

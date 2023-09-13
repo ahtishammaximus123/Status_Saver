@@ -1,57 +1,73 @@
 package com.example.stickers.Activities
 
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
+import android.widget.TextView
 import android.widget.Toast
-import com.example.stickers.Activities.newDashboard.MainDashActivity
+import androidx.core.net.toUri
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.ItemsViewModel
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.clickedPosition
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.openSaved
 import com.example.stickers.Models.Status
+import com.example.stickers.Models.StatusDocFile
 import com.example.stickers.R
 import com.example.stickers.Utils.AppCommons.Companion.ShowWAppDialog
 import com.example.stickers.Utils.Common
-import com.example.stickers.Utils.SaveHelperFull
-import com.example.stickers.Utils.saveStatus
+import com.example.stickers.Utils.saveInToPath
+import com.example.stickers.Utils.showSnackBar
 import com.example.stickers.ads.Ads
 import com.example.stickers.ads.loadNativeAdmob
 import com.example.stickers.ads.showInterAd
-import com.example.stickers.ads.showInterDemandAdmob
 import com.example.stickers.app.AppClass.Companion.file30List
 import com.example.stickers.app.AppClass.Companion.fileList
 import com.example.stickers.app.BillingBaseActivity
-import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.app.getUriPath
 import com.example.stickers.app.shareFile
 import com.example.stickers.databinding.ActivityFullScreenImageBinding
+import com.jsibbold.zoomage.ZoomageView
 import com.squareup.picasso.Picasso
 import java.io.File
 
 class FullScreenImageActivity : BillingBaseActivity() {
+    private var imgTag: String? = ""
     private lateinit var binding: ActivityFullScreenImageBinding
     private var is30Plus = false
     var status: Status? = null
     var pos = 0
     var na = 0
+
+    var position = 0
+    private val savedStatusList = mutableListOf<Boolean>()
+
+    private val savedStatusListFiles = mutableListOf<StatusDocFile>()
+    companion object{
+         val savedStatusListFiles29 = mutableListOf<Status>()
+        val savedVideoStatusListFiles29 = mutableListOf<Status>()
+    }
+
     override fun onResume() {
         super.onResume()
 
 
-
-        with(binding.nativeLayout) {
-            loadNativeAdmob(
-                root, adFrameLarge,
-                R.layout.admob_native_small,
-                R.layout.max_native_small, 2,
-                remoteAdSettings.native_inner,{},{},  adId = remoteAdSettings.getAdmobSplashNativeId2()
-            )
-        }
 
         Ads().showBannerAd(
             applicationContext,
@@ -61,7 +77,6 @@ class FullScreenImageActivity : BillingBaseActivity() {
         )
     }
 
-    var position = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adjustFontScale(resources.configuration)
@@ -70,52 +85,52 @@ class FullScreenImageActivity : BillingBaseActivity() {
         )
         val view: View = binding.root
         setContentView(view)
-
         SplashActivity.fbAnalytics?.sendEvent("FullImageActivity_Open")
 
+        savedStatusListFiles.clear()
+//        savedStatusListFiles29.clear()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            for (image in ImagesFragment.imagesList.reversed()) {
+                val savedFileName = image.file?.name
+                savedStatusList.add(Common.getSavedFile(savedFileName))
+                if (savedFileName != null && Common.getSavedFile(savedFileName)) {
+                    if (!savedStatusListFiles.contains(image)) {
+                        savedStatusListFiles.add(image)
+                    }
+                }
+            }
+        } else {
+            for (image in ImagesFragment.imagesList29.reversed()) {
+                val savedFileName = image.file?.name
+                savedStatusList.add(Common.getSavedFile(savedFileName))
+                if (savedFileName != null && Common.getSavedFile(savedFileName)) {
+                    if (!savedStatusListFiles29.contains(image)) {
+                    //    savedStatusListFiles29.add(image)
+                    }
+                }
+            }
+        }
+
+        imgTag = intent.getStringExtra("img_tag")
+        val imageList = intent.getSerializableExtra("imageList") as? Array<StatusDocFile>
 
         val getIntent = intent
         val tag = intent.extras?.getString("img_tag")
-
         is30Plus = intent.getBooleanExtra("is30Plus", false)
 
+        if (imgTag.isNullOrEmpty()) {
+            binding!!.imgDownload.setImageResource(R.drawable.ic_delete_ic)
+        }
+
+        if (clickedPosition != null) {
+            setupViewPager()
+        }
         if (is30Plus) {
         } else {
-            status = getIntent.getSerializableExtra("status") as Status?
-        }
-        try {
-            binding.imgDownload.visibility = View.VISIBLE
-            if (tag == "saved") {
-                binding.imgDownload.visibility = View.VISIBLE
-                binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
-            } else {
-                binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic)
-                binding!!.imgDownload.setOnClickListener {
-                    if (is30Plus) {
-                        saveStatus(binding.container, ItemsViewModel!!)
-                        binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
-                    } else {
-                        Common.copyFile(status, applicationContext, binding!!.container)
-                        binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
-                    }
-                    MainDashActivity.isActivityShown=true
-                    if(remoteAdSettings.admob_inter_download_btn_id.value.isNotEmpty())
-                    {
-                        showInterDemandAdmob(remoteAdSettings.admob_inter_download_btn_ad,remoteAdSettings.admob_inter_download_btn_id.value,{})
-
-                    }
-
-                }
-            }
-        } catch (e: Exception) {
-            //e.printStackTrace()
+            // status = getIntent.getSerializableExtra("status") as Status?
         }
 
-//        if (is30Plus) {
-//            Picasso.with(getApplicationContext()).load(ImagesFragment.ItemsViewModel.getFile().getUri()).into(binding.imgFull);
-//        } else {
-//            Picasso.with(getApplicationContext()).load(status.getFile()).into(binding.imgFull);
-//        }
         val list = ArrayList<String>()
         if (fileList != null && !fileList!!.isEmpty()) {
             for (a in fileList!!) {
@@ -132,54 +147,73 @@ class FullScreenImageActivity : BillingBaseActivity() {
                 na++
             }
         }
-        if (is30Plus) {
 
-            binding.imgFull.visibility = View.VISIBLE
-            if(ItemsViewModel?.getFile()?.getUri()!=null)
-            {
-                try {
-                    Picasso.with(applicationContext).load(ItemsViewModel?.getFile()?.getUri())
-                        .into(binding.imgFull);
+
+        binding!!.imgDownload.setOnClickListener {
+            if (!imgTag.isNullOrEmpty()) {
+                if (is30Plus) {
+                    //       saveStatus(binding.container, ItemsViewModel!!)
+                    (ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem]).apply {
+                        saveStatusFromViewPager(this)
+                    }
+
+                } else {
+                    (ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem]).apply {
+                        saveStatusFromViewPager29(this)
+                    }
+
                 }
-                catch (e: IllegalStateException) {
-                    e.printStackTrace()
-                }
+            } else {
+                deleteSavedStatus()
 
             }
-
-        } else {
-            if(status?.getFile()!=null)
-            {
-                try {
-                    binding.imgFull.visibility = View.VISIBLE
-                    Picasso.with(applicationContext).load(status?.getFile()).into(binding.imgFull);
-                }
-                catch (e: IllegalStateException) {
-                    e.printStackTrace()
-                }
-
-            }
-
         }
+
+
         binding.imageView25.setOnClickListener(
             View.OnClickListener {
                 if (list.size > position + 1) {
-                    position = position + 1
+                    position += 1
 
                     Picasso.with(applicationContext).load(Uri.parse(list[position]))
                         .into(binding.imgFull);
                 }
             }
         )
+
         binding.imgPost.setOnClickListener(View.OnClickListener {
-            val uri: Uri? = if (is30Plus) {
-                ItemsViewModel?.file?.uri
-            } else {
-                Uri.parse("file://" + status!!.file.absolutePath)
+          //  Log.e("WhatsAppicon", "onCreate: Clicked" )
+
+            val uri: Uri?
+                if (openSaved)
+            {
+                if (is30Plus) {
+//                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
+                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                  uri=imageUrl
+                } else {
+                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    Log.e("share303", "$imageUrl: " )
+                    uri=imageUrl
+                }
             }
+            else{
+                if (is30Plus) {
+//                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
+                    val imageUrl = ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file.uri
+                    uri=imageUrl
+                } else {
+                    val imageUrl = ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    Log.e("share303", "$imageUrl: " )
+                    uri=imageUrl
+
+                }
+            }
+
             if (uri != null) {
                 ShowWAppDialog(binding.imgPost, uri, false)
             }
+
         })
 //        binding.imageView26.setOnClickListener(
 //            View.OnClickListener {
@@ -199,68 +233,154 @@ class FullScreenImageActivity : BillingBaseActivity() {
             }
         }
         binding.imgBackFullScreen.setOnClickListener { onBackPressed() }
+
         binding.imgShare.setOnClickListener {
-            if (is30Plus) {
+            if (openSaved)
+            {
+                if (is30Plus) {
+//                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
+                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    shareFile(imageUrl, supportFragmentManager)
+                } else {
+                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    Log.e("share303", "$imageUrl: " )
+                    shareFile(imageUrl,supportFragmentManager)
 
-                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
-            } else {
+                }
+            }
+            else{
+                if (is30Plus) {
+//                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
+                    val imageUrl = ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file.uri
+                    shareFile(imageUrl, supportFragmentManager)
+                } else {
+                    val imageUrl = ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file
+                    Log.e("share303", "$imageUrl: " )
+                    shareFile(
+                        getUriPath(ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.absolutePath),
+                        supportFragmentManager
+                    )
 
-                shareFile(getUriPath(status!!.file.absolutePath))
+                }
+            }
+            }
+
+
+    }
+
+    private fun deleteSavedStatus() {
+        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setContentView(R.layout.delete_dialog)
+        val okButton = dialog.findViewById<TextView>(R.id.grant_permission)
+        val cancelDialog = dialog.findViewById<TextView>(R.id.button)
+        okButton.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Common.deleteSavedFile(savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.name)
+            }
+            else{
+                Common.deleteSavedFile(savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.name)
+            }
+            finish()
+            dialog.dismiss()
+        }
+        cancelDialog.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun setupViewPager() {
+        val adapter = FullScreenImagePagerAdapter()
+        binding.viewPager.adapter = adapter
+        binding.viewPager.offscreenPageLimit=0
+        binding.viewPager.currentItem = clickedPosition
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (binding.viewPager.currentItem >= 0&& ImagesFragment.imagesList.isNotEmpty()) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val currentImage =
+                        ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file?.name.toString()
+                    if (Common.getSavedFile(currentImage)) {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                    } else {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
+                    }
+                }, 50)
+            }
+        }else{
+            if (binding.viewPager.currentItem >= 0 && ImagesFragment.imagesList29.isNotEmpty()) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val currentImage =
+                        ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file?.name.toString()
+                    if (Common.getSavedFile(currentImage)) {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                    } else {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
+                    }
+                }, 50)
             }
         }
-        if (getIntent.action == "download") {
-            binding!!.imgDownload.setImageResource(R.drawable.ic_download__1_)
-            binding!!.imgDownload.setOnClickListener {
-                Log.d("hshs", "onClick: hereeee")
-                if (is30Plus) {
-                    val root = Environment.getExternalStorageDirectory().toString()
-                    Log.d("hshs", "onClick: hereeee11")
-                    val justDirOut = File(Common.APP_DIR)
-                    if (!justDirOut.exists()) {
-                        justDirOut.mkdir()
+        binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            var currentImage=""
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+
+            }
+
+            override fun onPageSelected(position: Int) {
+
+                var savedImageName =""
+                if(!openSaved)
+                {
+
+                    savedImageName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                         currentImage = ImagesFragment.imagesList.reversed()[position].file?.name.toString()
+                        currentImage
+                    } else{
+                         currentImage = ImagesFragment.imagesList29.reversed()[position].file?.name.toString()
+                        currentImage
                     }
-                    Log.d("hshs", "onClick: hereeee22")
-                    val outDirCopy = File(justDirOut, ItemsViewModel?.file?.name)
-                    Log.d("hshs", "onClick: hereeee33")
-                    val saveHelper = SaveHelperFull()
-                    Log.d("hshs", "onClick: hereeee44")
-                    ItemsViewModel?.file?.uri?.let { it1 ->
-                        saveHelper.saveintopathFull(
-                            it1,
-                            outDirCopy,
-                            this@FullScreenImageActivity
-                        )
+                    Common.getSavedFile(savedImageName)
+                    if (!imgTag.isNullOrEmpty()) {
+
+                        if ( Common.getSavedFile(currentImage)) {
+                            binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                        } else {
+                            binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
+                        }
+                    } else {
+                        binding!!.imgDownload.setImageResource(R.drawable.ic_delete_ic)
                     }
-                    Log.d("hshs", "onClick: hereeee5555")
-                } else {
-                    Common.copyFile(status, applicationContext, binding!!.container)
-                    binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                }
+                else{
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val currentImage = savedStatusListFiles.reversed()[position]
+                        currentImage.file?.name.toString()
+                    } else{
+                        val currentImage = savedStatusListFiles29.reversed()[position]
+                        currentImage.file?.name.toString()
+                    }
+
                 }
 
 
             }
-        } else if (getIntent.action == "delete") {
-            binding!!.imgDownload.setImageResource(R.drawable.ic_delete_ic)
-            binding!!.imgDownload.setOnClickListener {
-                if (status!!.file.delete()) {
-                    Toast.makeText(this@FullScreenImageActivity, "File Deleted", Toast.LENGTH_SHORT)
-                        .show()
-                    finish()
-                } else Toast.makeText(
-                    this@FullScreenImageActivity,
-                    "Unable to Delete File",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
+
+            override fun onPageScrollStateChanged(state: Int) {}
+        })
+
     }
 
     override fun onBackPressed() {
         file30List = null
         fileList = null
-        showInterAd(remoteAdSettings.inter_view_image) {
             super.onBackPressed()
-        }
     }
 
     fun adjustFontScale(configuration: Configuration) {
@@ -272,5 +392,123 @@ class FullScreenImageActivity : BillingBaseActivity() {
         baseContext.resources.updateConfiguration(configuration, metrics)
     }
 
+    private fun saveStatusFromViewPager(currentImage: StatusDocFile) {
+        if (Common.getSavedFile(currentImage.file.name)) {
+            binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+            showSnackBar(binding.viewPager, "Already downloaded.")
+            return
+        } else {
+            val justDirOut = File(Common.APP_DIR)
+            if (!justDirOut.exists()) {
+                justDirOut.mkdir()
+            }
+            val outDirCopy = File(justDirOut, currentImage.file?.name!!)
+            currentImage.file?.uri?.let {
+                saveInToPath(it, outDirCopy)
+                binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                showSnackBar(binding.viewPager, "File downloaded successfully.")
+            }
+
+        }
+    }
+    private fun saveStatusFromViewPager29(currentImage: Status) {
+        if (Common.getSavedFile(currentImage.file.name)) {
+            binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+            showSnackBar(binding.viewPager, "Already downloaded.")
+            return
+        } else {
+            val justDirOut = File(Common.APP_DIR)
+            if (!justDirOut.exists()) {
+                justDirOut.mkdir()
+            }
+            val outDirCopy = File(justDirOut, currentImage.file?.name!!)
+
+            saveInToPath(currentImage.file.toUri(), outDirCopy)
+            binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+            showSnackBar(binding.viewPager, "File downloaded successfully.")
+
+
+        }
+    }
+
+    inner class FullScreenImagePagerAdapter() : PagerAdapter() {
+        override fun instantiateItem(container: ViewGroup, position: Int): Any {
+            val inflater = LayoutInflater.from(container.context)
+            val view = inflater.inflate(R.layout.item_image, container, false)
+            val imageView = view.findViewById<ZoomageView>(R.id.img_full)
+            var imageUrl = ""
+
+            if(!openSaved)
+            {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+                        val imageList = ImagesFragment.imagesList.reversed()
+                        val currentImage = imageList[position]
+                        imageUrl = currentImage.file?.uri.toString()
+                   /* if ( Common.getSavedFile(imageList[position].file.name)) {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                    } else {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
+                    }*/
+                }
+
+                else {
+                    val imageList = ImagesFragment.imagesList29.reversed()
+                    val currentImage = imageList[position]
+                    imageUrl = currentImage.file?.toUri().toString()
+                   /* if ( Common.getSavedFile(imageList[position].file.name)) {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                    } else {
+                        binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
+                    }*/
+                }
+
+            }
+            else{
+
+                    val imageList =savedStatusListFiles29
+                    val currentImage = imageList.reversed()[position]
+                    imageUrl = currentImage.file.toUri().toString()
+
+            }
+
+            Picasso.with(container.context).load(Uri.parse(imageUrl)).into(imageView)
+            container.addView(view)
+            return imageView
+        }
+
+        // Other overridden methods...
+        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
+            container.removeView(`object` as View)
+        }
+
+        override fun getCount(): Int {
+
+            return if (!openSaved) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ImagesFragment.imagesList.size ?: 0
+                } else {
+                    ImagesFragment.imagesList29.size ?: 0
+                }
+
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    savedStatusListFiles29.size ?: 0
+                } else {
+                    savedStatusListFiles29.size ?: 0
+                }
+            }
+
+        }
+
+        override fun isViewFromObject(view: View, `object`: Any): Boolean {
+            return view == `object`
+        }
+    }
 
 }
+
+
+
+
+

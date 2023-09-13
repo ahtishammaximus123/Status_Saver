@@ -1,0 +1,20 @@
+
+Fkotlin:S108×")Either remove or fill this block of code.(ÍÖ¥ºÿÿÿÿÿ
+Fkotlin:S108æ")Either remove or fill this block of code.(ÍÖ¥ºÿÿÿÿÿ
+Fkotlin:S108ñ")Either remove or fill this block of code.(ÍÖ¥ºÿÿÿÿÿ
+Pkotlin:S1172º"2Use "_" instead of these unused lambda parameters.(ŒÀ¡Œùÿÿÿÿ
+Pkotlin:S1135"2Complete the task associated to this TODO comment.(Öõşÿÿÿÿ
+Pkotlin:S1135Ã"2Complete the task associated to this TODO comment.(–Ïé¡úÿÿÿÿ
+fkotlin:S1192‚"HDefine a constant instead of duplicating this literal "status*" 3 times.(àŒŠ¤ûÿÿÿÿ
+okotlin:S1192â"QDefine a constant instead of duplicating this literal "com.whatsapp.w4b" 9 times.(ğ¿´ÿÿÿÿÿ
+ekotlin:S1192ã"LDefine a constant instead of duplicating this literal "not present" 4 times.(ã°œã
+fkotlin:S1192ˆ"MDefine a constant instead of duplicating this literal "com.whatsapp" 8 times.(È¥¡é
+|kotlin:S1192è"cDefine a constant instead of duplicating this literal "android.provider.extra.INITIAL_URI" 4 times.(¨‘ÆÂ
+kkotlin:S1871¥"MThis branch's code block is the same as the block for the branch on line 667.(ÒÌâ–øÿÿÿÿ
+<kotlin:S1874è"#Deprecated code should not be used.(¨‘ÆÂ
+<kotlin:S1874‚"#Deprecated code should not be used.(¨‘ÆÂ
+okotlin:S3776u"RRefactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.(¶Á»¬şÿÿÿÿ
+kkotlin:S3776Ñ"RRefactor this method to reduce its Cognitive Complexity from 27 to the 15 allowed.(‚ÆéÊ
+kkotlin:S3776Ş"RRefactor this method to reduce its Cognitive Complexity from 19 to the 15 allowed.(“‘¨‘
+kkotlin:S3776"RRefactor this method to reduce its Cognitive Complexity from 19 to the 15 allowed.(…¼„ü
+Vkotlin:S6511æ"=Merge chained "if" statements into a single "when" statement.(ÿÎ¡é

@@ -42,8 +42,19 @@ import com.example.stickers.Activities.HowToUseActivity
 import com.example.stickers.Activities.ShareActivity
 import com.example.stickers.Activities.SplashActivity
 import com.example.stickers.Activities.SplashActivity.Companion.splashAdLoaded
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.isMultiSelect
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.isSavedMultiSelect
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.savedSelectedStatusList
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.savedSelectedVideoStatusList
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.savedSelectedVideoStatusList29
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.selectedStatusList
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.selectedStatusList29
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModel
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModelFactory
+import com.example.stickers.Adapter.ImageAdapter30plus
+import com.example.stickers.BuildConfig
+import com.example.stickers.Models.Status
+import com.example.stickers.Models.StatusDocFile
 import com.example.stickers.PremActivity
 import com.example.stickers.R
 import com.example.stickers.Utils.*
@@ -52,16 +63,18 @@ import com.example.stickers.Utils.AppCommons.Companion.isAppInstalled
 import com.example.stickers.ads.*
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.BillingBaseActivity
-import com.example.stickers.app.Constants
 import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.SharedPreferenceData
+import com.example.stickers.app.getUriPath
 import com.example.stickers.databinding.ActivityMainDashBinding
 import com.example.stickers.databinding.DialogOpenWhatsappBinding
-import com.example.stickers.dialog.ExitDialog
+import com.example.stickers.dialog.ExitDialogFragment
 import com.example.stickers.dialog.ProgressDialog
+import com.example.stickers.dialog.SelectWhatsAppFragment
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
+import java.io.File
 
 
 class MainDashActivity : BillingBaseActivity() {
@@ -73,20 +86,21 @@ class MainDashActivity : BillingBaseActivity() {
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE = 5544
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE_2 = 55442
     private var dialog: ProgressDialog? = null
-
+    private var imageAdapter30plus: ImageAdapter30plus? = null
+    private lateinit var openWhat: ImageView
+    private var exitDialogFragment: ExitDialogFragment? = null
     companion object {
         var isStoragePermissionDeny = true
         var isInterShown = false
         var isActivityShown = false
         var nativeAD: ConstraintLayout? = null
-        private const val REQUEST_PERMISSIONS = 1234
+        const val REQUEST_PERMISSIONS = 1234
         val PERMISSIONS = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
         var nativeAdNew1: NativeAd? = null
         var nativeAdNew2: NativeAd? = null
-
 
 
         val storagePermissions = arrayOf(
@@ -121,6 +135,45 @@ class MainDashActivity : BillingBaseActivity() {
         binding = ActivityMainDashBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
+        binding.textView10.text = "Version " + BuildConfig.VERSION_NAME
+
+        openWhat = findViewById<ImageView>(R.id.open_whatsApp_icon)
+        var whatsAppType = SharedPreferenceData(this).getString("apppackage")
+        if (whatsAppType == "com.whatsapp") {
+            openWhat.setBackgroundResource(R.drawable.whats_app_icon)
+        } else if (whatsAppType == "com.whatsapp.w4b") {
+            openWhat.setBackgroundResource(R.drawable.w_business_icon)
+        }
+
+        openWhat.setOnClickListener {
+             whatsAppType = SharedPreferenceData(this).getString("apppackage")
+            Log.e("WhatsAppicon", "onCreate: Clicked")
+            Log.e("WhatsAppicon", "$whatsAppType: Clicked")
+            if (whatsAppType == "com.whatsapp") {
+                Log.e("WhatsAppicon", "$whatsAppType: Clicked")
+                val i = packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
+                if (i != null) {
+                    startActivity(i)
+                } else {
+                    Toast.makeText(
+                        applicationContext,
+                        "whatsApp is not installed",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else if (whatsAppType == "com.whatsapp.w4b") {
+                val i = packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
+                if (i != null) {
+                    startActivity(i)
+                } else {
+                    Toast.makeText(
+                        applicationContext,
+                        "whatsApp is not installed",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
         val firstTime = SharedPreferenceData(this).getBoolean("ComingFirstTime", true)
         if (firstTime) {
@@ -142,8 +195,7 @@ class MainDashActivity : BillingBaseActivity() {
 
                 interAdShowFunc(isAdShown)
             }
-        }
-        else{
+        } else {
             var isAdShown = false
             model.selected.observe(this) {
                 Log.e("status*", "selected - $it")
@@ -161,10 +213,7 @@ class MainDashActivity : BillingBaseActivity() {
             interAdShowFunc(isAdShown)
 
         }
-
-
         //binding.content.toolbar.setNavigationIcon(R.drawable.ic_menu)
-
         nativeAD = binding.content.nativeLayout.root
         setSupportActionBar(binding.content.toolbar)
         val drawerLayout: DrawerLayout = binding.drawerLayout
@@ -186,19 +235,31 @@ class MainDashActivity : BillingBaseActivity() {
         navController?.addOnDestinationChangedListener { nc: NavController, nd: NavDestination, args: Bundle? ->
             if (/*nd.id == R.id.LiveVideosFragment
                 || nd.id == R.id.SavedStatusesFragment
-                || nd.id == R.id.LiveImagesFragment
-                || */nd.id == R.id.photoCollageFragment
-                || nd.id == R.id.stickerMakerFragment
+               || nd.id == R.id.LiveImagesFragment
+               || */nd.id == R.id.photoCollageFragment || nd.id == R.id.stickerMakerFragment
             ) {
+                openWhat.visibility = View.GONE
+                val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
+                multiSelectLay?.visibility = View.GONE
+                isMultiSelect = false
+                isSavedMultiSelect = false
+                selectedStatusList.clear()
+                savedSelectedStatusList.clear()
+                savedSelectedVideoStatusList.clear()
+
                 supportActionBar?.show()
                 drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 toggle.isDrawerIndicatorEnabled = true
                 drawerLayout.addDrawerListener(toggle)
                 toggle.syncState()
-            } else if (nd.id == R.id.galleryItemFragment ||
-                nd.id == R.id.galleryFragment
+            } else if (nd.id == R.id.galleryItemFragment || nd.id == R.id.galleryFragment
             ) {
+                openWhat.visibility = View.VISIBLE
+                hideSelectorLayout()
                 supportActionBar?.hide()
+            } else {
+                openWhat.visibility = View.VISIBLE
+                Log.e("atg**2", "$nd")
             }
             Log.e("atg**2", "$nd")
         }
@@ -264,42 +325,13 @@ class MainDashActivity : BillingBaseActivity() {
         }
     }
 
-    private fun showNativeAd() {
-        with(binding.content.nativeLayout) {
-            when (RemoteDateConfig.remoteAdSettings.native_dashboard.value) {
-                "on", "admob" -> {
-                    root.beVisible()
-                    loadNativeAdmob(
-                        root, adFrameLarge,
-                        R.layout.admob_native_small,
-                        R.layout.max_native_small, 1,
-                        RemoteDateConfig.remoteAdSettings.native_dashboard,
-                        failedListener = {
-//                            MaxNativeAd.isNativeAdmobFailed = true
-//                            MaxNativeAd.getInstance()
-//                                .loadMaxNativeAd0(
-//                                    this@MainDashActivity,
-//                                    R.layout.max_native_small,
-//                                    RemoteDateConfig.remoteAdSettings.getMaxNativeId(),
-//                                    adFrameLarge
-//                                )
-                        },
-                        adId = RemoteDateConfig.remoteAdSettings.getAdmobSplashNativeId1()
-                    )
-                }
 
-                "off" -> {
-                    root.beGone()
-                }
-            }
-        }
-    }
 
 
     override fun onResume() {
         super.onResume()
         isActivityShown = true
-        showNativeAd()
+
     }
 
     override fun onPause() {
@@ -335,7 +367,7 @@ class MainDashActivity : BillingBaseActivity() {
                 try {
                     val intent = Intent(
                         Intent.ACTION_VIEW, Uri.parse(
-                            "http://play.google.com/store/apps/details?id="
+                            "http://play.googlee.com/store/apps/details?id="
                                     + applicationContext.packageName
                         )
                     )
@@ -373,12 +405,8 @@ class MainDashActivity : BillingBaseActivity() {
                 exits.performClick()
             }
             exits.setOnClickListener {
-                ExitDialog(this@MainDashActivity) {
-                    finishAffinity()
-                    finishAndRemoveTask()
-//                    android.os.Process.killProcess(android.os.Process.myPid())
-//                    exitProcess(1)
-                }.show()
+                exitDialogFragment = ExitDialogFragment()
+                exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
             }
         }
     }
@@ -457,17 +485,14 @@ class MainDashActivity : BillingBaseActivity() {
                     textView28.text = getString(R.string.permision_text_)
 
                 grantPermission.setOnClickListener {
-                    if (arePermissionDenied())
-                    {
+                    if (arePermissionDenied()) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             requestPermissions(storagePermissions33, REQUEST_PERMISSIONS)
-                        }
-                        else{
+                        } else {
                             requestPermissions(PERMISSIONS, REQUEST_PERMISSIONS)
                         }
 
-                    }
-                    else
+                    } else
                         specialPermissionDialog()
                     dismiss()
                 }
@@ -491,9 +516,7 @@ class MainDashActivity : BillingBaseActivity() {
                     ) {
 
                         return
-                    }
-
-                    else {
+                    } else {
                         val intent =
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri: Uri = Uri.fromParts("package", packageName, null)
@@ -501,23 +524,19 @@ class MainDashActivity : BillingBaseActivity() {
                         startActivityForResult(intent, 1023)
                     }
                 }
-            }
-            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (arePermissionDenied()) {
                     ActivityCompat.requestPermissions(
                         this,
                         getPermissions(),
                         REQUEST_PERMISSIONS
                     )
-                }
-                else{
+                } else {
                     specialPermissionDialog()
                 }
-            }
-            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 specialPermissionDialog()
-            }
-            else {
+            } else {
                 model.select(1)
             }
         }
@@ -654,29 +673,35 @@ class MainDashActivity : BillingBaseActivity() {
 
     private fun arePermissionDenied(): Boolean {
 
-         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU)
-        {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU) {
             for (permissions in storagePermissions33) {
-                if (ActivityCompat.checkSelfPermission(applicationContext, permissions) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(
+                        applicationContext,
+                        permissions
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
                     isStoragePermissionDeny = true
                     return true
                 }
             }
-        }
-       else  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Build.VERSION.SDK_INT != Build.VERSION_CODES.TIRAMISU)
-        {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Build.VERSION.SDK_INT != Build.VERSION_CODES.TIRAMISU) {
             for (permissions in PERMISSIONS) {
-                if (ActivityCompat.checkSelfPermission(applicationContext, permissions) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(
+                        applicationContext,
+                        permissions
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
                     isStoragePermissionDeny = true
                     return true
                 }
             }
-        }
-
-        else
-        {
+        } else {
             for (permissions in PERMISSIONS) {
-                if (ActivityCompat.checkSelfPermission(applicationContext, permissions) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(
+                        applicationContext,
+                        permissions
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
                     isStoragePermissionDeny = true
                     return true
                 }
@@ -707,56 +732,63 @@ class MainDashActivity : BillingBaseActivity() {
     }
 
     private fun selectWhatsAppDialog(proceedListenerr: () -> Unit) {
-        val dialogBuilder = AlertDialog.Builder(this, R.style.CustomPAlertDialog)
-        val inflater = this.layoutInflater
-        val dialogView = inflater.inflate(R.layout.select_whats_app_dialog, null)
-        dialogBuilder.setView(dialogView)
-        val alertDialog = dialogBuilder.create()
-        val simpleBtn = dialogView.findViewById<TextView>(R.id.go_for_simple)
-        val businessBtn = dialogView.findViewById<TextView>(R.id.go_for_business)
 
-        simpleBtn.setOnClickListener {
-            alertDialog.dismiss()
-            SharedPreferenceData(this).putBoolean("ComingFirstTime", false)
-            if (isAppInstalled(applicationContext, "com.whatsapp")) {
-                WAoptions.appPackage = "com.whatsapp"
-                SharedPreferenceData(this).putString(
-                    "apppackage",
-                    WAoptions.appPackage
-                )
-                myMenu?.getItem(0)?.isChecked = true
-                navController?.navigate(R.id.status)
-            } else Toast.makeText(
-                applicationContext,
-                "WhatsApp is not installed",
-                Toast.LENGTH_LONG
-            ).show()
-            alertDialog.dismiss()
-            proceedListenerr.invoke()
-        }
-        businessBtn.setOnClickListener {
-            SharedPreferenceData(this).putBoolean("ComingFirstTime", false)
+        val selectwhatsApp = SelectWhatsAppFragment(openWhat){proceedListenerr.invoke()}
+        selectwhatsApp.show(supportFragmentManager, "select_whatsApp_tag")
 
-            if (isAppInstalled(applicationContext, "com.whatsapp.w4b")) {
-                WAoptions.appPackage = "com.whatsapp.w4b"
-                SharedPreferenceData(this).putString(
-                    "apppackage",
-                    WAoptions.appPackage
-                )
-
-                myMenu?.getItem(1)?.isChecked = true
-                navController?.navigate(R.id.status)
-            } else Toast.makeText(
-                applicationContext,
-                "WhatsApp Business is not installed",
-                Toast.LENGTH_LONG
-            ).show()
-            proceedListenerr.invoke()
-            alertDialog.dismiss()
-
-        }
-        alertDialog.setCancelable(false)
-        alertDialog.show()
+//        val dialogBuilder = AlertDialog.Builder(this, R.style.CustomPAlertDialog)
+//        val inflater = this.layoutInflater
+//        val dialogView = inflater.inflate(R.layout.select_whats_app_dialog, null)
+//        dialogBuilder.setView(dialogView)
+//        val alertDialog = dialogBuilder.create()
+//        val simpleBtn = dialogView.findViewById<TextView>(R.id.go_for_simple)
+//        val businessBtn = dialogView.findViewById<TextView>(R.id.go_for_business)
+//
+//        simpleBtn.setOnClickListener {
+//            alertDialog.dismiss()
+//
+//            SharedPreferenceData(this).putString("apppackage", WAoptions.appPackage)
+//            SharedPreferenceData(this).putBoolean("ComingFirstTime", false)
+//            if (isAppInstalled(applicationContext, "com.whatsapp")) {
+//
+//                SharedPreferenceData(this).putString("apppackage", "com.whatsapp")
+//                myMenu?.getItem(0)?.isChecked = true
+//                navController?.navigate(R.id.status)
+//                openWhat.setBackgroundResource(R.drawable.whats_app_icon)
+//
+//
+//            } else Toast.makeText(
+//                applicationContext,
+//                "WhatsApp is not installed",
+//                Toast.LENGTH_LONG
+//            ).show()
+//            alertDialog.dismiss()
+//            proceedListenerr.invoke()
+//        }
+//        businessBtn.setOnClickListener {
+//            SharedPreferenceData(this).putString("apppackage", "com.whatsapp.w4b")
+//            SharedPreferenceData(this).putBoolean("ComingFirstTime", false)
+//            if (isAppInstalled(applicationContext, "com.whatsapp.w4b")) {
+//                WAoptions.appPackage = "com.whatsapp.w4b"
+//                SharedPreferenceData(this).putString(
+//                    "apppackage",
+//                    WAoptions.appPackage
+//                )
+//
+//                myMenu?.getItem(1)?.isChecked = true
+//                navController?.navigate(R.id.status)
+//                openWhat.setBackgroundResource(R.drawable.w_business_icon)
+//            } else Toast.makeText(
+//                applicationContext,
+//                "WhatsApp Business is not installed",
+//                Toast.LENGTH_LONG
+//            ).show()
+//            proceedListenerr.invoke()
+//            alertDialog.dismiss()
+//
+//        }
+//        alertDialog.setCancelable(false)
+//        alertDialog.show()
 
     }
 
@@ -765,13 +797,16 @@ class MainDashActivity : BillingBaseActivity() {
             R.id.action_ba -> {
                 if (isAppInstalled(applicationContext, "com.whatsapp.w4b")) {
                     WAoptions.appPackage = "com.whatsapp.w4b"
-                    SharedPreferenceData(this).putString("apppackage", WAoptions.appPackage)
-
+                    SharedPreferenceData(this).putString("apppackage", "com.whatsapp.w4b")
                     myMenu?.getItem(1)?.isChecked = true
                     navController?.navigate(R.id.status)
 
-
-
+                    val whatsAppType = SharedPreferenceData(this).getString("apppackage")
+                    if (whatsAppType == "com.whatsapp") {
+                        openWhat.setBackgroundResource(R.drawable.whats_app_icon)
+                    } else if (whatsAppType == "com.whatsapp.w4b") {
+                        openWhat.setBackgroundResource(R.drawable.w_business_icon)
+                    }
 
                 } else Toast.makeText(
                     applicationContext,
@@ -784,12 +819,16 @@ class MainDashActivity : BillingBaseActivity() {
             R.id.action_wa -> {
                 if (isAppInstalled(applicationContext, "com.whatsapp")) {
                     WAoptions.appPackage = "com.whatsapp"
-                    SharedPreferenceData(this).putString(
-                        "apppackage",
-                        WAoptions.appPackage
-                    )
+                    SharedPreferenceData(this).putString("apppackage", "com.whatsapp")
                     myMenu?.getItem(0)?.isChecked = true
                     navController?.navigate(R.id.status)
+
+                    val whatsAppType = SharedPreferenceData(this).getString("apppackage")
+                    if (whatsAppType == "com.whatsapp") {
+                        openWhat.setBackgroundResource(R.drawable.whats_app_icon)
+                    } else if (whatsAppType == "com.whatsapp.w4b") {
+                        openWhat.setBackgroundResource(R.drawable.w_business_icon)
+                    }
 
                 } else Toast.makeText(
                     applicationContext,
@@ -815,12 +854,8 @@ class MainDashActivity : BillingBaseActivity() {
         )
         when (navController?.currentDestination?.id) {
             R.id.status -> {
-                ExitDialog(this@MainDashActivity) {
-                    finishAffinity()
-                    finishAndRemoveTask()
-//                    android.os.Process.killProcess(android.os.Process.myPid())
-//                    exitProcess(1)
-                }.show()
+                exitDialogFragment = ExitDialogFragment()
+                exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
             }
             /*R.id.LiveVideosFragment, R.id.SavedStatusesFragment,
                 //R.id.stickerMakerFragment, R.id.photoCollageFragment
@@ -834,5 +869,251 @@ class MainDashActivity : BillingBaseActivity() {
 
             else -> super.onBackPressed()
         }
+    }
+
+    fun onMultiSelectMode(
+        notifyAdapter: () -> Unit,
+        deleteListener: () -> Unit,
+        shareListener: () -> Unit
+    ) {
+
+        openWhat.visibility = View.GONE
+        val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
+        val closeAction = findViewById<ImageView>(R.id.close_action)
+        val shareBtn = findViewById<ImageView>(R.id.share_btn)
+        val download = findViewById<ImageView>(R.id.downloadbtn)
+        download.setBackgroundResource(R.drawable.ic_download__1_)
+        multiSelectLay.visibility = View.VISIBLE
+
+        closeAction.setOnClickListener {
+            hideSelectorLayout()
+            notifyAdapter.invoke()
+        }
+
+        shareBtn.setOnClickListener {
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                shareImagesToOtherApps29(this, selectedStatusList29)
+            } else {
+                shareImagesToOtherApps(this, selectedStatusList)
+            }
+
+            hideSelectorLayout()
+            notifyAdapter.invoke()
+
+        }
+        download.setOnClickListener {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                saveStatusFromViewPager29(selectedStatusList29)
+            } else {
+                saveStatusFromViewPager(selectedStatusList)
+            }
+            hideSelectorLayout()
+            notifyAdapter.invoke()
+        }
+
+    }
+
+    fun onMultiVideoSelectMode(
+        notifyAdapter: () -> Unit,
+        deleteListener: () -> Unit,
+        shareListener: () -> Unit
+    ) {
+
+        openWhat.visibility = View.GONE
+        val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
+        val closeAction = findViewById<ImageView>(R.id.close_action)
+        val shareBtn = findViewById<ImageView>(R.id.share_btn)
+        val download = findViewById<ImageView>(R.id.downloadbtn)
+        download.setBackgroundResource(R.drawable.ic_download__1_)
+        multiSelectLay.visibility = View.VISIBLE
+
+        closeAction.setOnClickListener {
+            hideSelectorLayout()
+            notifyAdapter.invoke()
+        }
+
+        shareBtn.setOnClickListener {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                saveStatusFromViewPager29(savedSelectedVideoStatusList29)
+            } else {
+                saveStatusFromViewPager(savedSelectedVideoStatusList)
+            }
+            hideSelectorLayout()
+            notifyAdapter.invoke()
+
+        }
+        download.setOnClickListener {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                saveStatusFromViewPager29(savedSelectedVideoStatusList29)
+            } else {
+                saveStatusFromViewPager(savedSelectedVideoStatusList)
+            }
+            hideSelectorLayout()
+            notifyAdapter.invoke()
+        }
+
+
+    }
+
+    fun hideSelectorLayout() {
+        val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
+        multiSelectLay?.visibility = View.GONE
+        isMultiSelect = false
+        isSavedMultiSelect = false
+
+        openWhat.visibility = View.VISIBLE
+        selectedStatusList.clear()
+        savedSelectedStatusList.clear()
+        savedSelectedVideoStatusList.clear()
+    }
+
+    fun onSavedMultiSelectMode(
+        notifyAdapter: () -> Unit,
+        deleteListener: () -> Unit,
+        shareListener: () -> Unit
+    ) {
+        openWhat.visibility = View.GONE
+        val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
+        val closeAction = findViewById<ImageView>(R.id.close_action)
+        val shareBtn = findViewById<ImageView>(R.id.share_btn)
+        val delete = findViewById<ImageView>(R.id.downloadbtn)
+        delete.setBackgroundResource(R.drawable.baseline_delete_24)
+        multiSelectLay.visibility = View.VISIBLE
+
+        closeAction.setOnClickListener {
+            hideSelectorLayout()
+
+            notifyAdapter.invoke()
+        }
+
+        shareBtn.setOnClickListener {
+            shareSavedImagesToOtherApps(this, savedSelectedStatusList)
+            hideSelectorLayout()
+            notifyAdapter.invoke()
+
+        }
+        delete.setOnClickListener {
+            val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.setCancelable(false)
+            dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.setContentView(R.layout.delete_dialog)
+            val okButton = dialog.findViewById<TextView>(R.id.grant_permission)
+            val cancelDialog = dialog.findViewById<TextView>(R.id.button)
+            okButton.setOnClickListener {
+                deleteImages(savedSelectedStatusList, { notifyAdapter.invoke() })
+                dialog.dismiss()
+            }
+            cancelDialog.setOnClickListener {
+                hideSelectorLayout()
+                notifyAdapter.invoke()
+                dialog.dismiss()
+            }
+            dialog.show()
+
+        }
+    }
+
+    private fun shareSavedImagesToOtherApps(
+        context: Context,
+        selectedStatusList: MutableList<Status?>
+    ) {
+        val imageUris = ArrayList<Uri>()
+        selectedStatusList.forEach {
+            it?.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> imageUris.add(it2) }
+        }
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "image/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+        }
+        context.startActivity(Intent.createChooser(intent, "Share images via"))
+    }
+
+    private fun deleteImages(selectedStatusList: MutableList<Status?>, updateRecycler: () -> Unit) {
+        selectedStatusList.forEach { status ->
+            status?.file?.let { filePath ->
+                if (filePath.exists()) {
+                    val deleted = filePath.delete()
+                    if (deleted) {
+                        showToast("Images Deleted")
+                    } else {
+                        showToast("Failed To Delete Images")
+                    }
+                }
+            }
+        }
+        updateRecycler.invoke()
+        hideSelectorLayout()
+    }
+
+
+    private fun shareImagesToOtherApps29(context: Context, selectedStatusList: List<Status>) {
+        val imageUris = ArrayList<Uri>()
+        selectedStatusList.forEach {
+            it.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> imageUris.add(it2) }
+        }
+
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "image/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+        }
+        context.startActivity(Intent.createChooser(intent, "Share images via"))
+    }
+
+    private fun shareImagesToOtherApps(context: Context, selectedStatusList: List<StatusDocFile>) {
+        val imageUris = ArrayList<Uri>()
+        selectedStatusList.forEach {
+            imageUris.add(it.file.uri)
+        }
+
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "image/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+        }
+        context.startActivity(Intent.createChooser(intent, "Share images via"))
+    }
+
+    private fun saveStatusFromViewPager(selectedStatusList: List<StatusDocFile>) {
+        selectedStatusList.forEach {
+            if (Common.getSavedFile(it.file.name)) {
+                // binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                // showSnackBar(binding.viewPager, "Already downloaded.")
+                // return
+            } else {
+                val justDirOut = File(Common.APP_DIR)
+                if (!justDirOut.exists()) {
+                    justDirOut.mkdir()
+                }
+                val outDirCopy = File(justDirOut, it.file?.name!!)
+                it.file?.uri?.let {
+                    saveInToPath(it, outDirCopy)
+                    //binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                }
+            }
+        }
+        showSnackBar(binding.drawerLayout, "Files downloaded successfully.")
+    }
+
+    private fun saveStatusFromViewPager29(selectedStatusList: List<Status>) {
+        selectedStatusList.forEach {
+            if (Common.getSavedFile(it.file.name)) {
+                // binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                // showSnackBar(binding.viewPager, "Already downloaded.")
+                // return
+            } else {
+                val justDirOut = File(Common.APP_DIR)
+                if (!justDirOut.exists()) {
+                    justDirOut.mkdir()
+                }
+                val outDirCopy = File(justDirOut, it.file?.name!!).apply {
+
+                    saveInToPath(getUriPath(it.path), this)
+                }
+                //binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+
+            }
+        }
+        showSnackBar(binding.drawerLayout, "Files downloaded successfully.")
     }
 }

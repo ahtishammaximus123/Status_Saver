@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.view.ContextThemeWrapper
@@ -24,44 +25,56 @@ class AppCommons {
         fun Context.ShowWAppDialog(view: View, uri: Uri, isVideo: Boolean){
             val wrapper: Context = ContextThemeWrapper(this, R.style.PopupMenu2)
         val popupMenu = PopupMenu(wrapper, view)
-        popupMenu.inflate(R.menu.status_menu)
+        popupMenu.inflate(R.menu.status_menu_inside)
+            val link = "http://play.googlee.com/store/apps/details?id=$packageName"
+            val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
         popupMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_ba ->
-                    if (isAppInstalled(
-                        applicationContext, "com.whatsapp.w4b"
-                    )
-                ) {
+                    if (isAppInstalled(applicationContext, "com.whatsapp.w4b")) {
+                        Log.e("WhatsAppicon", "1: Clicked" )
                         val shareIntent = Intent(Intent.ACTION_SEND)
                         if(isVideo)
                         shareIntent.type = "video/*"
                         else     shareIntent.type = "image/*"
                         shareIntent.setPackage("com.whatsapp.w4b");
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
                         shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
                         startActivity(shareIntent)
-//                        try {
-//                            val launchIntent = packageManager.getLaunchIntentForPackage("com.whatsapp.w4b")
-//                            startActivity(launchIntent)
-//                        } catch (e: Exception) {
-//                            Toast.makeText(
-//                                applicationContext,
-//                                "Whatsapp Business not installed!",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        }
+                        try {
+                            Log.e("WhatsAppicon", "2: Clicked" )
+                       //     val launchIntent = packageManager.getLaunchIntentForPackage("com.whatsapp.w4b")
+                            startActivity(shareIntent)
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                applicationContext,
+                                "Whatsapp Business not installed!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                 }
+                else{
+                        Toast.makeText(
+                            applicationContext,
+                            "Whatsapp Business not installed!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 R.id.action_wa -> if (isAppInstalled(applicationContext, "com.whatsapp")) {
                     try {
+                        Log.e("WhatsAppicon", "3: Clicked" )
                         val shareIntent = Intent(Intent.ACTION_SEND)
                         if(isVideo)
                             shareIntent.type = "video/*"
                         else     shareIntent.type = "image/*"
-                        shareIntent.setPackage("com.whatsapp");
+                        shareIntent.setPackage("com.whatsapp")
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
                         shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
                         startActivity(shareIntent)
                         //val launchIntent = packageManager.getLaunchIntentForPackage("com.whatsapp")
                        // startActivity(launchIntent)
                     } catch (e: Exception) {
+                        Log.e("WhatsAppicon", "4: Clicked" )
                         Toast.makeText(
                             applicationContext,
                             "Whatsapp not installed!",
@@ -69,6 +82,14 @@ class AppCommons {
                         ).show()
                     }
                 }
+                else{
+                    Toast.makeText(
+                        applicationContext,
+                        "Whatsapp not installed!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
             }
             false
         })

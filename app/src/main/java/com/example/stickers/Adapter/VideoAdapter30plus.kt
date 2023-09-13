@@ -2,23 +2,25 @@ package com.example.stickers.Adapter
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.FileProvider
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.stickers.Activities.FullScreenVideoActivity
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.ItemsViewModel
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.isMultiSelect
+import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.savedSelectedVideoStatusList
 import com.example.stickers.Models.StatusDocFile
+import com.example.stickers.MultiVideoSelectCallback
 import com.example.stickers.R
 import com.example.stickers.Utils.saveStatus
 import com.example.stickers.ads.showInterAd
+import com.example.stickers.ads.showToast
 import com.example.stickers.app.RemoteDateConfig
-import com.example.stickers.app.getUriPath
 import com.example.stickers.app.shareFile
 import java.io.*
 import java.util.*
@@ -26,13 +28,12 @@ import java.util.*
 
 class VideoAdapter30plus(
     val mList: MutableList<StatusDocFile>,
+    val context1: FragmentManager,
     private val context: Activity,
-    private val downloadListener: () -> Unit
+    private val downloadListener: () -> Unit,
+    private val callBack: MultiVideoSelectCallback
 ) : RecyclerView.Adapter<ItemViewHolder>() {
 
-
-    private val imagesList: List<StatusDocFile>? = null
-    private val container: ConstraintLayout? = null
     val FILE_PROVIDER_AUTHORITY = "com.example.videodownloader"
 
     // create new views
@@ -47,12 +48,12 @@ class VideoAdapter30plus(
 
     // binds the list items to a view
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-
         try {
-            ItemsViewModel = mList[position]
-            Log.d("tree", "onBindViewHolder " + mList.get(position).file.uri)
+            val reversedPosition = mList.size - 1 - position
+            val itemsViewModel = mList[reversedPosition]
+            Log.d("tree", "onBindViewHolder " + itemsViewModel.file.uri)
 
-            if (ItemsViewModel?.isSavedStatus() == true) {
+            if (itemsViewModel.isSavedStatus()) {
                 holder.save.setImageResource(R.drawable.ic_download_ic__1_)
                 holder.save.tag = "saved"
             } else {
@@ -61,127 +62,96 @@ class VideoAdapter30plus(
             }
 
             Glide.with(context)
-                .load(ItemsViewModel?.file?.uri)
+                .load(itemsViewModel.file.uri)
                 .into(holder.imageView)
 
             holder.share.setOnClickListener { v ->
-                ItemsViewModel = mList[holder.adapterPosition]
-//                val intent = Intent(Intent.ACTION_SEND)
-//                intent.type = "video/image/mp4/*"
-//                intent.putExtra(Intent.EXTRA_STREAM, ItemsViewModel?.file?.uri)
-//                val shareSub = "Shared via Video Downloader and Editor"
-//                intent.putExtra(Intent.EXTRA_TEXT, shareSub)
-//                context.startActivity(intent)
-                ItemsViewModel?.file?.uri?.let {
-                    context.shareFile(it)
+                itemsViewModel.file.let {
+                    context.shareFile(it.uri, context1)
                 }
+            }
+
+            if (mList.isNotEmpty() && reversedPosition >= 0 && reversedPosition < mList.size) {
+                if (mList[reversedPosition].isSelected) {
+                    val drawable = context?.let { ContextCompat.getDrawable(it, R.drawable.selected_back) }
+                    holder.imageView.foreground = drawable
+                } else {
+                    holder.imageView.foreground = null
+                }
+            } else {
+                // Handle the case where reversedPosition is out of bounds or selectedStatusList is empty.
+                // You can log an error or perform appropriate error handling here.
+            }
+            holder.imageView.setOnLongClickListener {
+                if (!isMultiSelect) {
+                    isMultiSelect = true
+                    savedSelectedVideoStatusList.add(itemsViewModel)
+                    mList[reversedPosition].isSelected=true
+                    val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
+                    holder.imageView.foreground = drawable
+                    callBack.onMultiVideoSelectModeActivated()
+                }
+                //     notifyItemChanged(position)
+                true
+            }
+
+            holder.imageView.setOnClickListener {
+                if (isMultiSelect) {
+                    if (savedSelectedVideoStatusList.contains(itemsViewModel)) {
+                        savedSelectedVideoStatusList.remove(itemsViewModel)
+                        mList[reversedPosition].isSelected=false
+                        holder.imageView.foreground=null
+                        callBack.onMultiVideoSelectModeActivated()
+                    } else {
+                        val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
+                        holder.imageView.foreground = drawable
+
+//                    val foregroundDrawable = ColorDrawable(Color.parseColor("#C9ACACAC"))
+//                    holder.imageView.foreground=foregroundDrawable
+                        savedSelectedVideoStatusList.add(itemsViewModel)
+                        mList[reversedPosition].isSelected=true
+                        callBack.onMultiVideoSelectModeActivated()
+                    }
+                    // notifyItemChanged(position)
+                } else {
+                    val i = Intent(context, FullScreenVideoActivity::class.java)
+                    ItemsViewModel = mList[reversedPosition]
+                    i.action = "sa"
+                    i.putExtra("is30Plus", true)
+                    i.putExtra("img_tag", holder.save.tag.toString())
+                    Log.e("img_tag", holder.save.tag.toString())
+                    context.startActivity(i)
+                }
+            }
 
 
-            }
-            holder.imageView.setOnClickListener { v ->
-                //todo here
-                val i = Intent(
-                    context,
-                    FullScreenVideoActivity::class.java
-                )
-                ItemsViewModel = mList[holder.adapterPosition]
-                i.action = "sa"
-//            i.putExtra("status", ItemsViewModel)
-                i.putExtra("is30Plus", true)
-                i.putExtra("img_tag", holder.save.getTag().toString())
-                Log.e("img_tag", holder.save.getTag().toString())
-                context.startActivity(i)
-            }
             holder.save.setOnClickListener { v ->
-
-                if (holder.save.tag != "saved")
+                if (holder.save.tag != "saved") {
                     context.showInterAd(RemoteDateConfig.remoteAdSettings.inter_download_status) {
-                        if (mList.size > holder.adapterPosition) {
+                        if (reversedPosition < mList.size) {
                             try {
-                                ItemsViewModel = mList[holder.adapterPosition]
+                                val newItem = mList[reversedPosition]
                                 try {
-                                    context.saveStatus(v, mList[holder.adapterPosition])
-                                    ItemsViewModel?.setSavedStatus(true)
-                                }
-                                catch (e:Exception)
-                                {
-                                    e.printStackTrace()
-                                    Toast.makeText(context,"Corrupted Video,Can't be Saved", Toast.LENGTH_LONG).show()
+                                    context.saveStatus(v, newItem)
+                                    newItem.setSavedStatus(true)
 
+                                    notifyDataSetChanged()
+
+                                    downloadListener.invoke()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    Toast.makeText(context, "Corrupted Video, Can't be Saved", Toast.LENGTH_LONG).show()
                                 }
-                                notifyItemChanged(position)
-                                downloadListener.invoke()
                             } catch (exp: ArrayIndexOutOfBoundsException) {
                             }
                         }
                     }
+                } else {
+                    context.showToast("Video Already Downloaded")
+                }
             }
         } catch (exp: Exception) {
-        }
-    }
-
-    private fun saveintopath(imgUri: Uri, file: File) {
-
-        val chunkSize = 1024 // We'll read in one kB at a time
-
-        val imageData = ByteArray(chunkSize)
-
-        var `in`: InputStream? = null
-        var out: OutputStream? = null
-
-
-        try {
-            `in` = context.getContentResolver().openInputStream(imgUri)
-            val out =
-                FileOutputStream(file) // I'm assuming you already have the File object for where you're writing to
-            var bytesRead: Int
-            while (`in`?.read(imageData).also { bytesRead = it!! }!! > 0) {
-                out.write(Arrays.copyOfRange(imageData, 0, Math.max(0, bytesRead)))
-            }
-        } catch (ex: Exception) {
-            Log.e("Something went wrong.", ex.toString())
-        } finally {
-            `in`?.close()
-            out?.close()
-        }
-        notifyDataSetChanged()
-    }
-
-    private fun copyFile(inputPath: String?, inputFile: String, outputPath: String) {
-        var `in`: InputStream? = null
-        var out: OutputStream? = null
-        var outFile: File? = null
-        try {
-
-            //create output directory if it doesn't exist
-            val dir = File(outputPath)
-            outFile = File(outputPath + File.separator + inputFile)
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-//            `in` = FileInputStream(inputPath + File.separator + uriStringFileName)
-            `in` = FileInputStream(inputPath)
-            out = FileOutputStream(outFile)
-            val buffer = ByteArray(1024)
-            var read: Int
-            while (`in`.read(buffer).also { read = it } != -1) {
-                out.write(buffer, 0, read)
-            }
-            `in`.close()
-            `in` = null
-
-            // write the output file (You have now copied the file)
-            out.flush()
-            out.close()
-            out = null
-            val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-            intent.data = Uri.fromFile(outFile)
-//            sendBroadcast(intent)
-            Log.e("tree", "done outFile path  is : " + outFile.absolutePath)
-        } catch (fnfe1: FileNotFoundException) {
-            Log.e("tree", "FileNotFoundException : " + fnfe1.message)
-        } catch (e: Exception) {
-            Log.e("tree", "Exception : " + e.message)
+            exp.printStackTrace()
         }
     }
 
@@ -189,9 +159,5 @@ class VideoAdapter30plus(
     override fun getItemCount(): Int {
         return mList.size
     }
-
-    private fun buildFileProviderUri(uri: Uri): Uri? {
-        return FileProvider.getUriForFile(context, FILE_PROVIDER_AUTHORITY, File(uri.path))
-    }
-
 }
+

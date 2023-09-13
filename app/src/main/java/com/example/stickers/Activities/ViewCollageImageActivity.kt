@@ -88,7 +88,7 @@ class ViewCollageImageActivity : BillingBaseActivity() {
             imgBackFullScreen.setOnClickListener { onBackPressed() }
             imgShare.setOnClickListener {
                 if (path.isNotEmpty()) {
-                    shareFile(getUriPath(path))
+                    shareFile(getUriPath(path), supportFragmentManager)
                 }
             }
         }

@@ -6,11 +6,12 @@ import java.io.Serializable;
 public class Status implements Serializable {
 
     private File file;
-//    private Bitmap thumbnail;
+    //    private Bitmap thumbnail;
     private String title = "";
     private String path = "";
     private boolean isVideo = false;
     public boolean isSavedStatus = false;
+    public boolean isSelected = false;
 
     public Status(File file, String title, String path) {
         this.file = file;
@@ -18,6 +19,15 @@ public class Status implements Serializable {
         this.path = path;
         String MP4 = ".mp4";
         this.isVideo = file.getName().endsWith(MP4);
+
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
     }
 
     public boolean isSavedStatus() {

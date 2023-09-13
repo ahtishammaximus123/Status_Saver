@@ -2,6 +2,7 @@ package com.example.stickers.Activities.sticker
 
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.stickers.R
@@ -22,6 +23,8 @@ class StickerMakerFragment : Fragment() {
     ): View {
         _binding = FragmentStickerMakerBinding.inflate(inflater, container, false)
         setHasOptionsMenu(true)
+        val openWhat = requireActivity().findViewById<ImageView>(R.id.open_whatsApp_icon)
+        openWhat.visibility=View.GONE
         return binding.root
     }
 
@@ -40,6 +43,7 @@ class StickerMakerFragment : Fragment() {
     override fun onPrepareOptionsMenu(menu: Menu) {
         val item: MenuItem = menu.findItem(R.id.folder)
         item.isVisible = true
+
     }
 
     override fun onDestroyView() {

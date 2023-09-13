@@ -3,6 +3,7 @@ package com.example.stickers.Adapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -14,6 +15,7 @@ import com.example.stickers.databinding.ItemCollageFileBinding
 
 class CollageFilesAdaptor(
     private val context: Context,
+   val  supportFragmentManager: FragmentManager,
     fileList: MutableList<FileModel>,
     listener: FileListener
 ) :
@@ -58,7 +60,7 @@ class CollageFilesAdaptor(
                     listener.onFileDelete(item, position)
                 }
                 share.setOnClickListener {
-                    context.shareFile(context.getUriPath(item.filePath))
+                    context.shareFile(context.getUriPath(item.filePath), supportFragmentManager)
                 }
             }
         }

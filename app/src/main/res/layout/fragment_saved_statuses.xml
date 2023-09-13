@@ -24,6 +24,46 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/tab_layout_text"
+                android:layout_width="@dimen/_270sdp"
+                android:layout_height="35dp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@drawable/green_stroke"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/load_images"
+                    android:layout_width="@dimen/_135sdp"
+                    android:layout_height="35dp"
+                    android:background="@drawable/btn_back_green"
+                    android:text="Images"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_11sdp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/load_videos"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/load_videos"
+                    android:layout_width="@dimen/_134sdp"
+                    android:layout_height="35dp"
+                    android:background="@drawable/whitestrokes"
+                    android:text="Videos"
+                    android:textColor="@color/main_backgroud"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/_11sdp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/load_images"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewImage"
@@ -33,7 +73,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/tab_layout_text" />
 
             <ProgressBar
                 android:id="@+id/progressBarImage"

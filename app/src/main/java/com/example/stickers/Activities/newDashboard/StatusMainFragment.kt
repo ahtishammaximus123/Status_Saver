@@ -41,7 +41,10 @@ class StatusMainFragment : Fragment() {
 
         val adapter = StatusPagerAdapter(childFragmentManager, lifecycle)
         binding.viewPager.adapter = adapter
-        binding.viewPager.offscreenPageLimit = 2
+
+
+
+        binding.viewPager.offscreenPageLimit = 1
         TabLayoutMediator(binding.tabLayout.tabLayoutNav, binding.viewPager) { tab, position ->
             tab.text = fragmentList[position].name
         }.attach()

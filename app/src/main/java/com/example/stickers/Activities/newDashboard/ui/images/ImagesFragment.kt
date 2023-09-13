@@ -1,5 +1,6 @@
 package com.example.stickers.Activities.newDashboard.ui.images
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -10,12 +11,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.storage.StorageManager
+import android.provider.Settings
 import android.util.Log
 import android.view.*
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -36,19 +42,19 @@ import com.example.stickers.Adapter.ImageAdapter30plus
 import com.example.stickers.ImageAdapterCallBack
 import com.example.stickers.Models.Status
 import com.example.stickers.Models.StatusDocFile
+import com.example.stickers.MultiSelectCallback
 import com.example.stickers.R
+import com.example.stickers.Utils.AppCommons
 import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.WAoptions
-import com.example.stickers.ads.InterAdmobClass
 import com.example.stickers.ads.beGone
 import com.example.stickers.ads.beVisible
-import com.example.stickers.ads.showInterAd
 import com.example.stickers.ads.showInterDemandAdmob
+import com.example.stickers.ads.showToast
 import com.example.stickers.app.AppClass
-import com.example.stickers.app.RemoteDateConfig
+import com.example.stickers.app.BillingBaseActivity
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.databinding.FragmentLiveImagesBinding
-import com.example.stickers.dialog.ProgressDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -56,7 +62,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
-class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
+class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelectCallback{
 
     private var _binding: FragmentLiveImagesBinding? = null
 
@@ -78,9 +84,23 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
     val anyImages = MutableLiveData<Int>()
 
     companion object {
+        var clickedPosition: Int=0
+        var openSaved=false
         var ItemsViewModel: StatusDocFile? = null
         private const val REQUEST_ACTION_OPEN_DOCUMENT_TREE = 5544
+        private val REQUEST_ACTION_OPEN_DOCUMENT_TREE_2 = 55442
         private var isLoadedAllStatus = false
+        val imagesList: MutableList<StatusDocFile> = ArrayList()
+        val imagesList29: MutableList<Status> = ArrayList()
+
+         var isMultiSelect = false
+        var isSavedMultiSelect = false
+         val selectedStatusList = mutableListOf<StatusDocFile>()
+        val selectedStatusList29 = mutableListOf<Status>()
+        val savedSelectedVideoStatusList29 = mutableListOf<Status>()
+
+        val savedSelectedStatusList = mutableListOf<Status?>()
+        val savedSelectedVideoStatusList = mutableListOf<StatusDocFile>()
     }
 
     private val imagesViewModel: ImagesViewModel by activityViewModels() {
@@ -139,22 +159,26 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            imageAdapter = ImageAdapter(container, this)
+            imageAdapter = ImageAdapter(container, this,this)
+
             with(_binding?.recyclerViewImage) {
                 this?.layoutManager = GridLayoutManager(activity, Common.GRID_COUNT)
                 this?.adapter = imageAdapter
             }
+
         } else {
             imageAdapter30plus = activity?.let {
-                ImageAdapter30plus(it) {
+                ImageAdapter30plus(it,{
                     imagesViewModel.getAllFiles()
-                    if(remoteAdSettings.admob_inter_download_btn_id.value.isNotEmpty())
-                    {
-                        requireActivity().showInterDemandAdmob(remoteAdSettings.admob_inter_download_btn_ad,remoteAdSettings.admob_inter_download_btn_id.value,{})
+                    if (remoteAdSettings.admob_inter_download_btn_id.value.isNotEmpty()) {
+                        requireActivity().showInterDemandAdmob(
+                            remoteAdSettings.admob_inter_download_btn_ad,
+                            remoteAdSettings.admob_inter_download_btn_id.value,
+                            {})
 
                     }
 
-                }
+                },this,requireActivity().supportFragmentManager)
             }
             with(_binding?.recyclerViewImage) {
                 this?.layoutManager = GridLayoutManager(activity, Common.GRID_COUNT)
@@ -175,15 +199,188 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         }
         _binding?.grantPermission?.setOnClickListener {
             imagesViewModel.select(0)
+            if (arePermissionDenied()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissions(
+                        MainDashActivity.storagePermissions33,
+                        MainDashActivity.REQUEST_PERMISSIONS
+                    )
+                } else {
+                    requestPermissions(
+                        MainDashActivity.PERMISSIONS,
+                        MainDashActivity.REQUEST_PERMISSIONS
+                    )
+                }
+
+            } else
+                specialPermissionDialog()
         }
 
-        status()
+        try {
+            status()
+        }
+        catch (e:Exception)
+        {
+            e.printStackTrace()
+        }
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+    fun specialPermissionDialog() {
+        if (WAoptions.appPackage == "com.whatsapp" &&
+            !AppCommons.isAppInstalled(requireActivity(), "com.whatsapp")
+        ) {
+            requireActivity().showToast("WhatsApp Not installed!")
+
+        } else if (WAoptions.appPackage == "com.whatsapp.w4b" &&
+            !AppCommons.isAppInstalled(requireActivity(), "com.whatsapp.w4b")
+        ) {
+            requireActivity().showToast("WhatsApp Business Not installed!")
+        } else {
+            val dialog =
+                Dialog(requireActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+
+            dialog.setCancelable(false)
+            dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.window!!.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+
+            dialog.setContentView(R.layout.dialog_grant_permission)
+            val okButton = dialog.findViewById<Button>(R.id.grant_permission)
+            val cancelDialog = dialog.findViewById<ImageView>(R.id.close_permission_dialog)
+            okButton.setOnClickListener {
+                permissionSpecial
+                dialog.dismiss()
+            }
+            cancelDialog.setOnClickListener {
+                dialog.dismiss()
+            }
+            dialog.show()
+        }
+    }
+
+    private fun arePermissionDenied(): Boolean {
+
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU) {
+            for (permissions in MainDashActivity.storagePermissions33) {
+                if (ActivityCompat.checkSelfPermission(
+                        requireActivity(),
+                        permissions
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    MainDashActivity.isStoragePermissionDeny = true
+                    return true
+                }
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Build.VERSION.SDK_INT != Build.VERSION_CODES.TIRAMISU) {
+            for (permissions in MainDashActivity.PERMISSIONS) {
+                if (ActivityCompat.checkSelfPermission(
+                        requireActivity(),
+                        permissions
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    MainDashActivity.isStoragePermissionDeny = true
+                    return true
+                }
+            }
+        } else {
+            for (permissions in MainDashActivity.PERMISSIONS) {
+                if (ActivityCompat.checkSelfPermission(
+                        requireActivity(),
+                        permissions
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    MainDashActivity.isStoragePermissionDeny = true
+                    return true
+                }
+            }
+        }
+        MainDashActivity.isStoragePermissionDeny = false
+        return false
+    }
+
+    private val permissionSpecial: Unit
+        get() {
+            BillingBaseActivity.isApplovinClicked = true
+//            val sharedPreferences = getSharedPreferences("uriTreePref", MODE_PRIVATE)
+//            var ut = "uriTree"
+//            if (WAoptions.appPackage == "com.whatsapp.w4b") ut = "uriTree1"
+//            if (sharedPreferences.getString(ut, "not present") != "not present") {
+//                Log.d("tree", "getStatus:  30 or above perm yes")
+//                val uriTree = sharedPreferences.getString(ut, "null")
+//                Log.d("tree", "getStatus : ureTree is : $uriTree")
+//            } else {
+            if (WAoptions.appPackage === "com.whatsapp") {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    takePermOfSpecialWhatsappFolder()
+                }
+
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    takePermOfSpecialWhatsappBusinessFolder()
+                }
+            }
+
+        }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun takePermOfSpecialWhatsappFolder() {
+        BillingBaseActivity.isApplovinClicked = true
+        BillingBaseActivity.wasAppinBack = false
+        BillingBaseActivity.isAnyVisible = true
+        val sm =
+            requireActivity().getSystemService(AppCompatActivity.STORAGE_SERVICE) as StorageManager
+        val intent = sm.primaryStorageVolume.createOpenDocumentTreeIntent()
+
+
+        //takes directly to whatsapp .statuses path
+        val startDir = "Android%2Fmedia%2Fcom.whatsapp%2FWhatsApp%2FMedia%2F.statuses"
+        //val startDir = "Android%2Fmedia"
+        var uri = intent.getParcelableExtra<Uri>("android.provider.extra.INITIAL_URI")
+        var scheme = uri.toString()
+        //Log.d("tree", "INITIAL_URI scheme: $scheme")
+        scheme = scheme.replace("/root/", "/document/")
+        scheme += "%3A$startDir"
+        uri = Uri.parse(scheme)
+//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+//            // Optionally, specify a URI for the directory that should be opened in
+//            // the system file picker when it loads.
+//            putExtra(DocumentsContract.EXTRA_INITIAL_URI, startDir)
+//        }
+        intent.putExtra("android.provider.extra.INITIAL_URI", uri)
+        //Log.d("tree", "uri: $uri")
+        BillingBaseActivity.wasAppinBack = false
+        BillingBaseActivity.isAnyVisible = true
+        BillingBaseActivity.isApplovinClicked = true
+        startActivityForResult(intent, REQUEST_ACTION_OPEN_DOCUMENT_TREE)
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private fun takePermOfSpecialWhatsappBusinessFolder() {
+
+        val sm =
+            requireActivity().getSystemService(AppCompatActivity.STORAGE_SERVICE) as StorageManager
+        val intent = sm.primaryStorageVolume.createOpenDocumentTreeIntent()
+        val startDir =
+            "Android%2Fmedia%2Fcom.whatsapp.w4b%2FWhatsApp%20Business%2FMedia%2F.statuses"
+        var uri = intent.getParcelableExtra<Uri>("android.provider.extra.INITIAL_URI")
+        var scheme = uri.toString()
+        Log.d("tree", "INITIAL_URI scheme: $scheme")
+        scheme = scheme.replace("/root/", "/document/")
+        scheme += "%3A$startDir"
+        uri = Uri.parse(scheme)
+
+        intent.putExtra("android.provider.extra.INITIAL_URI", uri)
+        Log.d("tree", "uri: $uri")
+        BillingBaseActivity.isApplovinClicked = true
+        startActivityForResult(intent, REQUEST_ACTION_OPEN_DOCUMENT_TREE_2)
+    }
+
     private fun showHowToUse() {
         val dialog2 = activity?.let {
             Dialog(
@@ -197,6 +394,16 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         dialog2?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val okButton = dialog2?.findViewById<ImageView>(R.id.open_whatsApp_img)
         val cancelDialog = dialog2?.findViewById<ImageView>(R.id.close_open_whatsapp_dialog)
+        val etxt = dialog2?.findViewById<TextView>(R.id.open_text)
+        val i = activity?.packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
+        if (i != null&&i.`package`=="com.whatsapp") {
+            Log.e("showHowToUse", "showHowToUse: ${i.`package`}", )
+            etxt?.setText("WhatsApp")
+        }
+        else if (i != null&&i.`package`=="com.whatsapp.w4b")
+        {
+            etxt?.setText("WA Business")
+        }
         okButton?.setOnClickListener { //open whatsapp
             val i = activity?.packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
             if (i != null) {
@@ -217,8 +424,11 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
 
 
     }
-    private fun status() {
 
+    private fun status() {
+        isMultiSelect = false
+        val parentActivity = activity as? MainDashActivity
+        parentActivity?.hideSelectorLayout()
         _binding?.messageTextImage?.visibility = View.GONE
         _binding?.grantPermission?.visibility = View.GONE
         _binding?.imgNoSaved?.visibility = View.GONE
@@ -257,8 +467,8 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                 _binding?.grantPermission?.visibility = View.VISIBLE
                 _binding?.shimmerContent?.root?.visibility = View.GONE
                 messageTextView!!.visibility = View.VISIBLE
-                binding.points.visibility=View.VISIBLE
-                binding.howToUse.visibility=View.GONE
+                binding.points.visibility = View.VISIBLE
+                binding.howToUse.visibility = View.GONE
                 imgNoFound!!.visibility = View.VISIBLE
                 recyclerView!!.visibility = View.GONE
                 anyImages.postValue(0)
@@ -266,29 +476,101 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         }
     }
 
-    private fun arePermissionDenied(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            for (permissions in MainDashActivity.PERMISSIONS) {
-                if (ActivityCompat.checkSelfPermission(
-                        requireContext(),
-                        permissions
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    return true
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+
+        BillingBaseActivity.isApplovinClicked = true
+        if (requestCode == MainDashActivity.REQUEST_PERMISSIONS && grantResults.isNotEmpty()) {
+            if (arePermissionDenied()) {
+                MainDashActivity.nativeAD?.beGone()
+                val storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+                if (!storageAccepted) {
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    ) {
+
+                        return
+                    } else {
+                        val intent =
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        val uri: Uri = Uri.fromParts("package", requireActivity().packageName, null)
+                        intent.data = uri
+                        startActivityForResult(intent, 1023)
+                    }
                 }
-            }
-        } else {
-            for (permissions in MainDashActivity.PERMISSIONS) {
-                if (ActivityCompat.checkSelfPermission(
-                        requireContext(),
-                        permissions
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    return true
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (arePermissionDenied()) {
+                    ActivityCompat.requestPermissions(
+                        requireActivity(),
+                        MainDashActivity.getPermissions(),
+                        MainDashActivity.REQUEST_PERMISSIONS
+                    )
+                } else {
+                    specialPermissionDialog()
                 }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                specialPermissionDialog()
+            } else {
+                // model.select(1)
             }
         }
-        return false
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d("tree", "onActivityResult: came here : ")
+        if (resultCode == -1) {
+            Log.d("tree", "onActivityResult: RESULT_OK : ")
+            if (requestCode == REQUEST_ACTION_OPEN_DOCUMENT_TREE) {
+                val uriTree = data!!.data
+                Log.d("tree", "onActivityResult: uriTree : $uriTree")
+                Log.d("tree", "onActivityResult: uriTree.getPath() : " + uriTree!!.path)
+                //todo taking pres
+
+// Check for the freshest data.
+                requireActivity().contentResolver
+                    .takePersistableUriPermission(
+                        uriTree,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                val sharedPreferences =
+                    requireContext().getSharedPreferences("uriTreePref", Context.MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.putString("uriTree", uriTree.toString())
+                editor.apply()
+                lifecycleScope.launch(Dispatchers.Default) {
+                    read30SDKWithUri(uriTree)
+                }
+            } else if (requestCode == REQUEST_ACTION_OPEN_DOCUMENT_TREE_2) {
+                BillingBaseActivity.isApplovinClicked = true
+                val uriTree = data!!.data
+                Log.d("tree", "onActivityResult: uriTree : $uriTree")
+                Log.d("tree", "onActivityResult: uriTree.getPath() : " + uriTree!!.path)
+                //todo taking pres
+
+// Check for the freshest data.
+                requireActivity().contentResolver
+                    .takePersistableUriPermission(
+                        uriTree,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                val sharedPreferences = requireActivity().getSharedPreferences(
+                    "uriTreePref",
+                    AppCompatActivity.MODE_PRIVATE
+                )
+                val editor = sharedPreferences.edit()
+                editor.putString("uriTree1", uriTree.toString())
+                editor.apply()
+
+                MainDashActivity.nativeAD?.beVisible()
+            }
+        } else {
+            _binding?.shimmerContent?.root?.visibility = View.GONE
+            Log.d("tree", "onActivityResult: RESULT_NOT_OK : ")
+        }
     }
 
     private fun execute() {
@@ -331,6 +613,10 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                         }
                     }
                 }
+                if(imagesList29.size>0)
+                {
+                    imagesList29.clear()
+                }
                 val statusFiles: Array<File>? = wAFolder?.listFiles()
                 wAFolder?.listFiles()?.forEach { file ->
                     val status = Status(file, file.name, file.absolutePath)
@@ -339,6 +625,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                         )
                     ) {
                         imagesList.add(status)
+                        imagesList29.add(status)
                         val check = getSavedFile(status.title)
                         status.setSavedStatus(check)
                     }
@@ -374,21 +661,24 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
             if (imagesList.size <= 0) {
                 anyImages.postValue(0)
                 messageTextView?.visibility = View.VISIBLE
-                binding.points.visibility=View.VISIBLE
+                binding.points.visibility = View.VISIBLE
 
                 if (MainDashActivity.isStoragePermissionDeny) {
                     binding.howToUse.visibility = View.GONE
                     _binding?.grantPermission?.visibility = View.VISIBLE
-                }
-                else
+                } else
+                {
                     _binding?.grantPermission?.visibility = View.GONE
-                binding.howToUse.visibility=View.VISIBLE
-                imgNoFound?.visibility = View.VISIBLE
-                recyclerView?.visibility = View.GONE
+                    binding.howToUse.visibility = View.VISIBLE
+                    imgNoFound?.visibility = View.VISIBLE
+                    recyclerView?.visibility = View.GONE
+
+                }
+
             } else {
                 messageTextView?.visibility = View.GONE
-                binding.points.visibility=View.GONE
-                binding.howToUse.visibility=View.GONE
+                binding.points.visibility = View.GONE
+                binding.howToUse.visibility = View.GONE
                 _binding?.grantPermission?.visibility = View.GONE
                 imgNoFound?.visibility = View.GONE
                 recyclerView?.visibility = View.VISIBLE
@@ -424,21 +714,23 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
                     }
                     if ((adp?.itemCount ?: 0) <= 0) {
                         messageTextView?.visibility = View.VISIBLE
-                        binding.points.visibility=View.VISIBLE
+                        binding.points.visibility = View.VISIBLE
 
                         if (MainDashActivity.isStoragePermissionDeny) {
                             binding.howToUse.visibility = View.GONE
                             _binding?.grantPermission?.visibility = View.VISIBLE
-                        }
-                        else
-                            binding.howToUse.visibility=View.VISIBLE
+                        } else
+                        {
+                            binding.howToUse.visibility = View.VISIBLE
                             _binding?.grantPermission?.visibility = View.GONE
-                        imgNoFound?.visibility = View.VISIBLE
+                            imgNoFound?.visibility = View.VISIBLE
+                        }
+
 //                recyclerView?.visibility = View.GONE
                     } else {
                         messageTextView?.visibility = View.GONE
-                        binding.points.visibility=View.GONE
-                        binding.howToUse.visibility=View.GONE
+                        binding.points.visibility = View.GONE
+                        binding.howToUse.visibility = View.GONE
                         _binding?.grantPermission?.visibility = View.GONE
                         imgNoFound?.visibility = View.GONE
 //                recyclerView?.visibility = View.VISIBLE
@@ -467,16 +759,19 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         val imagesList30plus: MutableList<StatusDocFile> = ArrayList()
         Coroutines.ioThenMain({
             val docFilePath = DocumentFile.fromTreeUri(requireActivity(), uriTree!!)
+            if(imagesList.size>0)
+            {
+                imagesList.clear()
+            }
 
             docFilePath?.listFiles()?.forEach { docFile ->
                 val statusDocFile = StatusDocFile(docFile, docFile.name, docFile.uri.path)
-                if (!statusDocFile.isVideo && statusDocFile.title != null && statusDocFile.title.endsWith(
-                        ".jpg"
-                    ) && !imagesList30plus.contains(
-                        statusDocFile
-                    )
-                ) {
+
+                if (!statusDocFile.isVideo && statusDocFile.title != null
+                    && statusDocFile.title.endsWith(".jpg") && !imagesList30plus.contains(statusDocFile)) {
                     imagesList30plus.add(statusDocFile)
+                    imagesList.add(statusDocFile)
+                    //imagesList29.add(status)
                     val check = getSavedFile(statusDocFile.title)
                     statusDocFile.setSavedStatus(check)
                 }
@@ -488,20 +783,21 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
             if (imagesList30plus.size <= 0) {
                 anyImages.postValue(0)
                 messageTextView?.visibility = View.VISIBLE
-                binding.points.visibility=View.VISIBLE
-                binding.howToUse.visibility=View.VISIBLE
+                binding.points.visibility = View.VISIBLE
+                binding.howToUse.visibility = View.VISIBLE
                 _binding?.grantPermission?.visibility = View.GONE
                 imgNoFound?.visibility = View.VISIBLE
                 recyclerView?.visibility = View.GONE
             } else {
                 messageTextView?.visibility = View.GONE
-                binding.points.visibility=View.GONE
-                binding.howToUse.visibility=View.GONE
+                binding.points.visibility = View.GONE
+                binding.howToUse.visibility = View.GONE
                 _binding?.grantPermission?.visibility = View.GONE
                 imgNoFound?.visibility = View.GONE
                 recyclerView?.visibility = View.VISIBLE
             }
             imageAdapter30plus?.submitList(null)
+
             imageAdapter30plus?.submitList(imagesList30plus)
             progressBar?.visibility = View.GONE
             AppClass.fileList = null
@@ -565,12 +861,13 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
 
     override fun onShareClicked(status: Status) {
         val shareIntent = Intent(Intent.ACTION_SEND)
-        val link = "http://play.google.com/store/apps/details?id=" + requireContext().packageName
+        val link = "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,
             "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
         )
         shareIntent.type = "image/*"
+        Log.e("share29", "${Uri.parse("file://" + status.file.absolutePath)} ")
         shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + status.file.absolutePath))
         startActivity(shareIntent)
     }
@@ -588,12 +885,14 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
     }
 
     override fun onDownloadClick(status: Status, container: ConstraintLayout) {
-        InterAdmobClass.getInstance().loadAndShowInter(requireActivity(),remoteAdSettings.getAdmobDownloadBtnInterId(),
-            ProgressDialog(requireActivity()),{})
-        activity?.showInterAd(remoteAdSettings.inter_download_status) {
+//        InterAdmobClass.getInstance()
+//            .loadAndShowInter(requireActivity(), remoteAdSettings.getAdmobDownloadBtnInterId(),
+//                ProgressDialog(requireActivity()), {})
+//        activity?.showInterAd(remoteAdSettings.inter_download_status) {
             Common.copyFile(status, activity, container)
             imagesViewModel.getAllFiles()
-        }
+        imageAdapter?.notifyDataSetChanged()
+   //     }
     }
 
     override fun onPause() {
@@ -603,6 +902,12 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
 
     override fun onResume() {
         super.onResume()
+        try {
+            status()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         var isNewDownloaded = false
         imageAdapter?.currentList?.forEach {
             if (it.isSavedStatus != getSavedFile(it.title))
@@ -621,4 +926,32 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack {
         if (isNewDownloaded)
             imagesViewModel.getAllFiles()
     }
-}
+
+
+
+    override fun onMultiSelectModeActivated() {
+        val parentActivity = activity as? MainDashActivity
+        parentActivity?.onMultiSelectMode(
+            {
+                status()
+        },
+            {
+            //deleteListener
+
+            },
+            {
+             //ShareListener
+
+
+            })
+
+       }
+
+    override fun setMenuVisibility(menuVisible: Boolean) {
+        super.setMenuVisibility(menuVisible)
+        val parentActivity = activity as? MainDashActivity
+        parentActivity?.hideSelectorLayout()
+    }
+    }
+
+

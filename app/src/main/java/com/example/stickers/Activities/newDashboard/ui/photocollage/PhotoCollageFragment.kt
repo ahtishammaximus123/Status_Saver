@@ -3,6 +3,7 @@ package com.example.stickers.Activities.newDashboard.ui.photocollage
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.stickers.Activities.newDashboard.base.BaseLiveStatusFragment
@@ -44,6 +45,8 @@ class PhotoCollageFragment : Fragment() {
     override fun onPrepareOptionsMenu(menu: Menu) {
         val item: MenuItem = menu.findItem(R.id.folder)
         item.isVisible = true
+        val openWhat = requireActivity().findViewById<ImageView>(R.id.open_whatsApp_icon)
+        openWhat.visibility=View.GONE
 
         val menuWa: MenuItem = menu.findItem(R.id.action_wa)
         val menuBa: MenuItem = menu.findItem(R.id.action_ba)

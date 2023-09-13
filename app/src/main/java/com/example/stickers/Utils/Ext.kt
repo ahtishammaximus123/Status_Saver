@@ -60,7 +60,7 @@ inline fun <reified T> Context.openActivity(extras: Intent.() -> Unit) {
     startActivity(intent)
 }
 
-private fun Context.saveInToPath(imgUri: Uri, file: File) {
+ fun Context.saveInToPath(imgUri: Uri, file: File) {
 
     val chunkSize = 1024 // We'll read in one kB at a time
 

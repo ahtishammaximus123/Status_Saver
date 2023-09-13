@@ -12,12 +12,14 @@ android {
         enabled = true
     }
     defaultConfig {
-     applicationId "com.status.video.saver.for.whatsapp.video.downloader"
-     // applicationId "status.saver.debug"
+        //crashes to be fixed
+        //play.google to be change
+     //applicationId "com.status.video.saver.for.whatsapp.video.downloader"
+        applicationId "status.saver.debug"
         minSdk 23
         targetSdk 33
-        versionCode 13
-        versionName "0.0.13"
+        versionCode 14
+        versionName "0.0.14"
         project.archivesBaseName = "Status Saver " + versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -28,8 +30,8 @@ android {
         release {
 
             applicationIdSuffix ".download.satatuses"
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "admob_app_id", "ca-app-pub-8234579426147131~3652699507"
 
@@ -37,8 +39,8 @@ android {
 
         debug {
 //            applicationIdSuffix ".download.satatuses"
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "admob_app_id", "ca-app-pub-3940256099942544~3347511713"
 
