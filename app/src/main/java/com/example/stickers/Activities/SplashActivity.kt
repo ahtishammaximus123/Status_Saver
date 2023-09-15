@@ -44,6 +44,7 @@ class SplashActivity : BillingBaseActivity() {
         var isNativeAdShowed1 = false
         var isNativeAdLoaded1 = false
         var splashAdLoaded = ""
+        var appOpenClass: AppOpenClass? = null
 
 
     }
@@ -62,9 +63,9 @@ class SplashActivity : BillingBaseActivity() {
     override fun onResume() {
         super.onResume()
         isActivityShown = true
-
-        if (remoteTime > 3500)
-            gotoNextScreen()
+//
+//        if (remoteTime > 3500)
+//           // gotoNextScreen()
     }
 
     override fun onPause() {
@@ -79,23 +80,19 @@ class SplashActivity : BillingBaseActivity() {
         isActivityShown = true
         MainDashActivity.isInterShown = false
         initBillingListener()
-        FcmLib.setupFCM(this, "/topics/$packageName")
-        fbAnalytics = FirebaseAnalytics(this)
-        fbAnalytics?.sendEvent("SplashActivity_Open")
         LoadSticker.loadStickers(this)
+
         initMax {
 //            AppLovinSdk.getInstance(this).showMediationDebugger()
         }
 
 
-        resetAds()
 
-        Ads.loadBannerAd(applicationContext)
+
+       // Ads.loadBannerAd(applicationContext)
         MobileAds.initialize(this)
 
-        val firstTime = SharedPreferenceData(this).getBoolean(Constants.FIRST_TIME,
-            true
-        )
+        val firstTime = SharedPreferenceData(this).getBoolean(Constants.FIRST_TIME, true      )
         isRemoteFetched = false
         isMoveToNext = false
         remoteTime = 0
@@ -106,12 +103,9 @@ class SplashActivity : BillingBaseActivity() {
                     if (firstTime) {
                         val layout = findViewById<ConstraintLayout>(R.id.layout)
                         val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
-                        runOnUiThread {
-                            layout.beVisible()
-                            loading.beGone()
-                        }
+
                     } else
-                        gotoNextScreen()
+                        showContent()
                     timer.cancel()
                     Log.e("RemoteConfig2", "remoteTime; $remoteTime")
                 }
@@ -123,24 +117,23 @@ class SplashActivity : BillingBaseActivity() {
             fbAnalytics?.sendEvent("remote_fetch$remoteTime")
             val data = Gson().toJson(remoteAdSettings)
             Log.e("RemoteConfig", data)
-            AppOpen(application)
-            loadingInterAd()
+            if(data!=null)
             {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    if (firstTime)
-                    {
-                    val layout = findViewById<ConstraintLayout>(R.id.layout)
-                    val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
-                    runOnUiThread {
-                        layout.beVisible()
-                        loading.beGone()
-                    }
+                if (firstTime)
+                {
+                    loadAds()
+
                 } else
                 {
-                    gotoNextScreen()
-                }},400)
-
+                    loadAds()
+                }
             }
+            else{
+                showContent()
+            }
+
+
+
 
 
         }
@@ -159,9 +152,8 @@ class SplashActivity : BillingBaseActivity() {
             /*if (checkBox.isChecked) {
                 SharedPreferenceData(this).putBoolean(Constants.KEY_IS_PRIVACY, true)
             } else this.showToast("Kindly Accept the Terms.")*/
-
             SharedPreferenceData(this).putBoolean(Constants.FIRST_TIME, false)
-            SharedPreferenceData(this).putBoolean("ComingFirstTime", true)
+           // NativeAdmobClass.getInstance().loadDashboardNative(this,{},{})
             gotoNextScreen()
         }
         val txtTerms = findViewById<TextView>(R.id.txtTerms)
@@ -175,119 +167,37 @@ class SplashActivity : BillingBaseActivity() {
             }
         }
         txtTerms.setOnClickListener { view: View? -> }
-//        Handler().postDelayed({
-//            duration = true
-//            if (skiped) {
-//                lottieAnimationView.visibility = View.GONE
-//                layout.visibility = View.VISIBLE
-//                val isChecked =
-//                    SharedPreferenceData(this).getBoolean(Constants.KEY_IS_PRIVACY, false)
-//                checkBox.isChecked = isChecked
-//                if (isChecked) btnStart.alpha = 1.0f
-//            }
-//        }, 6000)
-/*
-        val rb = findViewById<RadioButton>(R.id.spinnerc)
-        val rb1 = findViewById<RadioButton>(R.id.spinnerc2)
-        val spinner = findViewById<ConstraintLayout>(R.id.spinner)
-        val rv = findViewById<ConstraintLayout>(R.id.spinnerList)
-        val skip = findViewById<TextView>(R.id.textView28)
-        val lang = findViewById<ConstraintLayout>(R.id.lang)
-        val titlesplash = findViewById<TextView>(R.id.textView11)
-        val icon = findViewById<ImageView>(R.id.imageView2)
-        val s = sharedPref.getString("apppackage", null)
-        if (s == null) {
-            WAoptions.appPackage = "com.whatsapp"
-            SharedPreferenceData(this).putString(
-                "apppackage",
-                WAoptions.appPackage
-            )
-        } else {
-            skiped = true
-            lang.visibility = View.GONE
-            icon.visibility = View.VISIBLE
-            titlesplash.visibility = View.VISIBLE
-            lottieAnimationView.visibility = View.GONE
-            layout.visibility = View.VISIBLE
-            val isChecked =
-                SharedPreferenceData(this).getBoolean(Constants.KEY_IS_PRIVACY, false)
-            checkBox.isChecked = isChecked
-            if (isChecked) btnStart.alpha = 1.0f
-        }
-        skip.setOnClickListener {
-            skiped = true
-            lang.visibility = View.GONE
-            icon.visibility = View.VISIBLE
-            titlesplash.visibility = View.VISIBLE
-            if (duration) {
-                lottieAnimationView.visibility = View.GONE
-                layout.visibility = View.VISIBLE
-                val isChecked =
-                    SharedPreferenceData(this).getBoolean(Constants.KEY_IS_PRIVACY, false)
-                checkBox.isChecked = isChecked
-                if (isChecked) btnStart.alpha = 1.0f
-            }
-        }
-        spinner.setOnClickListener {
-            skiped = true
-            rb.isChecked = true
-            val toast = Toast.makeText(this, "WA Selected!", Toast.LENGTH_LONG)
-            toast.setGravity(Gravity.CENTER, 0, 0)
-            toast.show()
-            if (duration) {
-                lottieAnimationView.visibility = View.GONE
-                layout.visibility = View.VISIBLE
-                val isChecked =
-                    SharedPreferenceData(this).getBoolean(Constants.KEY_IS_PRIVACY, false)
-                checkBox.isChecked = isChecked
-                if (isChecked) btnStart.alpha = 1.0f
-            }
-        }
-        rv.setOnClickListener {
-            rb1.isChecked = true
-            rb.isChecked = false
-        }
-        spinner.setOnClickListener {
-            rb1.isChecked = false
-            rb.isChecked = true
-        }
-        rb1.setOnCheckedChangeListener { compoundButton, b ->
-            rb.isChecked = !b
-            if (b) {
-                val toast = Toast.makeText(this, "WB Selected!", Toast.LENGTH_LONG)
-                toast.setGravity(Gravity.CENTER, 0, 0)
-                toast.show()
-                WAoptions.appPackage = "com.whatsapp.w4b"
-                SharedPreferenceData(this).putString(
-                    "apppackage",
-                    WAoptions.appPackage
-                )
-            }
-            skip.performClick()
-        }
-        rb.setOnCheckedChangeListener { compoundButton, b ->
-            rb1.isChecked = !b
-            if (b) {
-                val toast = Toast.makeText(this, "WA Selected!", Toast.LENGTH_LONG)
-                toast.setGravity(Gravity.CENTER, 0, 0)
-                toast.show()
-                WAoptions.appPackage = "com.whatsapp"
-                SharedPreferenceData(this).putString(
-                    "apppackage",
-                    WAoptions.appPackage
-                )
-            }
-            skip.performClick()
-        }
-*/
+
         layout.visibility = View.GONE
     }
 
-    private fun resetAds() {
-        InterAdmobClass.getInstance().admobInterAd = null
-        MainDashActivity.nativeAdNew2=null
-        MainDashActivity.nativeAdNew1=null
+    private fun loadAds() {
+        val frameLayout = findViewById<FrameLayout>(R.id.splash_native)
+        loadSplashNativeAd(this, frameLayout, RemoteDateConfig.remoteAdSettings.admob_native_splash_ad.value, layoutInflater, R.layout.gnt_medium_template_view,
+            {
+                Handler(Looper.getMainLooper()).postDelayed({ showContent() }, 3000)
+            },
+            {
+                showContent()
+            })
+
+        if(RemoteDateConfig.remoteAdSettings.appOpenAd.value=="on")
+        {
+            appOpenClass?.fetchAd {  }
+        }
+
+        InterAdsClass.getInstance().loadInterAdWithId1(this, { }, {})
+        InterAdsClass.getInstance().loadInterAdWithId2(this, { }, {})
+        InterAdsClass.getInstance().loadInterAdWithId3(this, { }, {})
     }
+
+    private fun showContent() {
+        val layout = findViewById<ConstraintLayout>(R.id.layout)
+        val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
+        layout.visibility = View.VISIBLE
+        loading.visibility = View.GONE
+    }
+
 
     override fun gotoNextScreen() {
 
@@ -295,10 +205,7 @@ class SplashActivity : BillingBaseActivity() {
         if (firstTime) {
             val layout = findViewById<ConstraintLayout>(R.id.layout)
             val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
-            runOnUiThread {
-                layout.beVisible()
-                loading.beGone()
-            }
+
         } else {
             if (!isActivityShown)
                 return
@@ -382,26 +289,5 @@ class SplashActivity : BillingBaseActivity() {
     }
 
 
-    private fun loadingInterAd(loadListener: () -> Unit)
-    {
-        if (isNetworkAvailable() && verifyInstallerId() &&!isAlreadyPurchased()&& RemoteDateConfig.remoteAdSettings.admob_inter_splash_id.value.isNotEmpty()
-        ) {
 
-            InterAdsClassNew.isInterstitialShown = true
-            InterAdsClassNew.getInstance()
-                .loadInterAds(this,RemoteDateConfig.remoteAdSettings.admob_inter_splash_id.value , {
-                    loadListener.invoke()
-                    splashAdLoaded = "ready"
-                  //  showToast("Splash Ad is Loaded")
-
-                }, {
-
-                })
-
-
-        }
-        else{
-        }
-
-    }
 }

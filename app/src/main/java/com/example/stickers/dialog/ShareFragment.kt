@@ -8,9 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.Toast
 import com.example.stickers.R
 import com.example.stickers.Utils.AppCommons
+import com.example.stickers.ads.loadNativeAd
+import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.getUriPath
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -95,6 +98,13 @@ class ShareFragment(val path: Uri) : BottomSheetDialogFragment() {
             }
             dismiss()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val frame = view?.findViewById<FrameLayout>(R.id.share_native)
+        loadNativeAd(requireActivity(),frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_share_bottom_sheet_ad.value,layoutInflater,R.layout.gnt_medium_template_view,{ },{})
     }
 }
 

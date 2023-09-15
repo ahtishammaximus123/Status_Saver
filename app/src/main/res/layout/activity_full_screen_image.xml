@@ -8,36 +8,17 @@
     android:background="@color/dashboard_background"
     android:forceDarkAllowed="false"
     tools:context=".Activities.FullScreenImageActivity">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lytBanner"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
+    <FrameLayout
+        android:id="@+id/banner_adview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:id="@+id/adView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ProgressBar
-            android:id="@+id/progressBar7"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:progressTint="#936969"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -46,7 +27,7 @@
         android:background="@color/accentColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lytBanner">
+        app:layout_constraintTop_toBottomOf="@+id/banner_adview">
 
         <ImageView
             android:id="@+id/img_back_full_screen"
@@ -128,7 +109,7 @@
         android:id="@+id/constraintLayout5"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/nativeLayout"
+        app:layout_constraintBottom_toTopOf="@+id/full_screen_image_native"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
@@ -211,14 +192,21 @@
         app:layout_constraintGuide_percent="0.96" />
 
 
-    <include
-        android:id="@+id/nativeLayout"
-        layout="@layout/native_ad_small"
+    <FrameLayout
+        android:id="@+id/full_screen_image_native"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/_105sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:background="@drawable/round_bg"
+        android:elevation="3dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <include layout="@layout/shimmer" />
+    </FrameLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

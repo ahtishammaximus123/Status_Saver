@@ -24,7 +24,7 @@ import com.example.stickers.Models.StatusDocFile
 import com.example.stickers.MultiSelectCallback
 import com.example.stickers.R
 import com.example.stickers.Utils.saveStatus
-import com.example.stickers.ads.showInterAd
+
 import com.example.stickers.ads.showToast
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.app.shareFile
@@ -37,12 +37,11 @@ class ImageAdapter30plus(
 ) :
     ListAdapter<StatusDocFile, ImageAdapter30plus.ItemImageViewHolder>(ADAPTER_COMPARATOR) {
     // Toggle selection mode
-
+    private val VIEW_TYPE_NORMAL = 0
+    private val VIEW_TYPE_NATIVE_AD = 1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemImageViewHolder {
-        // inflates the card_view_design view
-        // that is used to hold list item
-        Log.d("tree", "onCreateViewHolder ")
+
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.row_item_status, parent, false)
         return ItemImageViewHolder(view)
@@ -107,7 +106,7 @@ class ImageAdapter30plus(
             if (!isMultiSelect) {
                 isMultiSelect = true
                 selectedStatusList.add(reversedStatus)
-                imagesList[reversedPosition].isSelected=true
+                imagesList[reversedPosition].isSelected = true
                 val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
                 holder.imageView.foreground = drawable
                 callBack.onMultiSelectModeActivated()
@@ -121,22 +120,22 @@ class ImageAdapter30plus(
             if (isMultiSelect) {
                 if (selectedStatusList.contains(reversedStatus)) {
                     selectedStatusList.remove(reversedStatus)
-                    imagesList[reversedPosition].isSelected=false
-                    holder.imageView.foreground=null
+                    imagesList[reversedPosition].isSelected = false
+                    holder.imageView.foreground = null
                     callBack.onMultiSelectModeActivated()
                 } else {
                     val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
                     holder.imageView.foreground = drawable
-                    imagesList[reversedPosition].isSelected=true
+                    imagesList[reversedPosition].isSelected = true
 //                    val foregroundDrawable = ColorDrawable(Color.parseColor("#C9ACACAC"))
 //                    holder.imageView.foreground=foregroundDrawable
                     selectedStatusList.add(reversedStatus)
                     callBack.onMultiSelectModeActivated()
                 }
-           //     notifyItemChanged(position)
+                //     notifyItemChanged(position)
             } else {
-                ImagesFragment.clickedPosition =position
-                ImagesFragment.openSaved =false
+                ImagesFragment.clickedPosition = position
+                ImagesFragment.openSaved = false
                 val i = Intent(
                     context,
                     FullScreenImageActivity::class.java
@@ -152,32 +151,41 @@ class ImageAdapter30plus(
 
 
         holder.save.setOnClickListener { v ->
-            if (holder.save.tag != "saved")
-            {
-                context.showInterAd(remoteAdSettings.inter_download_status) {
-                    ItemsViewModel = reversedStatus
-                    try {
-                        context.saveStatus(v, reversedStatus)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Toast.makeText(context, "Corrupted Image, Can't be saved", Toast.LENGTH_LONG).show()
-                    }
+            if (holder.save.tag != "saved") {
 
-                    ItemsViewModel?.setSavedStatus(true)
-                    notifyItemChanged(reversedPosition)
-                    downloadListener.invoke()
-                    holder.save.setImageResource(R.drawable.ic_download_ic__1_)
+                ItemsViewModel = reversedStatus
+                try {
+                    context.saveStatus(v, reversedStatus)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(context, "Corrupted Image, Can't be saved", Toast.LENGTH_LONG)
+                        .show()
                 }
-            }
-            else
-            {
+
+                ItemsViewModel?.setSavedStatus(true)
+                notifyItemChanged(reversedPosition)
+                downloadListener.invoke()
+                ImagesFragment.clickedPosition = position
+                ImagesFragment.openSaved = false
+                val i = Intent(
+                    context,
+                    FullScreenImageActivity::class.java
+                )
+                i.action = "asa"
+                ItemsViewModel = reversedStatus
+                i.putExtra("is30Plus", true)
+                i.putExtra("img_tag", holder.save.getTag().toString())
+                Log.e("img_tag", holder.save.getTag().toString())
+                context.startActivity(i)
+                holder.save.setImageResource(R.drawable.ic_download_ic__1_)
+
+            } else {
                 context.showToast("Image Already Downloaded")
             }
 
 
         }
     }
-
 
 
     // Holds the views for adding it to image and text

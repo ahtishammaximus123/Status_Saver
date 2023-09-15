@@ -1,14 +1,21 @@
 package com.example.stickers.dialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
 import com.example.stickers.R
 import com.example.stickers.Utils.AppCommons
 import com.example.stickers.Utils.WAoptions
+import com.example.stickers.ads.loadNativeAd
+import com.example.stickers.ads.loadSplashNativeAd
+import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.SharedPreferenceData
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -17,6 +24,7 @@ class SelectWhatsAppFragment(val openWhat: ImageView, val proceedListenerr: () -
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL,R.style.BottomSheetDialog)
+
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -26,6 +34,7 @@ class SelectWhatsAppFragment(val openWhat: ImageView, val proceedListenerr: () -
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        isCancelable=false
         // Find views and set click listeners
         val simplewhats = view.findViewById<Button>(R.id.go_for_simple)
         val business = view.findViewById<Button>(R.id.go_for_business)
@@ -64,9 +73,16 @@ dismiss()
                 "WhatsApp Business is not installed",
                 Toast.LENGTH_LONG
             ).show()
-dismiss()
+            dismiss()
 
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val frame = view?.findViewById<FrameLayout>(R.id.select_whatsapp_native)
+        loadNativeAd(requireActivity(),frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_select_whats_app_ad.value,layoutInflater,R.layout.gnt_medium_template_view,{ },{})
     }
 }
 

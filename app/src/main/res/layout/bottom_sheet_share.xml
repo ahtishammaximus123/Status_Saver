@@ -38,6 +38,7 @@
             android:layout_marginEnd="@dimen/_4sdp"
             android:layout_marginBottom="@dimen/_3sdp"
             android:elevation="3dp"
+            android:background="@drawable/round_bg"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">

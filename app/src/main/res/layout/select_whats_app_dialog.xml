@@ -32,7 +32,8 @@
             android:layout_marginEnd="@dimen/_4sdp"
             android:layout_marginBottom="@dimen/_3sdp"
             android:elevation="3dp"
-            android:visibility="visible"
+            android:background="@drawable/round_bg"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -52,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/_10sdp"
-                android:text="Choose WhatsApp Version"
+                android:text="Choose WhatsApp Type"
                 android:textColor="@color/dark_grey"
                 android:textSize="@dimen/_14sdp"
                 android:textStyle="bold"

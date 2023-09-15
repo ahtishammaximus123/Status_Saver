@@ -18,7 +18,7 @@ import com.example.stickers.Models.StatusDocFile
 import com.example.stickers.MultiVideoSelectCallback
 import com.example.stickers.R
 import com.example.stickers.Utils.saveStatus
-import com.example.stickers.ads.showInterAd
+
 import com.example.stickers.ads.showToast
 import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.shareFile
@@ -127,7 +127,7 @@ class VideoAdapter30plus(
 
             holder.save.setOnClickListener { v ->
                 if (holder.save.tag != "saved") {
-                    context.showInterAd(RemoteDateConfig.remoteAdSettings.inter_download_status) {
+
                         if (reversedPosition < mList.size) {
                             try {
                                 val newItem = mList[reversedPosition]
@@ -138,6 +138,13 @@ class VideoAdapter30plus(
                                     notifyDataSetChanged()
 
                                     downloadListener.invoke()
+                                    val i = Intent(context, FullScreenVideoActivity::class.java)
+                                    ItemsViewModel = mList[reversedPosition]
+                                    i.action = "sa"
+                                    i.putExtra("is30Plus", true)
+                                    i.putExtra("img_tag", holder.save.tag.toString())
+                                    Log.e("img_tag", holder.save.tag.toString())
+                                    context.startActivity(i)
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                     Toast.makeText(context, "Corrupted Video, Can't be Saved", Toast.LENGTH_LONG).show()
@@ -145,7 +152,7 @@ class VideoAdapter30plus(
                             } catch (exp: ArrayIndexOutOfBoundsException) {
                             }
                         }
-                    }
+
                 } else {
                     context.showToast("Video Already Downloaded")
                 }

@@ -27,7 +27,8 @@ class GalleryFragment : Fragment(), ImageGalleryCallBack {
     private var galleryImages = arrayListOf<RadioFile>()
     private var adapter: SingleGalleryAdapter? = null
     private var filePath: String? = ""
-
+    private var adisready = "notshowed"
+    var isActivityRunning = false
     private val imagesViewModel: ImagesViewModel by activityViewModels() {
         ImagesViewModelFactory((activity?.application as AppClass).photosRep)
     }
@@ -78,6 +79,7 @@ class GalleryFragment : Fragment(), ImageGalleryCallBack {
         }
 
     }
+
     private var resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 

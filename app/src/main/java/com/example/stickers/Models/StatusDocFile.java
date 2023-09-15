@@ -1,5 +1,7 @@
 package com.example.stickers.Models;
 
+import android.util.Log;
+
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.Serializable;
@@ -27,13 +29,19 @@ public class StatusDocFile implements Serializable {
         this.title = title;
         this.path = path;
         String MP4 = ".mp4";
-        if (file != null)
-            if (file.getName() != null)
-                this.isVideo = file.getName().endsWith(MP4);
+        try {
+            if (file != null)
+                if (file.getName() != null)
+                    this.isVideo = file.getName().endsWith(MP4);
+                else
+                    this.isVideo = false;
             else
                 this.isVideo = false;
-        else
-            this.isVideo = false;
+
+        } catch (Exception e) {
+            Log.e("Exception", "on a null object reference:" + e.getMessage());
+        }
+
     }
 
     public boolean isSavedStatus() {

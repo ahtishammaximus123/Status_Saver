@@ -1,5 +1,6 @@
 package com.example.stickers.Activities
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -12,10 +13,13 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -23,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import com.example.stickers.Activities.SplashActivity.Companion.fbAnalytics
+import com.example.stickers.Activities.newDashboard.MainDashActivity.Companion.downloadClicked
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.ItemsViewModel
 import com.example.stickers.Models.Status
 import com.example.stickers.R
@@ -30,18 +35,21 @@ import com.example.stickers.Utils.AppCommons.Companion.ShowWAppDialog
 import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.SaveHelperFull
 import com.example.stickers.Utils.saveStatus
-import com.example.stickers.ads.Ads
-import com.example.stickers.ads.beGone
-import com.example.stickers.ads.beVisible
-import com.example.stickers.ads.loadNativeAdmob
-import com.example.stickers.ads.showInterAd
+import com.example.stickers.ads.AdmobCollapsibleBanner
+import com.example.stickers.ads.InterAdsClass
+import com.example.stickers.ads.loadAdaptiveBanner
+import com.example.stickers.ads.loadNativeAd
+
+
 import com.example.stickers.app.AppClass.Companion.file30List
 import com.example.stickers.app.AppClass.Companion.fileList
 import com.example.stickers.app.BillingBaseActivity
+import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.app.getUriPath
 import com.example.stickers.app.shareFile
 import com.example.stickers.databinding.ActivityFullScreenVideoBinding
+import com.example.stickers.dialog.ProgressDialog
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
@@ -54,8 +62,12 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
     var player: ExoPlayer? = null
     var fullscreen = false
     var lock = false
+    private var adisready = "notshowed"
+    var isActivityRunning = false
+    var loadingDialog: ProgressDialog? = null
     override fun onPause() {
         super.onPause()
+        isActivityRunning=false
         if (player != null) {
             player!!.stop()
             player!!.release()
@@ -65,12 +77,11 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        Ads().showBannerAd(
-            applicationContext,
-            binding!!.lytBanner,
-            binding!!.progressBar7,
-            binding!!.adView
-        )
+        isActivityRunning=true
+        showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_download_btn_inter_ad.value){   }
+        val frame = findViewById<FrameLayout>(R.id.full_screen_video_native)
+        loadNativeAd(this,frame!!,
+            remoteAdSettings.admob_native_full_screen_video_ad.value,layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
         var hasVid = false
         if (is30Plus) {
             hasVid = true
@@ -95,10 +106,51 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
             if (mediaItem != null) player!!.setMediaItem(mediaItem!!)
             binding!!.controls.player = player
             player!!.prepare()
-            player!!.play()
+
+        }
+
+        val frameBanner = findViewById<FrameLayout>(R.id.banner_adview)
+        loadAdaptiveBanner(
+            this,
+            frameBanner,
+            remoteAdSettings.admob_adaptive_video_full_scr_banner_ad.value
+        )
+    }
+    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
+
+        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null && downloadClicked ) {
+
+            loadingDialog?.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                if(isActivityRunning)
+                {
+                    downloadClicked=false
+                    InterAdsClass.getInstance().showInterAd123(activity,
+                        {
+                            if (player != null) {
+                                player!!.prepare()
+                                player?.play()
+
+                            }
+                        }, {}, {
+
+                            adisready="showed"
+                            loadingDialog?.dismiss()
+                        })
+                }
+
+
+            }, 900)
+        }
+        else{
+            if (player != null) {
+                player!!.prepare()
+                player?.play()
+
+            }
+            functionalityListener.invoke()
         }
     }
-
     //    int position = 0;
     var mediaItem: MediaItem? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,6 +161,7 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
         )
         val view: View = binding!!.root
         setContentView(view)
+        loadingDialog = ProgressDialog(this, "Loading...")
         //setAdLyt1(binding.lytBanner);
         //setAdContent1(binding.adView);
         //setAdProgressBar1(binding.progressBar7);
@@ -256,7 +309,7 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
         if (mediaItem != null) player!!.setMediaItem(mediaItem!!)
         binding!!.controls.player = player
         player!!.prepare()
-        player!!.play()
+
         binding!!.videoFull.setOnClickListener(object : View.OnClickListener {
             override fun onClick(view: View) {
                 if (fullscreen) {
@@ -272,7 +325,7 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
             override fun onClick(view: View) {
                 if (!lock) {
                     if (fullscreen) {
-                        binding!!.nativeLayout.root.beVisible()
+
                         binding!!.imageView22.visibility = View.GONE
                         fullscreenButton.setImageDrawable(
                             ContextCompat.getDrawable(
@@ -303,7 +356,7 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
                         //player.setVideoScalingMode(C.VIDEO_SCALING_MODE_DEFAULT);
                         binding!!.controls.show()
                     } else {
-                        binding!!.nativeLayout.root.beGone()
+
                         binding!!.imageView22.visibility = View.VISIBLE
                         fullscreenButton.setImageDrawable(
                             ContextCompat.getDrawable(

@@ -163,7 +163,23 @@
         android:textSize="15dp"
         app:icon="@android:drawable/stat_sys_phone_call"
         app:iconTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/sticker_maker_native"
         tools:layout_editor_absoluteX="60dp" />
+
+    <FrameLayout
+        android:id="@+id/sticker_maker_native"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_110sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:background="@drawable/round_bg"
+        android:elevation="3dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <include layout="@layout/shimmer" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

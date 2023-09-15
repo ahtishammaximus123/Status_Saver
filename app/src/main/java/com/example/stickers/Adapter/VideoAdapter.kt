@@ -46,6 +46,10 @@ class VideoAdapter(
             if (holder.save.tag !== "saved")
                 callBack.onDownloadClick(status, container)
             videoList[position].setSavedStatus(true)
+            callBack.onImageViewClicked(
+                status,
+                holder.save.tag
+            )
             notifyItemChanged(position)
         }
         Glide.with(context!!).asBitmap().load(status.file)

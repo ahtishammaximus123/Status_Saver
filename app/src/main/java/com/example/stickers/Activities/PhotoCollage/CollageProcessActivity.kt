@@ -9,6 +9,8 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -27,19 +29,23 @@ import com.example.stickers.Activities.CollageFilesActivity
 import com.example.stickers.Activities.PhotoCollage.sizes.BgAdapter
 import com.example.stickers.Activities.PhotoCollage.sizes.SizeAdapter
 import com.example.stickers.Activities.SplashActivity
+
+import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Activities.newDashboard.ui.photocollage.PhotoCollageViewModel
 import com.example.stickers.Activities.newDashboard.ui.photocollage.PhotoCollageViewModelFactory
 import com.example.stickers.Activities.sticker.LoadSticker
 import com.example.stickers.Models.BgModel
 import com.example.stickers.R
 import com.example.stickers.Utils.*
-import com.example.stickers.ads.afterDelay
-import com.example.stickers.ads.loadNativeAdmob
-import com.example.stickers.ads.showInterAd
+import com.example.stickers.ads.InterAdsClass
+import com.example.stickers.ads.loadAdaptiveBanner
+
 import com.example.stickers.ads.showToast
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.BillingBaseActivity
 import com.example.stickers.app.RemoteDateConfig
+import com.example.stickers.dialog.ProgressDialog
+
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -86,7 +92,9 @@ class CollageProcessActivity : BillingBaseActivity(), StickerImageCollage,
     private lateinit var imgRightB: ImageView
     private lateinit var imgLeftS: ImageView
     private lateinit var imgRightS: ImageView
-
+    private var adisready = "notshowed"
+    var isActivityRunning = false
+    var loadingDialog: ProgressDialog? = null
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.done_menu, menu)
         return true
@@ -102,7 +110,7 @@ class CollageProcessActivity : BillingBaseActivity(), StickerImageCollage,
             R.id.action_done -> {
                 val file = FileUtils.getNewFile(this@CollageProcessActivity, "Puzzle")
                 try {
-                    showInterAd(RemoteDateConfig.remoteAdSettings.inter_collage_save_photo) {
+
                         Log.e("tagPath*", file.absolutePath)
                         layoutSaveImage.isDrawingCacheEnabled = true
                         val parent = layoutSaveImage.drawingCache
@@ -121,7 +129,7 @@ class CollageProcessActivity : BillingBaseActivity(), StickerImageCollage,
                                     showToast("Save Failed")
                                 }
                             })
-                    }
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -182,15 +190,10 @@ class CollageProcessActivity : BillingBaseActivity(), StickerImageCollage,
         super.onCreate(savedInstanceState)
         adjustFontScale(resources.configuration)
         setContentView(R.layout.activity_collage_process)
+        loadingDialog = ProgressDialog(this, "Loading...")
 
-        val adRoot = findViewById<ConstraintLayout>(R.id.nativeLayout)
-        val adFrameLarge = findViewById<FrameLayout>(R.id.adFrameLarge)
-        loadNativeAdmob(
-            adRoot, adFrameLarge,
-            R.layout.admob_native_small,
-            R.layout.max_native_small, 2,
-            RemoteDateConfig.remoteAdSettings.native_inner,{},{},adId = RemoteDateConfig.remoteAdSettings.getAdmobSplashNativeId2()
-        )
+      //  val adFrameLarge = findViewById<FrameLayout>(R.id.adFrameLarge)
+
         SplashActivity.fbAnalytics?.sendEvent("CollageActivity_Open")
 
         deviceWidth = resources.displayMetrics.widthPixels
@@ -539,5 +542,45 @@ class CollageProcessActivity : BillingBaseActivity(), StickerImageCollage,
 
     override fun SingleImageTagData(path: String) {
 
+    }
+    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
+
+
+        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null ) {
+
+            loadingDialog?.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                if(isActivityRunning)
+                {
+                    InterAdsClass.getInstance().showInterAd123(activity,
+                        { functionalityListener.invoke()
+                        }, {}, {
+
+                            adisready="showed"
+                            loadingDialog?.dismiss()
+                        })
+                }
+
+
+            }, 900)
+        }
+        else{
+            functionalityListener.invoke()
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        isActivityRunning=false
+    }
+    override fun onResume() {
+        super.onResume()
+        isActivityRunning=true
+        showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_create_collage_done_btn_inter_ad.value){}
+        val frameBanner = findViewById<FrameLayout>(R.id.banner_adview)
+        loadAdaptiveBanner(
+            this,
+            frameBanner,
+            RemoteDateConfig.remoteAdSettings.admob_adaptive_create_collage_banner_ad.value
+        )
     }
 }

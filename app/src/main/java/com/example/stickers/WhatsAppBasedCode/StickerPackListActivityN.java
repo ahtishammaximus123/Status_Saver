@@ -1,7 +1,7 @@
 package com.example.stickers.WhatsAppBasedCode;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.example.stickers.ads.AdsExtKt.showInterAd;
+
 
 import android.Manifest;
 import android.app.Activity;
@@ -156,12 +156,11 @@ public class StickerPackListActivityN extends Fragment {
         categoryPref = getActivity().getSharedPreferences("category_saved", MODE_PRIVATE);
         editor = categoryPref.edit();
 
-        imageViewCreateNewpack.setOnClickListener(v -> showInterAd(requireActivity(),
-                RemoteDateConfig.getRemoteAdSettings().getInter_create_sticker(),
-                () -> {
-                    addNewStickerPackInInterface();
-                    return null;
-                }));
+        imageViewCreateNewpack.setOnClickListener(v ->
+                addNewStickerPackInInterface()
+        );
+
+
 
         progressOfTray = new ProgressDialog(getContext(), 0);
         progressOfTray.setTitle("Generating Icon...");

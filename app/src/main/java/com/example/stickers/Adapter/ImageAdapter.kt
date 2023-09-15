@@ -85,6 +85,11 @@ class ImageAdapter(private val container: ConstraintLayout?,
                 {
                     holder.save.setImageResource(R.drawable.ic_download_ic)
                     callBack.onDownloadClick(reversedStatus, container)
+                    holder.save.visibility=View.INVISIBLE
+                    holder.share.visibility=View.INVISIBLE
+                    ImagesFragment.openSaved =false
+                    ImagesFragment.clickedPosition = position
+                    callBack.onImageViewClicked(reversedStatus, holder.save.tag)
                     reversedStatus.setSavedStatus(true)
                     notifyItemChanged(reversedPosition)
 

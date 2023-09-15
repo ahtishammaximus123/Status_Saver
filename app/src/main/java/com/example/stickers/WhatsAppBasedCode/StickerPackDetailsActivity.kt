@@ -7,6 +7,7 @@
  */
 package com.example.stickers.WhatsAppBasedCode
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -14,10 +15,13 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -25,15 +29,20 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.stickers.Activities.SplashActivity
+import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Activities.sticker.GalleryActivity
 import com.example.stickers.Activities.sticker.StickerActivity
 import com.example.stickers.BuildConfig
 import com.example.stickers.R
 import com.example.stickers.Utils.WAoptions
 import com.example.stickers.WhatsAppBasedCode.StickerPreviewAdapter.StickerClicked
-import com.example.stickers.ads.showInterAd
+import com.example.stickers.ads.InterAdsClass
+import com.example.stickers.ads.loadNativeAd
+
 import com.example.stickers.app.Constants
-import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
+import com.example.stickers.app.RemoteDateConfig
+import com.example.stickers.dialog.ProgressDialog
+
 import com.example.stickers.stickers.GridSpacingItemDecoration
 import com.example.stickers.stickers.StickerBook
 import com.google.android.material.button.MaterialButton
@@ -53,13 +62,19 @@ class StickerPackDetailsActivity : BaseActivity(), StickerClicked {
     private var stickerPreviewView: ImageView? = null
     private var trayIcon: ImageView? = null
     private var cast: ImageView? = null
+    private var adisready = "notshowed"
+    var isActivityRunning = false
+    var loadingDialog: ProgressDialog? = null
+
+
+
     var job = Job()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adjustFontScale(resources.configuration)
         setContentView(R.layout.activity_sticker_pack_details)
 
-
+        loadingDialog = ProgressDialog(this, "Loading...")
         SplashActivity.fbAnalytics?.sendEvent("StkrPckActy_Open")
 
         val showUpButton = intent.getBooleanExtra(EXTRA_SHOW_UP_BUTTON, false)
@@ -280,9 +295,9 @@ class StickerPackDetailsActivity : BaseActivity(), StickerClicked {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == ADD_PACK) {
-            showInterAd(remoteAdSettings.inter_sticker_added) {
+
                 finish()
-            }
+
             if (resultCode == RESULT_CANCELED && data != null) {
                 val validationError = data.getStringExtra("validation_error")
                 if (validationError != null) {
@@ -378,15 +393,55 @@ class StickerPackDetailsActivity : BaseActivity(), StickerClicked {
 
     override fun onResume() {
         super.onResume()
-//        whiteListCheckAsyncTask = WhiteListCheckAsyncTask(this)
-//        whiteListCheckAsyncTask!!.execute(stickerPack)
+
+        isActivityRunning=true
+
+        if(RemoteDateConfig.remoteAdSettings.admob_create_sticker_create_btn_inter_ad.value=="on"&& adStatus=="comingToThis")
+        {
+
+            showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_create_sticker_create_btn_inter_ad.value){
+            }
+        }
+        else if(RemoteDateConfig.remoteAdSettings.admob_create_sticker_done_btn_inter_ad.value=="on"&&adStatus=="backToThis"){
+            adisready="notshowed"
+            showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_create_sticker_create_btn_inter_ad.value){
+            }
+        }
+
+        val frame = findViewById<FrameLayout>(R.id.sticker_maker_native)
+        loadNativeAd(this,frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_sticker_maker_ad.value,layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
 
         setTrayIcon()
         stickerPreviewAdapter?.notifyDataSetChanged()
     }
+    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
 
+        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null ) {
+            adStatus=""
+            loadingDialog?.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                if(isActivityRunning)
+                {
+                    InterAdsClass.getInstance().showInterAd123(activity,
+                        { functionalityListener.invoke()
+                        }, {}, {
+
+                            adisready="showed"
+                            loadingDialog?.dismiss()
+                        })
+                }
+
+
+            }, 900)
+        }
+        else{
+            functionalityListener.invoke()
+        }
+    }
     override fun onPause() {
         super.onPause()
+        isActivityRunning=false
         Log.e("checkcccheckcccheck", "on pause")
 //        if (whiteListCheckAsyncTask != null && !whiteListCheckAsyncTask!!.isCancelled) {
 //            whiteListCheckAsyncTask!!.cancel(true)
@@ -432,7 +487,7 @@ class StickerPackDetailsActivity : BaseActivity(), StickerClicked {
         const val EXTRA_SHOW_UP_BUTTON = "show_up_button"
         const val EXTRA_STICKER_PACK_DATA = "sticker_pack"
         private const val TAG = "StickerPackDetails"
-
+         var adStatus = "comingToThis"
         @JvmField
         var stickerPack: StickerPack? = null
         fun saveSticker(yourUriSt: Uri?, context: Context?) {

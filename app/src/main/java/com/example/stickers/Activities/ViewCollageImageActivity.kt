@@ -3,8 +3,6 @@ package com.example.stickers.Activities
 import android.os.Bundle
 import android.view.View
 import com.bumptech.glide.Glide
-import com.example.stickers.ads.Ads
-import com.example.stickers.ads.showInterAd
 
 import com.example.stickers.app.AppClass.Companion.fileListCollage
 import com.example.stickers.app.BillingBaseActivity
@@ -22,23 +20,13 @@ class ViewCollageImageActivity : BillingBaseActivity() {
     private var path = ""
     override fun onResume() {
         super.onResume()
-        Ads().showBannerAd(
-            applicationContext,
-            binding.lytBanner,
-            binding.progressBar7,
-            binding.adView
-        )
+
     }
     var position = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        Ads().showBannerAd(
-            applicationContext,
-            binding.lytBanner,
-            binding.progressBar7,
-            binding.adView
-        )
+
         path = intent.getStringExtra("path") ?: ""
         if (path.isNotEmpty())
             Glide.with(this).load(path).into(binding.imgFull)
@@ -95,8 +83,8 @@ class ViewCollageImageActivity : BillingBaseActivity() {
     }
     override fun onBackPressed() {
         fileListCollage = null
-        showInterAd(RemoteDateConfig.remoteAdSettings.inter_collage_view_photo) {
+
             finish()
-        }
+
     }
 }

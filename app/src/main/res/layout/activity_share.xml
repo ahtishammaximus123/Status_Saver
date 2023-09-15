@@ -26,7 +26,7 @@
         android:text="Share the app with your friend"
         android:textColor="@color/white"
         android:textSize="@dimen/_14sdp"
-        app:layout_constraintBottom_toTopOf="@+id/adLyt"
+        app:layout_constraintBottom_toTopOf="@+id/share_activity_native"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/shareback" />
@@ -60,45 +60,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/img_skype_share"
         app:layout_constraintTop_toBottomOf="@+id/textView22" />
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/adLyt"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/_200sdp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/white"
-        android:visibility="visible"
+
+    <FrameLayout
+        android:id="@+id/share_activity_native"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_220sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
+        android:background="@drawable/round_bg"
+        android:elevation="3dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <FrameLayout
-            android:id="@+id/adContent"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginBottom="2dp"
-            android:backgroundTint="@color/white"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        </FrameLayout>
-
-        <!--        <ProgressBar-->
-        <!--            android:id="@+id/adProgressBar"-->
-        <!--            style="?android:attr/progressBarStyle"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_gravity="center_horizontal|center_vertical"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            app:layout_constraintStart_toStartOf="parent"-->
-        <!--            app:layout_constraintTop_toTopOf="parent" />-->
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <include layout="@layout/shimmer" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

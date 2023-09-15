@@ -1,5 +1,6 @@
 package com.example.stickers.Activities
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -17,11 +18,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
+import com.example.stickers.Activities.newDashboard.MainDashActivity
+import com.example.stickers.Activities.newDashboard.MainDashActivity.Companion.downloadClicked
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.ItemsViewModel
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.clickedPosition
@@ -33,16 +37,19 @@ import com.example.stickers.Utils.AppCommons.Companion.ShowWAppDialog
 import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.saveInToPath
 import com.example.stickers.Utils.showSnackBar
-import com.example.stickers.ads.Ads
-import com.example.stickers.ads.loadNativeAdmob
-import com.example.stickers.ads.showInterAd
+import com.example.stickers.ads.AdmobCollapsibleBanner
+import com.example.stickers.ads.InterAdsClass
+import com.example.stickers.ads.loadAdaptiveBanner
+import com.example.stickers.ads.loadNativeAd
+
 import com.example.stickers.app.AppClass.Companion.file30List
 import com.example.stickers.app.AppClass.Companion.fileList
 import com.example.stickers.app.BillingBaseActivity
-import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
+import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.getUriPath
 import com.example.stickers.app.shareFile
 import com.example.stickers.databinding.ActivityFullScreenImageBinding
+import com.example.stickers.dialog.ProgressDialog
 import com.jsibbold.zoomage.ZoomageView
 import com.squareup.picasso.Picasso
 import java.io.File
@@ -63,20 +70,53 @@ class FullScreenImageActivity : BillingBaseActivity() {
          val savedStatusListFiles29 = mutableListOf<Status>()
         val savedVideoStatusListFiles29 = mutableListOf<Status>()
     }
+    private var adisready = "notshowed"
+    var isActivityRunning = false
+    var loadingDialog: ProgressDialog? = null
 
+    override fun onPause() {
+        super.onPause()
+        isActivityRunning=false
+    }
     override fun onResume() {
         super.onResume()
-
-
-
-        Ads().showBannerAd(
-            applicationContext,
-            binding.lytBanner,
-            binding.progressBar7,
-            binding.adView
+        isActivityRunning=true
+        showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_download_btn_inter_ad.value){   }
+        val frame = findViewById<FrameLayout>(R.id.full_screen_image_native)
+       loadNativeAd(this,frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_full_screen_image_ad.value,layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
+        val frameBanner = findViewById<FrameLayout>(R.id.banner_adview)
+     loadAdaptiveBanner(
+            this,
+            frameBanner,
+            RemoteDateConfig.remoteAdSettings.admob_adaptive_image_full_scr_banner_ad.value
         )
     }
+    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
 
+        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null && downloadClicked) {
+
+            loadingDialog?.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                if(isActivityRunning)
+                {
+                    downloadClicked=false
+                    InterAdsClass.getInstance().showInterAd123(activity,
+                        { functionalityListener.invoke()
+                        }, {}, {
+
+                            adisready="showed"
+                            loadingDialog?.dismiss()
+                        })
+                }
+
+
+            }, 900)
+        }
+        else{
+            functionalityListener.invoke()
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adjustFontScale(resources.configuration)
@@ -85,6 +125,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
         )
         val view: View = binding.root
         setContentView(view)
+        loadingDialog = ProgressDialog(this, "Loading...")
         SplashActivity.fbAnalytics?.sendEvent("FullImageActivity_Open")
 
         savedStatusListFiles.clear()

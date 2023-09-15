@@ -6,17 +6,29 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.stickers.Activities.PhotoCollage.FileUtils
+import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Adapter.CollageFilesAdaptor
 import com.example.stickers.Models.FileModel
+import com.example.stickers.R
+import com.example.stickers.ads.InterAdsClass
+import com.example.stickers.ads.loadAdaptiveBanner
+import com.example.stickers.ads.loadNativeAd
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.BillingBaseActivity
+import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.databinding.ActivityCollageFilesBinding
+import com.example.stickers.dialog.ProgressDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,11 +41,13 @@ class CollageFilesActivity : BillingBaseActivity() {
     }
     private lateinit var adapter: CollageFilesAdaptor
     private val fileList = arrayListOf<FileModel>()
-
+    private var adisready = "notshowed"
+    var loadingDialog: ProgressDialog? = null
+    var isActivityRunning = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
+        loadingDialog = ProgressDialog(this, "Loading...")
         SplashActivity.fbAnalytics?.sendEvent("CollageFileActivity_Open")
 
         initViews()
@@ -151,6 +165,7 @@ class CollageFilesActivity : BillingBaseActivity() {
                 onBackPressed()
             }
         }
+
     }
 
     private fun getAllFilesFrom(path: String): ArrayList<FileModel> {
@@ -178,6 +193,50 @@ class CollageFilesActivity : BillingBaseActivity() {
         }
         fileList.reverse()
         return fileList
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isActivityRunning=true
+        showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_create_collage_done_btn_inter_ad.value){}
+        Handler(Looper.getMainLooper()).postDelayed({
+            if(fileList.size>0)
+            {
+                val frame = findViewById<FrameLayout>(R.id.save_files_native)
+                loadNativeAd(this,frame!!,
+                    RemoteDateConfig.remoteAdSettings.admob_native_save_files_ad.value,layoutInflater,R.layout.gnt_medium_template_view,{ },{})
+            }
+        },1200)
+
+
+    }
+    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
+
+
+        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null ) {
+             loadingDialog?.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                if(isActivityRunning)
+                {
+                    InterAdsClass.getInstance().showInterAd123(activity,
+                        { functionalityListener.invoke()
+                        }, {}, {
+
+                            adisready="showed"
+                            loadingDialog?.dismiss()
+                        })
+                }
+
+
+            }, 900)
+        }
+        else{
+            functionalityListener.invoke()
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        isActivityRunning=false
     }
 
     override fun onBackPressed() {

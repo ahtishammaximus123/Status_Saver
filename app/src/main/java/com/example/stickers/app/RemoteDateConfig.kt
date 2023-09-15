@@ -56,119 +56,139 @@ class RemoteDateConfig {
     }
 }
 
+
 @Keep
 data class RemoteAdSettings(
-    /**AD KEYS**/
+    @SerializedName("admob_InterID1")
+    val admob_Inter_ID1: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_InterID2")
+    val admob_Inter_ID2: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_InterID3")
+    val admob_Inter_ID3: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_InterID4")
+    val admob_Inter_ID4: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_InterID5")
+    val admob_Inter_ID5: RemoteAdDetails = RemoteAdDetails(),
     @SerializedName("admob_open_id")
     val admob_open_id: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("admob_inter_id")
-    val admob_inter_id: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("admob_native_id")
-    val admob_native_id: RemoteAdDetails = RemoteAdDetails(),
+
     @SerializedName("admob_inter_splash_id")
     val admob_inter_splash_id: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("admob_native_id_1")
-    val admob_native_id_1: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("admob_native_id_2")
-    val admob_native_id_2: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_dash_native_id")
+    val admob_dash_native_id: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_splash_native_id")
+    val admob_splash_native_id: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_small_banner_id")
+    val admob_small_banner_id: RemoteAdDetails = RemoteAdDetails(),
+    @SerializedName("admob_adaptive_banner_id")
+    val admob_adaptive_banner_id: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_splash_ad")
+    val admob_native_splash_ad: RemoteAdDetails = RemoteAdDetails(),
+    @SerializedName("admob_native_dashboard_ad")
+    val admob_native_dashboard_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_splash_inter_ad")
+    val admob_splash_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_download_btn_inter_ad")
+    val admob_download_btn_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_allow_permission_inter_ad")
+    val admob_allow_permission_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_create_sticker_save_btn_inter_ad")
+    val admob_create_sticker_save_btn_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_create_sticker_create_btn_inter_ad")
+    val admob_create_sticker_create_btn_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_create_sticker_done_btn_inter_ad")
+    val admob_create_sticker_done_btn_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_create_collage_done_btn_inter_ad")
+    val admob_create_collage_done_btn_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_mirroring_scr_inter_ad")
+    val admob_mirroring_scr_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_create_collage_save_btn_inter_ad")
+    val admob_create_collage_save_btn_inter_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_select_whats_app_ad")
+    val admob_native_select_whats_app_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_allow_permission_bottom_sheet_ad")
+    val admob_native_allow_permission_bottom_sheet_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("collapseAble_banner_ID")
+    val collapseAble_banner_ID: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_collapsable_banner_ad")
+    val admob_collapsable_banner_ad: RemoteAdDetails = RemoteAdDetails(),
 
 
-    @SerializedName("admob_inter_download_btn_ad")
-    val admob_inter_download_btn_ad: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("admob_inter_download_btn_id")
-    val admob_inter_download_btn_id: RemoteAdDetails = RemoteAdDetails(),
+    @SerializedName("admob_adaptive_image_full_scr_banner_ad")
+    val admob_adaptive_image_full_scr_banner_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_adaptive_video_full_scr_banner_ad")
+    val admob_adaptive_video_full_scr_banner_ad: RemoteAdDetails = RemoteAdDetails(),
 
 
-    @SerializedName("appOpen")
-    val appOpen: RemoteAdDetails = RemoteAdDetails(),
+    @SerializedName("admob_adaptive_create_sticker_banner_ad")
+    val admob_adaptive_create_sticker_banner_ad: RemoteAdDetails = RemoteAdDetails(),
 
-    /**INTERSTITIALS KEYS**/
-    @SerializedName("inter_splash_ad")
-    val inter_splash_ad: RemoteAdDetails = RemoteAdDetails(),
-    //Status
-    @SerializedName("inter_view_video")
-    val inter_view_video: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("inter_view_image")
-    val inter_view_image: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("inter_download_status")
-    val inter_download_status: RemoteAdDetails = RemoteAdDetails(),
-    //Sticker
-    @SerializedName("inter_create_sticker")
-    val inter_create_sticker: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("inter_sticker_added")
-    val inter_sticker_added: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("inter_sticker_save")
-    val inter_sticker_save: RemoteAdDetails = RemoteAdDetails(),
-    //Collage
-    @SerializedName("inter_collage_photos")
-    val inter_collage_photos: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("inter_collage_view_photo")
-    val inter_collage_view_photo: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("inter_collage_save_photo")
-    val inter_collage_save_photo: RemoteAdDetails = RemoteAdDetails(),
 
-    /**NATIVES KEYS**/
-    @SerializedName("native_dashboard")
-    val native_dashboard: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("native_inner")
-    val native_inner: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("native_sticker")
-    val native_sticker: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("native_collage")
-    val native_collage: RemoteAdDetails = RemoteAdDetails(),
+    @SerializedName("admob_adaptive_create_collage_banner_ad")
+    val admob_adaptive_create_collage_banner_ad: RemoteAdDetails = RemoteAdDetails(),
 
-    @SerializedName("native_video_view")
-    val native_video_view: RemoteAdDetails = RemoteAdDetails(),
-    @SerializedName("native_image_view")
-    val native_image_view: RemoteAdDetails = RemoteAdDetails(),
+    @SerializedName("admob_adaptive_dashboard_banner_ad")
+    val admob_adaptive_dashboard_banner_ad: RemoteAdDetails = RemoteAdDetails(),
+
+
+    @SerializedName("admob_adaptive_mirroring_scr_banner_ad")
+    val admob_adaptive_mirroring_scr_banner_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_full_screen_image_ad")
+    val admob_native_full_screen_image_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_full_screen_video_ad")
+    val admob_native_full_screen_video_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_share_screen_ad")
+    val admob_native_share_screen_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_share_bottom_sheet_ad")
+    val admob_native_share_bottom_sheet_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_mirroring_ad")
+    val admob_native_mirroring_ad: RemoteAdDetails = RemoteAdDetails(),
+    @SerializedName("admob_native_sticker_maker_ad")
+    val admob_native_sticker_maker_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_save_files_ad")
+    val admob_native_save_files_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("admob_native_exit_dialog_ad")
+    val admob_native_exit_dialog_ad: RemoteAdDetails = RemoteAdDetails(),
+
+    @SerializedName("appOpenAd")
+    val appOpenAd: RemoteAdDetails = RemoteAdDetails(),
 
     @SerializedName("call_to_action_btn_color")
-    val call_to_action_btn_color: RemoteAdDetails = RemoteAdDetails(""),
-    @SerializedName("maxNativeId")
-    val maxNativeId: RemoteAdDetails = RemoteAdDetails(""),
-    @SerializedName("maxInterId")
-    val maxInterId: RemoteAdDetails = RemoteAdDetails(""),
-    @SerializedName("maxDashboardNativeId")
-    val maxDashboardNativeId: RemoteAdDetails = RemoteAdDetails(""),
-    @SerializedName("maxDashboardInterId")
-    val maxDashboardInterId: RemoteAdDetails = RemoteAdDetails(""),
-) {
+    val call_to_action_btn_color: RemoteAdDetails = RemoteAdDetails(),
+    )
+{
     fun getAdmobAppOpen() =
-        admob_open_id.value
+        appOpenAd.value
 
-    fun getAdmobInterId() =
-        admob_inter_id.value
-
-    fun getAdmobNativeId() =
-        admob_native_id.value
-
-    fun getNativeDashboardAd() =
-        native_dashboard.value
-
-    fun getAdmobDownloadBtnInterId() =
-        admob_inter_download_btn_ad.value
-
-    fun getAdmobSplashNativeId1() =
-        admob_native_id_1.value
-
-
-    fun getAdmobSplashNativeId2() =
-        admob_native_id_2.value
-
-
-
-    /**
-     * TEST ID'S
-     * cc5d92d7be74d0b7 Inter
-     * 5f24543b8cf51a75 Banner
-     * f8a7c5bc9b3e47fd Native
-     *
-     * Live ID'S For TESTING
-     * 57260bcab4e4e31f
-     * Native Testing AD IDS
-     * 9e7931178c2f7d2e
-     * Banner Testing AD IDS
-     * 0536633a072cca85	*/
 }
 
 @Keep

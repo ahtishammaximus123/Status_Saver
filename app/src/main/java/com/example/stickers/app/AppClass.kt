@@ -7,10 +7,14 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
+import com.example.stickers.Activities.SplashActivity
 import com.example.stickers.Activities.repositories.PhotosRep
 import com.example.stickers.Models.FileModel
 import com.example.stickers.Models.Status
 import com.example.stickers.Models.StatusDocFile
+import com.example.stickers.Utils.FirebaseAnalytics
+import com.example.stickers.ads.AppOpenClass
+import com.example.stickers.fcm.FcmLib
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
@@ -39,6 +43,11 @@ class AppClass : MultiDexApplication(), Application.ActivityLifecycleCallbacks {
         sharedPref = SharedPreferenceData(this)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         registerActivityLifecycleCallbacks(this)
+        SplashActivity.appOpenClass = AppOpenClass(this)
+        SplashActivity.appOpenClass?.setAdShownStatus(true)
+        FcmLib.setupFCM(this, "/topics/$packageName")
+        SplashActivity.fbAnalytics = FirebaseAnalytics(this)
+        SplashActivity.fbAnalytics?.sendEvent("SplashActivity_Open")
     }
 
     override fun attachBaseContext(base: Context?) {

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -17,7 +18,8 @@ import com.example.stickers.Activities.newDashboard.ui.gallery.RadioFile
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModel
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModelFactory
 import com.example.stickers.ImageGalleryCallBack
-import com.example.stickers.ads.showInterAd
+import com.example.stickers.R
+
 import com.example.stickers.ads.showToast
 import com.example.stickers.ads.singleClick
 import com.example.stickers.app.AppClass
@@ -42,12 +44,14 @@ class MultipleGalleryFragment : Fragment(), ImageGalleryCallBack {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentGalleryItemListNewBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val openWhat = requireActivity().findViewById<ImageView>(R.id.open_whatsApp_icon)
+        openWhat.visibility=View.GONE
         imagesViewModel.loadImages()
         // Set the adapter
         adapter = MultipleGalleryAdapter(this)
@@ -60,7 +64,6 @@ class MultipleGalleryFragment : Fragment(), ImageGalleryCallBack {
 //                singleClick(it)
                 if (selectedfiles.size > 1) {
                     if (selectedfiles.size <= 8) {
-                        activity?.showInterAd(remoteAdSettings.inter_collage_photos) {
                             val intent = Intent(
                                 activity,
                                 CollageProcessActivity::class.java
@@ -70,7 +73,7 @@ class MultipleGalleryFragment : Fragment(), ImageGalleryCallBack {
                             intent.putExtra("piece_size", selectedfiles.size)
                             startActivity(intent)
                             findNavController().popBackStack()
-                        }
+
                     } else {
                         activity?.showToast("Can't Select More than 8 Photos!")
                     }

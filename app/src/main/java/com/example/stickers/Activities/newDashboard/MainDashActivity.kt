@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -61,6 +62,8 @@ import com.example.stickers.Utils.*
 import com.example.stickers.Utils.AppCommons.Companion.initDash
 import com.example.stickers.Utils.AppCommons.Companion.isAppInstalled
 import com.example.stickers.ads.*
+import com.example.stickers.ads.AdmobCollapsibleBanner.Companion.adViewCollapsible
+import com.example.stickers.ads.AdmobCollapsibleBanner.Companion.isAdLoadedCollapsible
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.BillingBaseActivity
 import com.example.stickers.app.RemoteDateConfig
@@ -89,11 +92,15 @@ class MainDashActivity : BillingBaseActivity() {
     private var imageAdapter30plus: ImageAdapter30plus? = null
     private lateinit var openWhat: ImageView
     private var exitDialogFragment: ExitDialogFragment? = null
+    private var adisready = "notshowed"
+    var isActivityRunning = false
+    var loadingDialog: ProgressDialog? = null
+
     companion object {
         var isStoragePermissionDeny = true
         var isInterShown = false
-        var isActivityShown = false
-        var nativeAD: ConstraintLayout? = null
+        var isActivityShown = true
+        var downloadClicked = false
         const val REQUEST_PERMISSIONS = 1234
         val PERMISSIONS = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -133,10 +140,10 @@ class MainDashActivity : BillingBaseActivity() {
         super.onCreate(savedInstanceState)
         initDash(SharedPreferenceData(this))
         binding = ActivityMainDashBinding.inflate(layoutInflater)
-
+        loadingDialog = ProgressDialog(this, "Loading...")
         setContentView(binding.root)
         binding.textView10.text = "Version " + BuildConfig.VERSION_NAME
-
+        initDrawer()
         openWhat = findViewById<ImageView>(R.id.open_whatsApp_icon)
         var whatsAppType = SharedPreferenceData(this).getString("apppackage")
         if (whatsAppType == "com.whatsapp") {
@@ -175,46 +182,49 @@ class MainDashActivity : BillingBaseActivity() {
             }
         }
 
-        val firstTime = SharedPreferenceData(this).getBoolean("ComingFirstTime", true)
-        if (firstTime) {
-            selectWhatsAppDialog() {
+            val firstTime = SharedPreferenceData(this).getBoolean("ComingFirstTime", true)
+            if (firstTime) {
+                selectWhatsAppDialog() {
+                    var isAdShown = false
+                    model.selected.observe(this) {
+                        Log.e("status*", "selected - $it")
+                        if (it == 0 && isAdShown) {
+                            startPermissions()
+
+                        } else {
+
+                        }
+                    }
+                    initDrawer()
+                    SplashActivity.fbAnalytics = FirebaseAnalytics(this)
+                    SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
+
+
+                    interAdShowFunc(isAdShown)
+                }
+            } else {
                 var isAdShown = false
                 model.selected.observe(this) {
                     Log.e("status*", "selected - $it")
                     if (it == 0 && isAdShown) {
                         startPermissions()
-                        nativeAD?.beGone()
+
                     } else {
-                        nativeAD?.beVisible()
+
                     }
                 }
                 initDrawer()
                 SplashActivity.fbAnalytics = FirebaseAnalytics(this)
                 SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
-                AppOpen.interPreLoadAd = true
 
                 interAdShowFunc(isAdShown)
-            }
-        } else {
-            var isAdShown = false
-            model.selected.observe(this) {
-                Log.e("status*", "selected - $it")
-                if (it == 0 && isAdShown) {
-                    startPermissions()
-                    nativeAD?.beGone()
-                } else {
-                    nativeAD?.beVisible()
-                }
-            }
-            initDrawer()
-            SplashActivity.fbAnalytics = FirebaseAnalytics(this)
-            SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
-            AppOpen.interPreLoadAd = true
-            interAdShowFunc(isAdShown)
 
-        }
+            }
+
+
+
         //binding.content.toolbar.setNavigationIcon(R.drawable.ic_menu)
-        nativeAD = binding.content.nativeLayout.root
+
         setSupportActionBar(binding.content.toolbar)
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navBottomView: BottomNavigationView = binding.content.navViewBottom
@@ -273,14 +283,14 @@ class MainDashActivity : BillingBaseActivity() {
             dialog = ProgressDialog(this, "Ad is Loading")
             dialog?.show()
             Handler(Looper.getMainLooper()).postDelayed({
-                InterAdsClassNew.getInstance().showInterAd(this, {
+
                     dialog?.dismiss()
                     splashAdLoaded = "showed"
                     isInterShown = true
                     isAdShown1 = true
-                    AppOpen.interPreLoadAd = false
+
                     if (!arePermissionDenied()) {
-                        nativeAD?.beVisible()
+
                         val sharedPreferences =
                             getSharedPreferences("uriTreePref", Context.MODE_PRIVATE)
                         var ut = "uriTree"
@@ -292,11 +302,11 @@ class MainDashActivity : BillingBaseActivity() {
                         startPermissions()
                         model.select(0)
 
-                        nativeAD?.beGone()
+
                     }
 
 
-                }, {}, {})
+
                 Log.e("max_inter*", "loadMaxSplashInter")
 
             }, 700)
@@ -305,10 +315,10 @@ class MainDashActivity : BillingBaseActivity() {
         } else {
             isInterShown = true
             isAdShown1 = true
-            AppOpen.interPreLoadAd = false
+
 
             if (!arePermissionDenied()) {
-                nativeAD?.beVisible()
+
                 val sharedPreferences =
                     getSharedPreferences("uriTreePref", Context.MODE_PRIVATE)
                 var ut = "uriTree"
@@ -320,7 +330,7 @@ class MainDashActivity : BillingBaseActivity() {
                 startPermissions()
                 model.select(0)
 
-                nativeAD?.beGone()
+
             }
         }
     }
@@ -331,12 +341,68 @@ class MainDashActivity : BillingBaseActivity() {
     override fun onResume() {
         super.onResume()
         isActivityShown = true
+        isActivityRunning=true
+        val frame = findViewById<FrameLayout>(R.id.main_dash_native)
+        loadCollapsableBannerAd()
+        loadNativeAd(this,frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_dashboard_ad.value,layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
+        showInterAd(this,   RemoteDateConfig.remoteAdSettings.admob_splash_inter_ad.value){}
+    }
+    private fun loadCollapsableBannerAd() {
+        if ( RemoteDateConfig.remoteAdSettings.collapseAble_banner_ID.value.isNotEmpty()&&  RemoteDateConfig.remoteAdSettings.admob_collapsable_banner_ad.value=="on" && adViewCollapsible == null) {
+            binding.content.collapseAbleBanner.visibility = View.VISIBLE
+            if (!isAdLoadedCollapsible) {
+                AdmobCollapsibleBanner.getInstance()
+                    .loadAdmobCollapsible(this, binding.content.collapseAbleBanner,
+                         RemoteDateConfig.remoteAdSettings.collapseAble_banner_ID.value, binding.content.collapseAbleBanner,
+                        {
+                            //load listener
+
+                            AdmobCollapsibleBanner.getInstance()
+                                .showCollapsibleAd(
+                                    binding.content.collapseAbleBanner
+                                )
+                        }, {
+                            //fail listener
+
+                            loadAdaptiveBanner()
+                            binding.content.collapseAbleBanner.visibility = View.GONE
+                        }, {
+                            //onAdd Close listener
+                        }, {
+                            //onAdd Open listener
+                        })
+            } else {
+                AdmobCollapsibleBanner.getInstance().showCollapsibleAd(
+                    binding.content.collapseAbleBanner,
+
+                )
+            }
+
+        }
+        else if(adViewCollapsible == null){
+            loadAdaptiveBanner()
+
+        }
+        else if(adViewCollapsible != null){
+            AdmobCollapsibleBanner.getInstance().showCollapsibleAd(
+                binding.content.collapseAbleBanner,
+
+            )
+        }
+
 
     }
 
+    private fun loadAdaptiveBanner()
+    {
+
+
+    }
     override fun onPause() {
         super.onPause()
         isActivityShown = false
+        isActivityRunning= false
     }
 
 
@@ -458,9 +524,7 @@ class MainDashActivity : BillingBaseActivity() {
         permissionsD?.show()
     }
 
-    inner class PermissionDialog(
-        activity: Activity
-    ) : Dialog(activity) {
+    inner class PermissionDialog(activity: Activity) : Dialog(activity) {
 
         private lateinit var binding: DialogOpenWhatsappBinding
 
@@ -485,19 +549,35 @@ class MainDashActivity : BillingBaseActivity() {
                     textView28.text = getString(R.string.permision_text_)
 
                 grantPermission.setOnClickListener {
-                    if (arePermissionDenied()) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            requestPermissions(storagePermissions33, REQUEST_PERMISSIONS)
-                        } else {
-                            requestPermissions(PERMISSIONS, REQUEST_PERMISSIONS)
+                    if(RemoteDateConfig.remoteAdSettings.admob_allow_permission_inter_ad.value=="on")
+                        {
+                            adisready="notshowed"
                         }
 
-                    } else
-                        specialPermissionDialog()
-                    dismiss()
+                    showInterAd(this@MainDashActivity,   RemoteDateConfig.remoteAdSettings.admob_allow_permission_inter_ad.value){
+                        if (arePermissionDenied()) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                requestPermissions(storagePermissions33, REQUEST_PERMISSIONS)
+                            } else {
+                                requestPermissions(PERMISSIONS, REQUEST_PERMISSIONS)
+                            }
+
+                        } else
+                            specialPermissionDialog()
+                        dismiss()
+
+                    }
+
+
                 }
             }
+            loadNativeAd(this@MainDashActivity,binding.allowPermissionNative!!,
+                RemoteDateConfig.remoteAdSettings.admob_native_allow_permission_bottom_sheet_ad.value,layoutInflater,R.layout.gnt_medium_template_view,{ },{})
+
+
         }
+
+
     }
 
     override fun onRequestPermissionsResult(
@@ -509,7 +589,7 @@ class MainDashActivity : BillingBaseActivity() {
         isApplovinClicked = true
         if (requestCode == REQUEST_PERMISSIONS && grantResults.isNotEmpty()) {
             if (arePermissionDenied()) {
-                nativeAD?.beGone()
+
                 val storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
                 if (!storageAccepted) {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -588,7 +668,7 @@ class MainDashActivity : BillingBaseActivity() {
                 editor.putString("uriTree", uriTree.toString())
                 editor.apply()
                 actions()
-                nativeAD?.beVisible()
+
             }
             if (requestCode == REQUEST_ACTION_OPEN_DOCUMENT_TREE_2) {
                 isApplovinClicked = true
@@ -608,7 +688,7 @@ class MainDashActivity : BillingBaseActivity() {
                 editor.putString("uriTree1", uriTree.toString())
                 editor.apply()
                 actions()
-                nativeAD?.beVisible()
+
             }
 
         } else {
@@ -730,7 +810,30 @@ class MainDashActivity : BillingBaseActivity() {
 
         return true
     }
+    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
 
+        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null ) {
+
+            loadingDialog?.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                if(isActivityRunning)
+                {
+                    InterAdsClass.getInstance().showInterAd123(activity,
+                        { functionalityListener.invoke()
+                        }, {}, {
+
+                            adisready="showed"
+                            loadingDialog?.dismiss()
+                        })
+                }
+
+
+            }, 900)
+        }
+        else{
+            functionalityListener.invoke()
+        }
+    }
     private fun selectWhatsAppDialog(proceedListenerr: () -> Unit) {
 
         val selectwhatsApp = SelectWhatsAppFragment(openWhat){proceedListenerr.invoke()}
@@ -1117,3 +1220,4 @@ class MainDashActivity : BillingBaseActivity() {
         showSnackBar(binding.drawerLayout, "Files downloaded successfully.")
     }
 }
+

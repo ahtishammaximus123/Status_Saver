@@ -1,6 +1,7 @@
 package com.example.stickers.Activities.newDashboard.ui.images
 
 import android.Manifest
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.storage.StorageManager
 import android.provider.Settings
 import android.util.Log
@@ -34,7 +36,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.stickers.Activities.FullScreenImageActivity
 import com.example.stickers.Activities.SplashActivity
+
 import com.example.stickers.Activities.newDashboard.MainDashActivity
+import com.example.stickers.Activities.newDashboard.MainDashActivity.Companion.downloadClicked
 import com.example.stickers.Activities.newDashboard.base.BaseLiveStatusFragment
 import com.example.stickers.Activities.repositories.Coroutines
 import com.example.stickers.Adapter.ImageAdapter
@@ -47,14 +51,17 @@ import com.example.stickers.R
 import com.example.stickers.Utils.AppCommons
 import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.WAoptions
-import com.example.stickers.ads.beGone
-import com.example.stickers.ads.beVisible
-import com.example.stickers.ads.showInterDemandAdmob
+import com.example.stickers.ads.InterAdsClass
+
 import com.example.stickers.ads.showToast
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.BillingBaseActivity
+import com.example.stickers.app.RemoteAdDetails
+import com.example.stickers.app.RemoteAdSettings
+import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.databinding.FragmentLiveImagesBinding
+import com.example.stickers.dialog.ProgressDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -82,7 +89,9 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
     private var imgNoFound: ImageView? = null
     private val notFromButtonnnn = true
     val anyImages = MutableLiveData<Int>()
-
+    private var adisready = ""
+    var isActivityRunning = false
+    var loadingDialog: ProgressDialog? = null
     companion object {
         var clickedPosition: Int=0
         var openSaved=false
@@ -120,7 +129,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
         val root: View = binding.root
         tabLayoutNav = binding.tabLayout.tabLayoutNav
         selectTabCustom(0)
-
+        loadingDialog = ProgressDialog(requireActivity(), "Loading...")
         Log.e("atg**, ", "Img")
 
         return root
@@ -170,13 +179,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
             imageAdapter30plus = activity?.let {
                 ImageAdapter30plus(it,{
                     imagesViewModel.getAllFiles()
-                    if (remoteAdSettings.admob_inter_download_btn_id.value.isNotEmpty()) {
-                        requireActivity().showInterDemandAdmob(
-                            remoteAdSettings.admob_inter_download_btn_ad,
-                            remoteAdSettings.admob_inter_download_btn_id.value,
-                            {})
-
-                    }
+                    downloadClicked=true
 
                 },this,requireActivity().supportFragmentManager)
             }
@@ -485,7 +488,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
         BillingBaseActivity.isApplovinClicked = true
         if (requestCode == MainDashActivity.REQUEST_PERMISSIONS && grantResults.isNotEmpty()) {
             if (arePermissionDenied()) {
-                MainDashActivity.nativeAD?.beGone()
+
                 val storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
                 if (!storageAccepted) {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -565,7 +568,6 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
                 editor.putString("uriTree1", uriTree.toString())
                 editor.apply()
 
-                MainDashActivity.nativeAD?.beVisible()
             }
         } else {
             _binding?.shimmerContent?.root?.visibility = View.GONE
@@ -780,22 +782,30 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
             Log.e("status*", "statusI shimmerContent G")
             swipeRefreshLayout?.isRefreshing = false
             _binding?.shimmerContent?.root?.visibility = View.GONE
-            if (imagesList30plus.size <= 0) {
-                anyImages.postValue(0)
-                messageTextView?.visibility = View.VISIBLE
-                binding.points.visibility = View.VISIBLE
-                binding.howToUse.visibility = View.VISIBLE
-                _binding?.grantPermission?.visibility = View.GONE
-                imgNoFound?.visibility = View.VISIBLE
-                recyclerView?.visibility = View.GONE
-            } else {
-                messageTextView?.visibility = View.GONE
-                binding.points.visibility = View.GONE
-                binding.howToUse.visibility = View.GONE
-                _binding?.grantPermission?.visibility = View.GONE
-                imgNoFound?.visibility = View.GONE
-                recyclerView?.visibility = View.VISIBLE
+
+            try {
+                if (imagesList30plus.size <= 0) {
+                    anyImages.postValue(0)
+                    messageTextView?.visibility = View.VISIBLE
+                    binding.points.visibility = View.VISIBLE
+                    binding.howToUse.visibility = View.VISIBLE
+                    _binding?.grantPermission?.visibility = View.GONE
+                    imgNoFound?.visibility = View.VISIBLE
+                    recyclerView?.visibility = View.GONE
+                } else {
+                    messageTextView?.visibility = View.GONE
+                    binding.points.visibility = View.GONE
+                    binding.howToUse.visibility = View.GONE
+                    _binding?.grantPermission?.visibility = View.GONE
+                    imgNoFound?.visibility = View.GONE
+                    recyclerView?.visibility = View.VISIBLE
+                }
             }
+            catch (e:Exception)
+            {
+                e.printStackTrace()
+            }
+
             imageAdapter30plus?.submitList(null)
 
             imageAdapter30plus?.submitList(imagesList30plus)
@@ -885,23 +895,24 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
     }
 
     override fun onDownloadClick(status: Status, container: ConstraintLayout) {
-//        InterAdmobClass.getInstance()
-//            .loadAndShowInter(requireActivity(), remoteAdSettings.getAdmobDownloadBtnInterId(),
-//                ProgressDialog(requireActivity()), {})
-//        activity?.showInterAd(remoteAdSettings.inter_download_status) {
-            Common.copyFile(status, activity, container)
-            imagesViewModel.getAllFiles()
+        downloadClicked=true
+
+        Common.copyFile(status, activity, container)
+        imagesViewModel.getAllFiles()
         imageAdapter?.notifyDataSetChanged()
    //     }
     }
 
     override fun onPause() {
         super.onPause()
+        isActivityRunning=false
         job?.cancel()
     }
 
     override fun onResume() {
         super.onResume()
+        isActivityRunning=true
+
         try {
             status()
         } catch (e: Exception) {

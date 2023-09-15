@@ -1,6 +1,7 @@
 package com.example.stickers.Activities.PhotoCollage;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
@@ -15,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -39,7 +41,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.stickers.Activities.CollageFilesActivity;
 import com.example.stickers.Activities.PhotoCollage.layout.straight.StraightLayoutHelper;
 import com.example.stickers.R;
+import com.example.stickers.ads.InterAdsClass;
 import com.example.stickers.app.BillingBaseActivity;
+import com.example.stickers.dialog.ProgressDialog;
 import com.example.stickers.stickers.GridSpacingItemDecoration;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
@@ -85,6 +89,10 @@ public class PhotoCollageActivity extends BillingBaseActivity{
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+    private String adisready = "notshowed";
+    private boolean isActivityRunning = false;
+    private ProgressDialog loadingDialog = null;
+    private InterAdsClass interAdClass = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +104,7 @@ public class PhotoCollageActivity extends BillingBaseActivity{
         SharedPreferences.Editor editor = pref.edit();
         boolean firstRun = pref.getBoolean("firstRunLiveStatus", true);
 
+        loadingDialog = new ProgressDialog(this,"Loading...");
 
         puzzleHandler = new PuzzleHandler(this);
 
@@ -613,6 +622,9 @@ public class PhotoCollageActivity extends BillingBaseActivity{
         getBaseContext().getResources().updateConfiguration(configuration, metrics);
 
     }
+
+
+
     @Override
     protected void onResume() {
         super.onResume();

@@ -17,7 +17,7 @@ abstract class BillingBaseActivity : AppCompatActivity() {
     val sharedPref by lazy { SharedPreferenceData(this) }
 
     companion object {
-
+//        val config = RemoteAdSettings()
         var admobNativeADNext: NativeAd? = null
         var isAdmobClicked = false
         var isApplovinClicked = false

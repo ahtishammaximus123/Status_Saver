@@ -34,6 +34,7 @@
             android:layout_marginStart="@dimen/_4sdp"
             android:layout_marginTop="@dimen/_5sdp"
             android:layout_marginEnd="@dimen/_4sdp"
+            android:background="@drawable/round_bg"
             android:elevation="3dp"
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"

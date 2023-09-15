@@ -2,6 +2,7 @@ package com.example.stickers.Activities.newDashboard.ui.videos
 
 
 import android.Manifest
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.StrictMode
 import android.os.storage.StorageManager
 import android.provider.Settings
@@ -40,7 +42,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.stickers.Activities.FullScreenVideoActivity
 import com.example.stickers.Activities.SplashActivity
+
 import com.example.stickers.Activities.newDashboard.MainDashActivity
+import com.example.stickers.Activities.newDashboard.MainDashActivity.Companion.downloadClicked
 import com.example.stickers.Activities.newDashboard.base.BaseLiveStatusFragment
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModel
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModelFactory
@@ -56,10 +60,9 @@ import com.example.stickers.Utils.AppCommons
 import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.WAoptions
 import com.example.stickers.Utils.WAoptions.Companion.appPackage
+import com.example.stickers.ads.InterAdsClass
 import com.example.stickers.ads.afterDelay
-import com.example.stickers.ads.beGone
-import com.example.stickers.ads.beVisible
-import com.example.stickers.ads.showInterDemandAdmob
+
 import com.example.stickers.ads.showToast
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.AppClass.Companion.file30List
@@ -67,6 +70,7 @@ import com.example.stickers.app.AppClass.Companion.fileList
 import com.example.stickers.app.BillingBaseActivity
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.databinding.FragmentLiveVideosBinding
+import com.example.stickers.dialog.ProgressDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -100,8 +104,9 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE = 5544
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE_2 = 55442
     private var videoAdapter30plus: VideoAdapter30plus? = null
-    private val notFromButtonnnn = true
-
+    private var adisready = ""
+    var isActivityRunning = false
+    var loadingDialog: ProgressDialog? = null
     companion object{
          val videoList: ArrayList<Status> = ArrayList()
          var videoList30plus: ArrayList<StatusDocFile> = ArrayList()
@@ -121,7 +126,7 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        loadingDialog = ProgressDialog(requireActivity(), "Loading...")
         videoList.clear()
         videoList30plus.clear()
     }
@@ -397,7 +402,6 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
         BillingBaseActivity.isApplovinClicked = true
         if (requestCode == MainDashActivity.REQUEST_PERMISSIONS && grantResults.isNotEmpty()) {
             if (arePermissionDenied()) {
-                MainDashActivity.nativeAD?.beGone()
                 val storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
                 if (!storageAccepted) {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -480,7 +484,6 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
                 editor.putString("uriTree1", uriTree.toString())
                 editor.apply()
 
-                MainDashActivity.nativeAD?.beVisible()
             }
         } else {
             _binding?.shimmerContent?.root?.visibility = View.GONE
@@ -630,12 +633,8 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
                 videoList30plus.clear()
                 videoAdapter30plus = VideoAdapter30plus(videoList30plus, requireActivity().supportFragmentManager,requireActivity(),{
                     imagesViewModel.getAllFiles()
-                    if(remoteAdSettings.admob_inter_download_btn_id.value.isNotEmpty())
-                    {
-                        requireActivity().showInterDemandAdmob(remoteAdSettings.admob_inter_download_btn_ad,remoteAdSettings.admob_inter_download_btn_id.value,{})
 
-                    }
-
+                    downloadClicked =true
                 },this)
                 recyclerView?.adapter = videoAdapter30plus
                 //                DocumentFile documentFile = DocumentFile.fromTreeUri(getActivity(), Uri.parse(uriTree));
@@ -786,17 +785,19 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
 
     override fun onDownloadClick(status: Status?, container: ConstraintLayout?) {
 
-//        InterAdmobClass.getInstance().loadAndShowInter(requireActivity(),remoteAdSettings.getAdmobDownloadBtnInterId(),ProgressDialog(requireActivity()),{})
-//
-//        activity?.showInterDemandAdmob(remoteAdSettings.admob_inter_download_btn_ad,remoteAdSettings.admob_inter_download_btn_id.value) {
-            Common.copyFile(status, activity, container)
-            imagesViewModel.getAllFiles()
+        downloadClicked =true
+        Common.copyFile(status, activity, container)
+        imagesViewModel.getAllFiles()
 
-      //  }
     }
 
+    override fun onPause() {
+        super.onPause()
+        isActivityRunning=false
+    }
     override fun onResume() {
         super.onResume()
+        isActivityRunning=true
 
         try {
            this.getStatus()

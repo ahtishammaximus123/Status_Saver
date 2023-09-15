@@ -9,15 +9,16 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".Activities.PhotoCollage.CollageProcessActivity"
     tools:showIn="@layout/activity_collage_process">
-
-    <include
-        android:id="@+id/nativeLayout"
-        layout="@layout/native_ad_small"
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:id="@+id/banner_adview"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+    </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/save_layout"
@@ -28,7 +29,7 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nativeLayout">
+        app:layout_constraintTop_toBottomOf="@+id/banner_adview">
 
         <com.xiaopo.flying.puzzle.SquarePuzzleView
             android:id="@+id/puzzle_view"
