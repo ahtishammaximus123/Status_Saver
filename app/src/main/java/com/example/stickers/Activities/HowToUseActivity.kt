@@ -102,7 +102,7 @@ class HowToUseActivity : BillingBaseActivity() {
 
         if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null) {
 
-            loadingDialog?.show()
+            loadingDialog?.dialogShow()
             Handler(Looper.getMainLooper()).postDelayed({
                 if(isActivityRunning)
                 {

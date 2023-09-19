@@ -18,7 +18,11 @@ public class Status implements Serializable {
         this.title = title;
         this.path = path;
         String MP4 = ".mp4";
-        this.isVideo = file.getName().endsWith(MP4);
+        if(file!=null)
+        {
+            this.isVideo = file.getName().endsWith(MP4);
+        }
+
 
     }
 

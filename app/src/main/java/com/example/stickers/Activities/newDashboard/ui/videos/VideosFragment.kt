@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -37,7 +38,6 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.stickers.Activities.FullScreenVideoActivity
@@ -71,6 +71,7 @@ import com.example.stickers.app.BillingBaseActivity
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.databinding.FragmentLiveVideosBinding
 import com.example.stickers.dialog.ProgressDialog
+import com.example.stickers.dialog.ShareFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -159,7 +160,9 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
         }
 
         recyclerView?.setHasFixedSize(true)
-        recyclerView?.layoutManager = GridLayoutManager(activity, Common.GRID_COUNT)
+     //   recyclerView?.layoutManager = GridLayoutManager(activity, Common.GRID_COUNT)
+
+
 
         _binding?.grantPermission?.setOnClickListener {
             imagesViewModel.select(0)
@@ -199,9 +202,16 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
 
 //        if (notFromButtonnnn)
 
-        afterDelay(1500) {
-            getStatus()
-        }
+//        try {
+//            afterDelay(1500) {
+//                getStatus()
+//            }
+//
+//        }
+//        catch (e:Exception)
+//        {
+//            e.printStackTrace()
+//        }
 
         _binding?.howToUse?.setOnClickListener {
             showHowToUse()
@@ -586,7 +596,9 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
     var job: Job? = null
     private fun getStatus() {
 
-
+        val parentActivity = activity as? MainDashActivity
+        val frame=parentActivity?.findViewById<FrameLayout>(R.id.main_dash_native)
+        frame?.visibility=View.GONE
         job?.cancel()
         videoList.clear()
         videoList30plus.clear()
@@ -605,8 +617,9 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
             videoList.clear()
             videoList30plus.clear()
 
-            videoAdapter = container?.let { VideoAdapter(videoList, it, this@VideosFragment,this) }
+            videoAdapter = container?.let { VideoAdapter(videoList, it,binding.recyclerViewVideo,requireActivity() ,this@VideosFragment,this) }
             recyclerView?.adapter = videoAdapter
+            videoAdapter?.setLayoutManager()
             videoAdapter?.notifyDataSetChanged()
 
             val dir = if (appPackage == "com.whatsapp.w4b") {
@@ -631,12 +644,13 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
 
                 videoList.clear()
                 videoList30plus.clear()
-                videoAdapter30plus = VideoAdapter30plus(videoList30plus, requireActivity().supportFragmentManager,requireActivity(),{
+                videoAdapter30plus = VideoAdapter30plus(videoList30plus,binding.recyclerViewVideo, requireActivity().supportFragmentManager,requireActivity(),{
                     imagesViewModel.getAllFiles()
 
                     downloadClicked =true
                 },this)
                 recyclerView?.adapter = videoAdapter30plus
+                videoAdapter30plus?.setLayoutManager()
                 //                DocumentFile documentFile = DocumentFile.fromTreeUri(getActivity(), Uri.parse(uriTree));
 //                execute30plus(documentFile);
 //                execute30plusNewSameLikeOnActivity(Uri.parse(uriTree));
@@ -758,15 +772,33 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
     }
 
     override fun onShareClicked(status: Status) {
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        val link = "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
-        shareIntent.putExtra(
-            Intent.EXTRA_TEXT,
-            "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
-        )
-        shareIntent.type = "video/*"
-        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + status.file.absolutePath))
-        startActivity(shareIntent)
+
+        var exitDialogFragment: ShareFragment? = null
+        exitDialogFragment = ShareFragment(null, {
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            val link = "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+            shareIntent.putExtra(
+                Intent.EXTRA_TEXT,
+                "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
+            )
+            shareIntent.type = "video/*"
+            shareIntent.setPackage("com.whatsapp")
+            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + status.file.absolutePath))
+            startActivity(shareIntent)},
+
+            {val shareIntent = Intent(Intent.ACTION_SEND)
+            val link = "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+            shareIntent.putExtra(
+                Intent.EXTRA_TEXT,
+                "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
+            )
+            shareIntent.type = "video/*"
+            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + status.file.absolutePath))
+            startActivity(shareIntent)})
+        exitDialogFragment!!.show(requireActivity().supportFragmentManager, "exit_dialog_tag")
+
+
+
     }
 
     override fun onImageViewClicked(status: Status?, tag: Any) {

@@ -72,6 +72,8 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/poppins_regular"
         android:gravity="center"
+        android:layout_marginStart="@dimen/_15sdp"
+        android:layout_marginEnd="@dimen/_15sdp"
         android:text="@string/app_text"
         android:textAllCaps="false"
         android:textColor="@color/white"

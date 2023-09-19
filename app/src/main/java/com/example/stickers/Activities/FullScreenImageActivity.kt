@@ -81,6 +81,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
     override fun onResume() {
         super.onResume()
         isActivityRunning=true
+
         showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_download_btn_inter_ad.value){   }
         val frame = findViewById<FrameLayout>(R.id.full_screen_image_native)
        loadNativeAd(this,frame!!,
@@ -96,7 +97,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
 
         if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null && downloadClicked) {
 
-            loadingDialog?.show()
+            loadingDialog?.dialogShow()
             Handler(Looper.getMainLooper()).postDelayed({
                 if(isActivityRunning)
                 {
@@ -297,8 +298,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
                 } else {
                     val imageUrl = ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file
                     Log.e("share303", "$imageUrl: " )
-                    shareFile(
-                        getUriPath(ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.absolutePath),
+                    shareFile(ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.toUri(),
                         supportFragmentManager
                     )
 

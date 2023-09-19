@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -52,6 +53,8 @@ class MultipleGalleryFragment : Fragment(), ImageGalleryCallBack {
         super.onViewCreated(view, savedInstanceState)
         val openWhat = requireActivity().findViewById<ImageView>(R.id.open_whatsApp_icon)
         openWhat.visibility=View.GONE
+        val frame = requireActivity().findViewById<FrameLayout>(R.id.main_dash_native)
+        frame.visibility=View.VISIBLE
         imagesViewModel.loadImages()
         // Set the adapter
         adapter = MultipleGalleryAdapter(this)

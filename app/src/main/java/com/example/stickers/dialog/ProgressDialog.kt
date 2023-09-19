@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.RelativeLayout
+import com.example.stickers.ads.InterAdsClass.Companion.interIsShowing
 import com.example.stickers.databinding.SProgressDialogBinding
 
 class ProgressDialog(
@@ -32,5 +33,12 @@ class ProgressDialog(
         }
         if (text.isNotEmpty())
             binding.txtTitle.text = text
+    }
+
+    fun dialogShow ()
+    {
+        interIsShowing=true
+        this.show()
+
     }
 }

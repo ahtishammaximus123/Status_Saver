@@ -419,7 +419,7 @@ class StickerPackDetailsActivity : BaseActivity(), StickerClicked {
 
         if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null ) {
             adStatus=""
-            loadingDialog?.show()
+            loadingDialog?.dialogShow()
             Handler(Looper.getMainLooper()).postDelayed({
                 if(isActivityRunning)
                 {

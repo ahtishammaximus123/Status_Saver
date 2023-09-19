@@ -66,7 +66,7 @@ fun Context.shareFile(path: Uri, supportFragmentManager: FragmentManager) {
 
 
     var exitDialogFragment: ShareFragment? = null
-    exitDialogFragment = ShareFragment(path)
+    exitDialogFragment = ShareFragment(path,{}) {}
     exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
 
 

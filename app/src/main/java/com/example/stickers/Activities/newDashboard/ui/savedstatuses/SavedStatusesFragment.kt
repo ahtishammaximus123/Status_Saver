@@ -312,23 +312,35 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback,SavedMul
                     }
                 }
 //                savedFilesWithHeadersList.reverse()
+                val updatedSavedFilesList = mutableListOf<Status>()
+
+                for (i in 0 until savedVideoFilesList.size) {
+                    updatedSavedFilesList.add(savedVideoFilesList[i])
+                    if (i == 2 && savedVideoFilesList.size >= 3) {
+                        updatedSavedFilesList.add(savedVideoFilesList[i])
+                    }
+                }
+                savedVideoFilesList.clear()
+                savedVideoFilesList.addAll(updatedSavedFilesList)
                 filesAdapter = SavedStatusAdapter(
                     savedVideoFilesList,
                     this,
-                    this,
+                    this,requireActivity(),
+                    recyclerView!!,
                     requireActivity().supportFragmentManager
                 )
                 recyclerView!!.adapter = filesAdapter
-                val g = GridLayoutManager(activity, Common.GRID_COUNT)
-                recyclerView?.setLayoutManager(g)
-                g.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return when (filesAdapter?.getItemViewType(position)) {
-                            0 -> 2
-                            else -> 1
-                        }
-                    }
-                }
+//                val g = GridLayoutManager(activity, Common.GRID_COUNT)
+//                recyclerView?.setLayoutManager(g)
+//                g.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+//                    override fun getSpanSize(position: Int): Int {
+//                        return when (filesAdapter?.getItemViewType(position)) {
+//                            0 -> 2
+//                            else -> 1
+//                        }
+//                    }
+//                }
+                filesAdapter?.setLayoutManager()
                 filesAdapter?.notifyDataSetChanged()
                 progressBar!!.visibility = View.GONE
                 checkFiles()
@@ -370,12 +382,7 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback,SavedMul
                 savedVideoStatusListFiles29.clear()
                 savedFilesWithHeadersList.clear()
                 app_dir.listFiles()?.forEach { file ->
-                    val status =
-                        Status(
-                            file,
-                            file.name,
-                            file.absolutePath
-                        )
+                    val status = Status(file, file.name, file.absolutePath)
 
                     if (status.isVideo) {
                         savedVideoStatusListFiles29.add(status)
@@ -387,6 +394,10 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback,SavedMul
 
                     countIsSaved++
                 }
+
+
+
+
                 try {
 
                     savedFilesList.distinct().forEach { status ->
@@ -394,7 +405,7 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback,SavedMul
                         val time = status.file.lastModified()
                         val date = getDate(status.file.lastModified())
                         val title = time.millisToDate().formatToDMY()
-    //                                if (isToday(date) && isRecent(time)) "Recent" else if (isToday(date)) "Today" else date
+    //                   if (isToday(date) && isRecent(time)) "Recent" else if (isToday(date)) "Today" else date
 
                         val sh = StatusesHeaders(title, null)
                         val i =
@@ -426,18 +437,29 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback,SavedMul
                     }
                 }
                 savedFilesList.reverse()
-                filesAdapter = SavedStatusAdapter(savedFilesList, this, this,requireActivity().supportFragmentManager)
-                recyclerView!!.adapter = filesAdapter
-                val g = GridLayoutManager(activity, Common.GRID_COUNT)
-                recyclerView?.setLayoutManager(g)
-                g.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return when (filesAdapter?.getItemViewType(position)) {
-                            0 -> 2
-                            else -> 1
-                        }
+                val updatedSavedFilesList = mutableListOf<Status>()
+
+                for (i in 0 until savedFilesList.size) {
+                    updatedSavedFilesList.add(savedFilesList[i])
+                    if (i == 2 && savedFilesList.size >= 3) {
+                        updatedSavedFilesList.add(savedFilesList[i])
                     }
                 }
+                savedFilesList.clear()
+                savedFilesList.addAll(updatedSavedFilesList)
+                filesAdapter = SavedStatusAdapter(savedFilesList, this, this,requireActivity(),binding.recyclerViewImage,requireActivity().supportFragmentManager)
+                recyclerView!!.adapter = filesAdapter
+                val g = GridLayoutManager(activity, Common.GRID_COUNT)
+//                recyclerView?.setLayoutManager()
+//                g.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+//                    override fun getSpanSize(position: Int): Int {
+//                        return when (filesAdapter?.getItemViewType(position)) {
+//                            0 -> 2
+//                            else -> 1
+//                        }
+//                    }
+//                }
+                filesAdapter?.setLayoutManager()
                 filesAdapter?.notifyDataSetChanged()
                 progressBar!!.visibility = View.GONE
                 checkFiles()

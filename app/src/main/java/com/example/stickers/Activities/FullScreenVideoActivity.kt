@@ -26,6 +26,7 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.example.stickers.Activities.SplashActivity.Companion.fbAnalytics
 import com.example.stickers.Activities.newDashboard.MainDashActivity.Companion.downloadClicked
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.ItemsViewModel
@@ -120,7 +121,7 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
 
         if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null && downloadClicked ) {
 
-            loadingDialog?.show()
+            loadingDialog?.dialogShow()
             Handler(Looper.getMainLooper()).postDelayed({
                 if(isActivityRunning)
                 {
@@ -245,9 +246,8 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
                         supportFragmentManager
                     ) }
                 } else {
-                    this@FullScreenVideoActivity.shareFile(
-                        getUriPath(  this@FullScreenVideoActivity.
-                        status!!.file.path),
+                    this@FullScreenVideoActivity.shareFile(this@FullScreenVideoActivity.
+                        status!!.file.toUri(),
                         supportFragmentManager
                     )
                 }
@@ -327,6 +327,8 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
                     if (fullscreen) {
 
                         binding!!.imageView22.visibility = View.GONE
+                        binding!!.fullScreenVideoNative.visibility=View.VISIBLE
+                        binding!!.bannerAdview.visibility=View.VISIBLE
                         fullscreenButton.setImageDrawable(
                             ContextCompat.getDrawable(
                                 this@FullScreenVideoActivity,
@@ -358,6 +360,8 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
                     } else {
 
                         binding!!.imageView22.visibility = View.VISIBLE
+                        binding!!.fullScreenVideoNative.visibility=View.GONE
+                        binding!!.bannerAdview.visibility=View.GONE
                         fullscreenButton.setImageDrawable(
                             ContextCompat.getDrawable(
                                 this@FullScreenVideoActivity,

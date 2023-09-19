@@ -2,6 +2,7 @@ package com.example.stickers.Activities.sticker
 
 import android.os.Bundle
 import android.view.*
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -25,6 +26,8 @@ class StickerMakerFragment : Fragment() {
         setHasOptionsMenu(true)
         val openWhat = requireActivity().findViewById<ImageView>(R.id.open_whatsApp_icon)
         openWhat.visibility=View.GONE
+        val frame = requireActivity().findViewById<FrameLayout>(R.id.main_dash_native)
+        frame.visibility=View.VISIBLE
         return binding.root
     }
 

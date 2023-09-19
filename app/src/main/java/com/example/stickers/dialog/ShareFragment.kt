@@ -17,7 +17,8 @@ import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.getUriPath
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class ShareFragment(val path: Uri) : BottomSheetDialogFragment() {
+class ShareFragment(val path: Uri?,  val whatsapps: () -> Unit,val others: () -> Unit,) :
+    BottomSheetDialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,25 +40,27 @@ class ShareFragment(val path: Uri) : BottomSheetDialogFragment() {
         whatsapp.setOnClickListener {
             if (AppCommons.isAppInstalled(requireActivity(), "com.whatsapp")) {
                 try {
-                    try {
+                    if (path!=null) {
+                        try {
 
-                        val shareIntent = Intent(Intent.ACTION_SEND)
-                        if (path.path?.contains("jpg") == true) {
-                            shareIntent.type = "image/*"
-                        } else {
-                            shareIntent.type = "video/*"
+                            val shareIntent = Intent(Intent.ACTION_SEND)
+                            if (path.path?.contains("jpg") == true) {
+                                shareIntent.type = "image/*"
+                            } else {
+                                shareIntent.type = "video/*"
+                            }
+                            shareIntent.setPackage("com.whatsapp")
+                            shareIntent.putExtra(Intent.EXTRA_STREAM, path)
+                            shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            startActivity(Intent.createChooser(shareIntent, "Share"))
+                        } catch (e: Exception) {
+                            Log.e("error__", e.toString())
                         }
-                        shareIntent.setPackage("com.whatsapp")
-                        shareIntent.putExtra(
-                            Intent.EXTRA_STREAM,
-                            requireActivity().getUriPath(path.path.toString())
-                        )
-                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
-                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        startActivity(Intent.createChooser(shareIntent, "Share"))
-                    } catch (e: Exception) {
-                        Log.e("error__", e.toString())
+                    } else {
+                        whatsapps.invoke()
                     }
+
                 } catch (e: Exception) {
                     Log.e("WhatsAppicon", "4: Clicked")
                     Toast.makeText(
@@ -76,26 +79,29 @@ class ShareFragment(val path: Uri) : BottomSheetDialogFragment() {
             dismiss()
         }
         other.setOnClickListener {
+            if (path!=null) {
+                try {
+                    val shareIntent = Intent(Intent.ACTION_SEND)
+                    if (path.path?.contains("jpg") == true) {
+                        shareIntent.type = "image/*"
+                    } else {
+                        shareIntent.type = "video/*"
+                    }
 
-            try {
-
-                val shareIntent = Intent(Intent.ACTION_SEND)
-                if (path.path?.contains("jpg") == true) {
-                    shareIntent.type = "image/*"
-                } else {
-                    shareIntent.type = "video/*"
+                    shareIntent.putExtra(
+                        Intent.EXTRA_STREAM,
+                        path
+                    )
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                    shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    startActivity(Intent.createChooser(shareIntent, "Share"))
+                } catch (e: Exception) {
+                    Log.e("error__", e.toString())
                 }
-
-                shareIntent.putExtra(
-                    Intent.EXTRA_STREAM,
-                    requireActivity().getUriPath(path.path.toString())
-                )
-                shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
-                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                startActivity(Intent.createChooser(shareIntent, "Share"))
-            } catch (e: Exception) {
-                Log.e("error__", e.toString())
+            } else {
+                others.invoke()
             }
+
             dismiss()
         }
     }
@@ -103,8 +109,13 @@ class ShareFragment(val path: Uri) : BottomSheetDialogFragment() {
     override fun onResume() {
         super.onResume()
         val frame = view?.findViewById<FrameLayout>(R.id.share_native)
-        loadNativeAd(requireActivity(),frame!!,
-            RemoteDateConfig.remoteAdSettings.admob_native_share_bottom_sheet_ad.value,layoutInflater,R.layout.gnt_medium_template_view,{ },{})
+        loadNativeAd(requireActivity(),
+            frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_share_bottom_sheet_ad.value,
+            layoutInflater,
+            R.layout.gnt_medium_template_view,
+            { },
+            {})
     }
 }
 

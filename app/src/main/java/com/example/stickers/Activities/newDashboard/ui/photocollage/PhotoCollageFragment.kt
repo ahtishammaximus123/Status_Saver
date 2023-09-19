@@ -3,11 +3,14 @@ package com.example.stickers.Activities.newDashboard.ui.photocollage
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.view.*
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Activities.newDashboard.base.BaseLiveStatusFragment
 import com.example.stickers.R
+import com.example.stickers.ads.AdmobCollapsibleBanner.Companion.adViewCollapsible
 import com.example.stickers.databinding.FragmentPhotoCollageBinding
 
 class PhotoCollageFragment : Fragment() {
@@ -37,6 +40,16 @@ class PhotoCollageFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if(adViewCollapsible==null)
+        {
+            val parentActivity = activity as? MainDashActivity
+            val frame=parentActivity?.findViewById<FrameLayout>(R.id.main_dash_native)
+            frame?.visibility=View.VISIBLE
+        }
+
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -47,6 +60,8 @@ class PhotoCollageFragment : Fragment() {
         item.isVisible = true
         val openWhat = requireActivity().findViewById<ImageView>(R.id.open_whatsApp_icon)
         openWhat.visibility=View.GONE
+        val frame = requireActivity().findViewById<FrameLayout>(R.id.main_dash_native)
+        frame.visibility=View.VISIBLE
 
         val menuWa: MenuItem = menu.findItem(R.id.action_wa)
         val menuBa: MenuItem = menu.findItem(R.id.action_ba)

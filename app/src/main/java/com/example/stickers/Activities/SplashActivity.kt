@@ -192,10 +192,13 @@ class SplashActivity : BillingBaseActivity() {
     }
 
     private fun showContent() {
-        val layout = findViewById<ConstraintLayout>(R.id.layout)
-        val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
-        layout.visibility = View.VISIBLE
-        loading.visibility = View.GONE
+        runOnUiThread {
+            val layout = findViewById<ConstraintLayout>(R.id.layout)
+            val loading = findViewById<LottieAnimationView>(R.id.splash_loading_bar)
+            layout.visibility = View.VISIBLE
+            loading.visibility = View.GONE
+        }
+
     }
 
 

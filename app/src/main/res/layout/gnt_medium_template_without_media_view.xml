@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-      android:layout_height="@dimen/_110sdp"
+      android:layout_height="@dimen/_115sdp"
       android:layout_width="match_parent"
       android:id="@+id/native_ad_view"
       >
@@ -30,21 +30,18 @@
           tools:layout_editor_absoluteX="5dp" />
 
       <androidx.constraintlayout.widget.ConstraintLayout
-          android:layout_height="46dp"
-          android:layout_marginTop="1dp"
+          android:id="@+id/middle"
           android:layout_width="match_parent"
+          android:layout_height="40dp"
+          app:layout_constraintBottom_toTopOf="@+id/ad_body"
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toBottomOf="@id/ad_medi"
-          app:layout_constraintBottom_toTopOf="@+id/ad_body"
-          android:id="@+id/middle"
-          >
+          app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
 
             android:layout_width="@dimen/gnt_no_size"
             android:layout_height="@dimen/gnt_no_size"
-            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -86,7 +83,6 @@
                 android:layout_height="@dimen/gnt_no_size"
                 android:layout_marginBottom="2dp"
                 android:layout_weight="0.5"
-
                 android:background="@android:color/transparent"
                 android:gravity="left"
                 android:orientation="horizontal"
@@ -103,8 +99,8 @@
                   android:layout_marginTop="@dimen/gnt_no_margin"
                   android:layout_marginEnd="@dimen/gnt_no_margin"
                   android:layout_marginBottom="@dimen/gnt_no_margin"
-                  android:lines="1"
                   android:background="@color/white"
+                  android:lines="1"
                   android:textColor="@color/black"
                   android:textSize="@dimen/gnt_text_size_large"
                   android:textStyle="bold"
@@ -134,9 +130,9 @@
                   android:layout_marginStart="@dimen/gnt_no_margin"
                   android:layout_marginTop="@dimen/gnt_ad_indicator_top_margin"
                   android:layout_marginEnd="@dimen/gnt_default_margin"
+                  android:background="@color/grey"
                   android:gravity="center"
                   android:text="Ad"
-                  android:background="@color/grey"
                   android:textColor="@color/white"
                   android:textSize="@dimen/gnt_ad_indicator_text_size"
                   android:textStyle="bold"
@@ -178,9 +174,9 @@
                   android:layout_marginEnd="@dimen/gnt_no_margin"
                   android:layout_marginBottom="@dimen/gnt_no_margin"
 
+                  android:background="@color/white"
                   android:gravity="top"
                   android:lines="1"
-                  android:background="@color/white"
                   android:textColor="@color/black"
                   android:textSize="@dimen/gnt_text_size_small"
                   app:layout_constraintBottom_toBottomOf="parent"
@@ -204,7 +200,7 @@
       <TextView
           android:layout_width="match_parent"
           android:layout_margin="@dimen/gnt_no_size"
-          android:layout_height="wrap_content"
+          android:layout_height="26dp"
           android:paddingBottom="@dimen/gnt_default_margin"
           android:paddingLeft="@dimen/gnt_default_margin"
           android:textSize="12dp"
@@ -222,7 +218,7 @@
       <androidx.appcompat.widget.AppCompatButton
           android:id="@+id/ad_call_to_action"
           android:layout_width="match_parent"
-          android:layout_height="40dp"
+          android:layout_height="35dp"
           android:layout_marginLeft="5dp"
           android:layout_marginRight="5dp"
 

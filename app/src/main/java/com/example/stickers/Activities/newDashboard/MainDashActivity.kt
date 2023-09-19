@@ -26,7 +26,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
@@ -74,6 +73,7 @@ import com.example.stickers.databinding.DialogOpenWhatsappBinding
 import com.example.stickers.dialog.ExitDialogFragment
 import com.example.stickers.dialog.ProgressDialog
 import com.example.stickers.dialog.SelectWhatsAppFragment
+import com.example.stickers.dialog.ShareFragment
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
@@ -95,6 +95,7 @@ class MainDashActivity : BillingBaseActivity() {
     private var adisready = "notshowed"
     var isActivityRunning = false
     var loadingDialog: ProgressDialog? = null
+    private lateinit var nativeFrame: FrameLayout
 
     companion object {
         var isStoragePermissionDeny = true
@@ -141,10 +142,13 @@ class MainDashActivity : BillingBaseActivity() {
         initDash(SharedPreferenceData(this))
         binding = ActivityMainDashBinding.inflate(layoutInflater)
         loadingDialog = ProgressDialog(this, "Loading...")
+
         setContentView(binding.root)
         binding.textView10.text = "Version " + BuildConfig.VERSION_NAME
         initDrawer()
         openWhat = findViewById<ImageView>(R.id.open_whatsApp_icon)
+        nativeFrame = findViewById<FrameLayout>(R.id.main_dash_native)
+        nativeFrame.visibility = View.GONE
         var whatsAppType = SharedPreferenceData(this).getString("apppackage")
         if (whatsAppType == "com.whatsapp") {
             openWhat.setBackgroundResource(R.drawable.whats_app_icon)
@@ -153,7 +157,7 @@ class MainDashActivity : BillingBaseActivity() {
         }
 
         openWhat.setOnClickListener {
-             whatsAppType = SharedPreferenceData(this).getString("apppackage")
+            whatsAppType = SharedPreferenceData(this).getString("apppackage")
             Log.e("WhatsAppicon", "onCreate: Clicked")
             Log.e("WhatsAppicon", "$whatsAppType: Clicked")
             if (whatsAppType == "com.whatsapp") {
@@ -182,27 +186,9 @@ class MainDashActivity : BillingBaseActivity() {
             }
         }
 
-            val firstTime = SharedPreferenceData(this).getBoolean("ComingFirstTime", true)
-            if (firstTime) {
-                selectWhatsAppDialog() {
-                    var isAdShown = false
-                    model.selected.observe(this) {
-                        Log.e("status*", "selected - $it")
-                        if (it == 0 && isAdShown) {
-                            startPermissions()
-
-                        } else {
-
-                        }
-                    }
-                    initDrawer()
-                    SplashActivity.fbAnalytics = FirebaseAnalytics(this)
-                    SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
-
-
-                    interAdShowFunc(isAdShown)
-                }
-            } else {
+        val firstTime = SharedPreferenceData(this).getBoolean("ComingFirstTime", true)
+        if (firstTime) {
+            selectWhatsAppDialog() {
                 var isAdShown = false
                 model.selected.observe(this) {
                     Log.e("status*", "selected - $it")
@@ -217,10 +203,27 @@ class MainDashActivity : BillingBaseActivity() {
                 SplashActivity.fbAnalytics = FirebaseAnalytics(this)
                 SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
 
+
                 interAdShowFunc(isAdShown)
-
             }
+        } else {
+            var isAdShown = false
+            model.selected.observe(this) {
+                Log.e("status*", "selected - $it")
+                if (it == 0 && isAdShown) {
+                    startPermissions()
 
+                } else {
+
+                }
+            }
+            initDrawer()
+            SplashActivity.fbAnalytics = FirebaseAnalytics(this)
+            SplashActivity.fbAnalytics?.sendEvent("Dashboard_Open")
+
+            interAdShowFunc(isAdShown)
+
+        }
 
 
         //binding.content.toolbar.setNavigationIcon(R.drawable.ic_menu)
@@ -249,6 +252,13 @@ class MainDashActivity : BillingBaseActivity() {
                || */nd.id == R.id.photoCollageFragment || nd.id == R.id.stickerMakerFragment
             ) {
                 openWhat.visibility = View.GONE
+                if (adViewCollapsible == null) {
+                    nativeFrame.visibility = View.VISIBLE
+                }
+                else{
+                    nativeFrame.visibility = View.GONE
+                }
+
                 val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
                 multiSelectLay?.visibility = View.GONE
                 isMultiSelect = false
@@ -265,10 +275,12 @@ class MainDashActivity : BillingBaseActivity() {
             } else if (nd.id == R.id.galleryItemFragment || nd.id == R.id.galleryFragment
             ) {
                 openWhat.visibility = View.VISIBLE
+                nativeFrame.visibility = View.GONE
                 hideSelectorLayout()
                 supportActionBar?.hide()
             } else {
                 openWhat.visibility = View.VISIBLE
+                nativeFrame.visibility = View.GONE
                 Log.e("atg**2", "$nd")
             }
             Log.e("atg**2", "$nd")
@@ -284,26 +296,26 @@ class MainDashActivity : BillingBaseActivity() {
             dialog?.show()
             Handler(Looper.getMainLooper()).postDelayed({
 
-                    dialog?.dismiss()
-                    splashAdLoaded = "showed"
-                    isInterShown = true
-                    isAdShown1 = true
+                dialog?.dismiss()
+                splashAdLoaded = "showed"
+                isInterShown = true
+                isAdShown1 = true
 
-                    if (!arePermissionDenied()) {
+                if (!arePermissionDenied()) {
 
-                        val sharedPreferences =
-                            getSharedPreferences("uriTreePref", Context.MODE_PRIVATE)
-                        var ut = "uriTree"
-                        if (WAoptions.appPackage == "com.whatsapp.w4b") ut = "uriTree1"
-                        if (sharedPreferences?.getString(ut, "not present") != "not present") {
-                            model.select(1)
-                        }
-                    } else {
-                        startPermissions()
-                        model.select(0)
-
-
+                    val sharedPreferences =
+                        getSharedPreferences("uriTreePref", Context.MODE_PRIVATE)
+                    var ut = "uriTree"
+                    if (WAoptions.appPackage == "com.whatsapp.w4b") ut = "uriTree1"
+                    if (sharedPreferences?.getString(ut, "not present") != "not present") {
+                        model.select(1)
                     }
+                } else {
+                    startPermissions()
+                    model.select(0)
+
+
+                }
 
 
 
@@ -336,25 +348,31 @@ class MainDashActivity : BillingBaseActivity() {
     }
 
 
-
-
     override fun onResume() {
         super.onResume()
         isActivityShown = true
-        isActivityRunning=true
+        isActivityRunning = true
         val frame = findViewById<FrameLayout>(R.id.main_dash_native)
         loadCollapsableBannerAd()
-        loadNativeAd(this,frame!!,
-            RemoteDateConfig.remoteAdSettings.admob_native_dashboard_ad.value,layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
-        showInterAd(this,   RemoteDateConfig.remoteAdSettings.admob_splash_inter_ad.value){}
+        loadNativeAd(this,
+            frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_dashboard_ad.value,
+            layoutInflater,
+            R.layout.gnt_medium_template_without_media_view,
+            { },
+            {})
+        showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_splash_inter_ad.value) {}
     }
+
     private fun loadCollapsableBannerAd() {
-        if ( RemoteDateConfig.remoteAdSettings.collapseAble_banner_ID.value.isNotEmpty()&&  RemoteDateConfig.remoteAdSettings.admob_collapsable_banner_ad.value=="on" && adViewCollapsible == null) {
+        if (RemoteDateConfig.remoteAdSettings.collapseAble_banner_ID.value.isNotEmpty() && RemoteDateConfig.remoteAdSettings.admob_collapsable_banner_ad.value == "on" && adViewCollapsible == null) {
             binding.content.collapseAbleBanner.visibility = View.VISIBLE
             if (!isAdLoadedCollapsible) {
                 AdmobCollapsibleBanner.getInstance()
-                    .loadAdmobCollapsible(this, binding.content.collapseAbleBanner,
-                         RemoteDateConfig.remoteAdSettings.collapseAble_banner_ID.value, binding.content.collapseAbleBanner,
+                    .loadAdmobCollapsible(this,
+                        binding.content.collapseAbleBanner,
+                        RemoteDateConfig.remoteAdSettings.collapseAble_banner_ID.value,
+                        binding.content.collapseAbleBanner,
                         {
                             //load listener
 
@@ -362,47 +380,48 @@ class MainDashActivity : BillingBaseActivity() {
                                 .showCollapsibleAd(
                                     binding.content.collapseAbleBanner
                                 )
-                        }, {
+                        },
+                        {
                             //fail listener
 
                             loadAdaptiveBanner()
                             binding.content.collapseAbleBanner.visibility = View.GONE
-                        }, {
+                        },
+                        {
                             //onAdd Close listener
-                        }, {
+                        },
+                        {
                             //onAdd Open listener
                         })
             } else {
                 AdmobCollapsibleBanner.getInstance().showCollapsibleAd(
                     binding.content.collapseAbleBanner,
 
-                )
+                    )
             }
 
-        }
-        else if(adViewCollapsible == null){
+        } else if (adViewCollapsible == null) {
             loadAdaptiveBanner()
 
-        }
-        else if(adViewCollapsible != null){
+        } else if (adViewCollapsible != null) {
             AdmobCollapsibleBanner.getInstance().showCollapsibleAd(
                 binding.content.collapseAbleBanner,
 
-            )
+                )
         }
 
+    }
+
+    private fun loadAdaptiveBanner() {
+        val bannerAd = findViewById<FrameLayout>(R.id.banner_adview)
+        AdmobCollapsibleBanner.getInstance().loadAdmobAdaptiveBanner(this, bannerAd) {}
 
     }
 
-    private fun loadAdaptiveBanner()
-    {
-
-
-    }
     override fun onPause() {
         super.onPause()
         isActivityShown = false
-        isActivityRunning= false
+        isActivityRunning = false
     }
 
 
@@ -532,6 +551,7 @@ class MainDashActivity : BillingBaseActivity() {
             super.onCreate(savedInstanceState)
             binding = DialogOpenWhatsappBinding.inflate(layoutInflater)
             setContentView(binding.root)
+            setCancelable(false)
 
             window?.apply {
                 setLayout(
@@ -549,12 +569,14 @@ class MainDashActivity : BillingBaseActivity() {
                     textView28.text = getString(R.string.permision_text_)
 
                 grantPermission.setOnClickListener {
-                    if(RemoteDateConfig.remoteAdSettings.admob_allow_permission_inter_ad.value=="on")
-                        {
-                            adisready="notshowed"
-                        }
+                    if (RemoteDateConfig.remoteAdSettings.admob_allow_permission_inter_ad.value == "on") {
+                        adisready = "notshowed"
+                    }
 
-                    showInterAd(this@MainDashActivity,   RemoteDateConfig.remoteAdSettings.admob_allow_permission_inter_ad.value){
+                    showInterAd(
+                        this@MainDashActivity,
+                        RemoteDateConfig.remoteAdSettings.admob_allow_permission_inter_ad.value
+                    ) {
                         if (arePermissionDenied()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 requestPermissions(storagePermissions33, REQUEST_PERMISSIONS)
@@ -571,8 +593,13 @@ class MainDashActivity : BillingBaseActivity() {
 
                 }
             }
-            loadNativeAd(this@MainDashActivity,binding.allowPermissionNative!!,
-                RemoteDateConfig.remoteAdSettings.admob_native_allow_permission_bottom_sheet_ad.value,layoutInflater,R.layout.gnt_medium_template_view,{ },{})
+            loadNativeAd(this@MainDashActivity,
+                binding.allowPermissionNative!!,
+                RemoteDateConfig.remoteAdSettings.admob_native_allow_permission_bottom_sheet_ad.value,
+                layoutInflater,
+                R.layout.gnt_medium_template_view,
+                { },
+                {})
 
 
         }
@@ -810,33 +837,34 @@ class MainDashActivity : BillingBaseActivity() {
 
         return true
     }
-    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
 
-        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null ) {
+    private fun showInterAd(activity: Activity, status: String, functionalityListener: () -> Unit) {
 
-            loadingDialog?.show()
+        if (status == "on" && adisready == "notshowed" && InterAdsClass.currentInterAd != null) {
+
+            loadingDialog?.dialogShow()
             Handler(Looper.getMainLooper()).postDelayed({
-                if(isActivityRunning)
-                {
+                if (isActivityRunning) {
                     InterAdsClass.getInstance().showInterAd123(activity,
-                        { functionalityListener.invoke()
+                        {
+                            functionalityListener.invoke()
                         }, {}, {
 
-                            adisready="showed"
+                            adisready = "showed"
                             loadingDialog?.dismiss()
                         })
                 }
 
 
             }, 900)
-        }
-        else{
+        } else {
             functionalityListener.invoke()
         }
     }
+
     private fun selectWhatsAppDialog(proceedListenerr: () -> Unit) {
 
-        val selectwhatsApp = SelectWhatsAppFragment(openWhat){proceedListenerr.invoke()}
+        val selectwhatsApp = SelectWhatsAppFragment(openWhat) { proceedListenerr.invoke() }
         selectwhatsApp.show(supportFragmentManager, "select_whatsApp_tag")
 
 //        val dialogBuilder = AlertDialog.Builder(this, R.style.CustomPAlertDialog)
@@ -1038,9 +1066,9 @@ class MainDashActivity : BillingBaseActivity() {
 
         shareBtn.setOnClickListener {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                saveStatusFromViewPager29(savedSelectedVideoStatusList29)
+                shareVideosToOtherApps29(this,savedSelectedVideoStatusList29)
             } else {
-                saveStatusFromViewPager(savedSelectedVideoStatusList)
+                shareVideosToOtherApps(this,savedSelectedVideoStatusList)
             }
             hideSelectorLayout()
             notifyAdapter.invoke()
@@ -1126,11 +1154,30 @@ class MainDashActivity : BillingBaseActivity() {
         selectedStatusList.forEach {
             it?.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> imageUris.add(it2) }
         }
-        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-            type = "image/*"
-            putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
-        }
-        context.startActivity(Intent.createChooser(intent, "Share images via"))
+
+        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
+
+        var exitDialogFragment: ShareFragment? = null
+        exitDialogFragment = ShareFragment(null, {
+
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "image/*"
+                setPackage("com.whatsapp")
+                this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share images via"))
+        },
+            {
+                val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                    type = "image/*"
+                    this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+                }
+                context.startActivity(Intent.createChooser(intent, "Share images via"))
+            })
+        exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
     }
 
     private fun deleteImages(selectedStatusList: MutableList<Status?>, updateRecycler: () -> Unit) {
@@ -1157,24 +1204,121 @@ class MainDashActivity : BillingBaseActivity() {
             it.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> imageUris.add(it2) }
         }
 
-        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-            type = "image/*"
-            putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
-        }
-        context.startActivity(Intent.createChooser(intent, "Share images via"))
+        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
+
+        var exitDialogFragment: ShareFragment? = null
+        exitDialogFragment = ShareFragment(null, {
+
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "image/*"
+                setPackage("com.whatsapp")
+                this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share images via"))
+        },
+            {
+                val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                    type = "image/*"
+                    this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+                }
+                context.startActivity(Intent.createChooser(intent, "Share images via"))
+            })
+        exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
     }
 
     private fun shareImagesToOtherApps(context: Context, selectedStatusList: List<StatusDocFile>) {
+        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
         val imageUris = ArrayList<Uri>()
         selectedStatusList.forEach {
             imageUris.add(it.file.uri)
         }
+        var exitDialogFragment: ShareFragment? = null
+        exitDialogFragment = ShareFragment(null, {
 
-        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-            type = "image/*"
-            putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "image/*"
+                setPackage("com.whatsapp")
+                this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share images via"))
+        },
+            {
+                val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                    type = "image/*"
+                   this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+                }
+                context.startActivity(Intent.createChooser(intent, "Share images via"))
+            })
+        exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
+
+
+    }
+    private fun shareVideosToOtherApps29(context: Context, selectedStatusList: List<Status>) {
+        val videoUri = ArrayList<Uri>()
+        selectedStatusList.forEach {
+            it.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> videoUri.add(it2) }
         }
-        context.startActivity(Intent.createChooser(intent, "Share images via"))
+
+        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
+
+        var exitDialogFragment: ShareFragment? = null
+        exitDialogFragment = ShareFragment(null, {
+
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "video/*"
+                setPackage("com.whatsapp")
+                this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, videoUri)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share images via"))
+        },
+            {
+                val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                    type = "video/*"
+                    this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, videoUri)
+                }
+                context.startActivity(Intent.createChooser(intent, "Share images via"))
+            })
+        exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
+    }
+
+    private fun shareVideosToOtherApps(context: Context, selectedStatusList: List<StatusDocFile>) {
+        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
+        val videosUri = ArrayList<Uri>()
+        selectedStatusList.forEach {
+            videosUri.add(it.file.uri)
+        }
+        var exitDialogFragment: ShareFragment? = null
+        exitDialogFragment = ShareFragment(null, {
+
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "video/*"
+                setPackage("com.whatsapp")
+                this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, videosUri)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share images via"))
+        },
+            {
+                val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                    type = "image/*"
+                    this.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, videosUri)
+                }
+                context.startActivity(Intent.createChooser(intent, "Share images via"))
+            })
+        exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
+
+
     }
 
     private fun saveStatusFromViewPager(selectedStatusList: List<StatusDocFile>) {

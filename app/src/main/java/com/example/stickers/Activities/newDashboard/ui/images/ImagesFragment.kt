@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -62,6 +63,7 @@ import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.app.RemoteDateConfig.Companion.remoteAdSettings
 import com.example.stickers.databinding.FragmentLiveImagesBinding
 import com.example.stickers.dialog.ProgressDialog
+import com.example.stickers.dialog.ShareFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -69,7 +71,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
-class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelectCallback{
+class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiSelectCallback {
 
     private var _binding: FragmentLiveImagesBinding? = null
 
@@ -92,9 +94,10 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
     private var adisready = ""
     var isActivityRunning = false
     var loadingDialog: ProgressDialog? = null
+
     companion object {
-        var clickedPosition: Int=0
-        var openSaved=false
+        var clickedPosition: Int = 0
+        var openSaved = false
         var ItemsViewModel: StatusDocFile? = null
         private const val REQUEST_ACTION_OPEN_DOCUMENT_TREE = 5544
         private val REQUEST_ACTION_OPEN_DOCUMENT_TREE_2 = 55442
@@ -102,9 +105,9 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
         val imagesList: MutableList<StatusDocFile> = ArrayList()
         val imagesList29: MutableList<Status> = ArrayList()
 
-         var isMultiSelect = false
+        var isMultiSelect = false
         var isSavedMultiSelect = false
-         val selectedStatusList = mutableListOf<StatusDocFile>()
+        val selectedStatusList = mutableListOf<StatusDocFile>()
         val selectedStatusList29 = mutableListOf<Status>()
         val savedSelectedVideoStatusList29 = mutableListOf<Status>()
 
@@ -168,24 +171,26 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            imageAdapter = ImageAdapter(container, this,this)
+            imageAdapter =
+                ImageAdapter(container, this, this, binding.recyclerViewImage, requireActivity())
 
             with(_binding?.recyclerViewImage) {
-                this?.layoutManager = GridLayoutManager(activity, Common.GRID_COUNT)
+                //     this?.layoutManager = GridLayoutManager(activity, Common.GRID_COUNT)
                 this?.adapter = imageAdapter
+                imageAdapter?.setLayoutManager()
             }
 
         } else {
             imageAdapter30plus = activity?.let {
-                ImageAdapter30plus(it,{
+                ImageAdapter30plus(it, {
                     imagesViewModel.getAllFiles()
-                    downloadClicked=true
+                    downloadClicked = true
 
-                },this,requireActivity().supportFragmentManager)
+                }, this, binding.recyclerViewImage, requireActivity().supportFragmentManager)
             }
             with(_binding?.recyclerViewImage) {
-                this?.layoutManager = GridLayoutManager(activity, Common.GRID_COUNT)
                 this?.adapter = imageAdapter30plus
+                imageAdapter30plus?.setLayoutManager()
             }
         }
         imagesViewModel.selected.observe(viewLifecycleOwner) { item ->
@@ -221,9 +226,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
 
         try {
             status()
-        }
-        catch (e:Exception)
-        {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -399,12 +402,10 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
         val cancelDialog = dialog2?.findViewById<ImageView>(R.id.close_open_whatsapp_dialog)
         val etxt = dialog2?.findViewById<TextView>(R.id.open_text)
         val i = activity?.packageManager?.getLaunchIntentForPackage(WAoptions.appPackage)
-        if (i != null&&i.`package`=="com.whatsapp") {
-            Log.e("showHowToUse", "showHowToUse: ${i.`package`}", )
+        if (i != null && i.`package` == "com.whatsapp") {
+            Log.e("showHowToUse", "showHowToUse: ${i.`package`}")
             etxt?.setText("WhatsApp")
-        }
-        else if (i != null&&i.`package`=="com.whatsapp.w4b")
-        {
+        } else if (i != null && i.`package` == "com.whatsapp.w4b") {
             etxt?.setText("WA Business")
         }
         okButton?.setOnClickListener { //open whatsapp
@@ -431,6 +432,8 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
     private fun status() {
         isMultiSelect = false
         val parentActivity = activity as? MainDashActivity
+        val frame = parentActivity?.findViewById<FrameLayout>(R.id.main_dash_native)
+        frame?.visibility = View.GONE
         parentActivity?.hideSelectorLayout()
         _binding?.messageTextImage?.visibility = View.GONE
         _binding?.grantPermission?.visibility = View.GONE
@@ -615,8 +618,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
                         }
                     }
                 }
-                if(imagesList29.size>0)
-                {
+                if (imagesList29.size > 0) {
                     imagesList29.clear()
                 }
                 val statusFiles: Array<File>? = wAFolder?.listFiles()
@@ -668,8 +670,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
                 if (MainDashActivity.isStoragePermissionDeny) {
                     binding.howToUse.visibility = View.GONE
                     _binding?.grantPermission?.visibility = View.VISIBLE
-                } else
-                {
+                } else {
                     _binding?.grantPermission?.visibility = View.GONE
                     binding.howToUse.visibility = View.VISIBLE
                     imgNoFound?.visibility = View.VISIBLE
@@ -721,8 +722,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
                         if (MainDashActivity.isStoragePermissionDeny) {
                             binding.howToUse.visibility = View.GONE
                             _binding?.grantPermission?.visibility = View.VISIBLE
-                        } else
-                        {
+                        } else {
                             binding.howToUse.visibility = View.VISIBLE
                             _binding?.grantPermission?.visibility = View.GONE
                             imgNoFound?.visibility = View.VISIBLE
@@ -761,8 +761,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
         val imagesList30plus: MutableList<StatusDocFile> = ArrayList()
         Coroutines.ioThenMain({
             val docFilePath = DocumentFile.fromTreeUri(requireActivity(), uriTree!!)
-            if(imagesList.size>0)
-            {
+            if (imagesList.size > 0) {
                 imagesList.clear()
             }
 
@@ -770,7 +769,10 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
                 val statusDocFile = StatusDocFile(docFile, docFile.name, docFile.uri.path)
 
                 if (!statusDocFile.isVideo && statusDocFile.title != null
-                    && statusDocFile.title.endsWith(".jpg") && !imagesList30plus.contains(statusDocFile)) {
+                    && statusDocFile.title.endsWith(".jpg") && !imagesList30plus.contains(
+                        statusDocFile
+                    )
+                ) {
                     imagesList30plus.add(statusDocFile)
                     imagesList.add(statusDocFile)
                     //imagesList29.add(status)
@@ -800,9 +802,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
                     imgNoFound?.visibility = View.GONE
                     recyclerView?.visibility = View.VISIBLE
                 }
-            }
-            catch (e:Exception)
-            {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
 
@@ -870,16 +870,43 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
     }
 
     override fun onShareClicked(status: Status) {
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        val link = "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
-        shareIntent.putExtra(
-            Intent.EXTRA_TEXT,
-            "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
-        )
-        shareIntent.type = "image/*"
-        Log.e("share29", "${Uri.parse("file://" + status.file.absolutePath)} ")
-        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + status.file.absolutePath))
-        startActivity(shareIntent)
+        var exitDialogFragment: ShareFragment? = null
+        exitDialogFragment = ShareFragment(null,
+            {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                val link =
+                    "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+                shareIntent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
+                )
+                shareIntent.type = "image/*"
+                shareIntent.setPackage("com.whatsapp")
+                Log.e("share29", "${Uri.parse("file://" + status.file.absolutePath)} ")
+                shareIntent.putExtra(
+                    Intent.EXTRA_STREAM,
+                    Uri.parse("file://" + status.file.absolutePath)
+                )
+                startActivity(shareIntent)
+            },
+            {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                val link =
+                    "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+                shareIntent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
+                )
+                shareIntent.type = "image/*"
+                Log.e("share29", "${Uri.parse("file://" + status.file.absolutePath)} ")
+                shareIntent.putExtra(
+                    Intent.EXTRA_STREAM,
+                    Uri.parse("file://" + status.file.absolutePath)
+                )
+                startActivity(shareIntent)
+            })
+        exitDialogFragment!!.show(requireActivity().supportFragmentManager, "exit_dialog_tag")
+
     }
 
     override fun onImageViewClicked(status: Status, tag: Any) {
@@ -895,23 +922,24 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
     }
 
     override fun onDownloadClick(status: Status, container: ConstraintLayout) {
-        downloadClicked=true
+        downloadClicked = true
 
         Common.copyFile(status, activity, container)
         imagesViewModel.getAllFiles()
         imageAdapter?.notifyDataSetChanged()
-   //     }
+        //     }
     }
 
     override fun onPause() {
         super.onPause()
-        isActivityRunning=false
+        isActivityRunning = false
         job?.cancel()
     }
 
     override fun onResume() {
         super.onResume()
-        isActivityRunning=true
+        isActivityRunning = true
+
 
         try {
             status()
@@ -939,30 +967,29 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack,MultiSelec
     }
 
 
-
     override fun onMultiSelectModeActivated() {
         val parentActivity = activity as? MainDashActivity
         parentActivity?.onMultiSelectMode(
             {
                 status()
-        },
+            },
             {
-            //deleteListener
+                //deleteListener
 
             },
             {
-             //ShareListener
+                //ShareListener
 
 
             })
 
-       }
+    }
 
     override fun setMenuVisibility(menuVisible: Boolean) {
         super.setMenuVisibility(menuVisible)
         val parentActivity = activity as? MainDashActivity
         parentActivity?.hideSelectorLayout()
     }
-    }
+}
 
 

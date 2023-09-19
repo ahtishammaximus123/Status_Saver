@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.example.stickers.Activities.FullScreenVideoActivity
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.ItemsViewModel
@@ -17,7 +19,10 @@ import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Com
 import com.example.stickers.Models.StatusDocFile
 import com.example.stickers.MultiVideoSelectCallback
 import com.example.stickers.R
+import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.saveStatus
+import com.example.stickers.WhatsAppBasedCode.StickerPackListActivity
+import com.example.stickers.ads.loadNativeAd
 
 import com.example.stickers.ads.showToast
 import com.example.stickers.app.RemoteDateConfig
@@ -28,105 +33,115 @@ import java.util.*
 
 class VideoAdapter30plus(
     val mList: MutableList<StatusDocFile>,
+    private val recyclerView: RecyclerView,
     val context1: FragmentManager,
     private val context: Activity,
     private val downloadListener: () -> Unit,
     private val callBack: MultiVideoSelectCallback
-) : RecyclerView.Adapter<ItemViewHolder>() {
+) : RecyclerView.Adapter<ViewHolder>() {
 
-    val FILE_PROVIDER_AUTHORITY = "com.example.videodownloader"
+    private val ITEM_TYPE_IMAGE = 0
+    private val ITEM_TYPE_AD = 1
 
     // create new views
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        // inflates the card_view_design view
-        // that is used to hold list item
-        Log.d("tree", "onCreateViewHolder ")
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.row_item_video, parent, false)
-        return ItemViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return if (viewType == ITEM_TYPE_AD) {
+            // Inflate your ad layout for ad items
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.row_item_ad, parent, false)
+            AdViewHolder(view)
+        } else {
+            // Inflate your regular item layout for regular items
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.row_item_video, parent, false)
+            ItemViewHolder(view)
+        }
     }
 
     // binds the list items to a view
-    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        try {
-            val reversedPosition = mList.size - 1 - position
-            val itemsViewModel = mList[reversedPosition]
-            Log.d("tree", "onBindViewHolder " + itemsViewModel.file.uri)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-            if (itemsViewModel.isSavedStatus()) {
-                holder.save.setImageResource(R.drawable.ic_download_ic__1_)
-                holder.save.tag = "saved"
-            } else {
-                holder.save.setImageResource(R.drawable.ic_download_ic)
-                holder.save.tag = "notSaved"
-            }
+        if (getItemViewType(position) == ITEM_TYPE_IMAGE) {
+            val imageHolder = holder as ItemViewHolder
+            try {
+                val reversedPosition = mList.size - 1 - position
+                val itemsViewModel = mList[reversedPosition]
+                Log.d("tree", "onBindViewHolder " + itemsViewModel.file.uri)
 
-            Glide.with(context)
-                .load(itemsViewModel.file.uri)
-                .into(holder.imageView)
-
-            holder.share.setOnClickListener { v ->
-                itemsViewModel.file.let {
-                    context.shareFile(it.uri, context1)
-                }
-            }
-
-            if (mList.isNotEmpty() && reversedPosition >= 0 && reversedPosition < mList.size) {
-                if (mList[reversedPosition].isSelected) {
-                    val drawable = context?.let { ContextCompat.getDrawable(it, R.drawable.selected_back) }
-                    holder.imageView.foreground = drawable
+                if (itemsViewModel.isSavedStatus()) {
+                    imageHolder.save.setImageResource(R.drawable.ic_download_ic__1_)
+                    imageHolder.save.tag = "saved"
                 } else {
-                    holder.imageView.foreground = null
+                    imageHolder.save.setImageResource(R.drawable.ic_download_ic)
+                    imageHolder.save.tag = "notSaved"
                 }
-            } else {
-                // Handle the case where reversedPosition is out of bounds or selectedStatusList is empty.
-                // You can log an error or perform appropriate error handling here.
-            }
-            holder.imageView.setOnLongClickListener {
-                if (!isMultiSelect) {
-                    isMultiSelect = true
-                    savedSelectedVideoStatusList.add(itemsViewModel)
-                    mList[reversedPosition].isSelected=true
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
-                    holder.imageView.foreground = drawable
-                    callBack.onMultiVideoSelectModeActivated()
-                }
-                //     notifyItemChanged(position)
-                true
-            }
 
-            holder.imageView.setOnClickListener {
-                if (isMultiSelect) {
-                    if (savedSelectedVideoStatusList.contains(itemsViewModel)) {
-                        savedSelectedVideoStatusList.remove(itemsViewModel)
-                        mList[reversedPosition].isSelected=false
-                        holder.imageView.foreground=null
-                        callBack.onMultiVideoSelectModeActivated()
+                Glide.with(context)
+                    .load(itemsViewModel.file.uri)
+                    .into(imageHolder.imageView)
+
+                imageHolder.share.setOnClickListener { v ->
+                    itemsViewModel.file.let {
+                        context.shareFile(it.uri, context1)
+                    }
+                }
+
+                if (mList.isNotEmpty() && reversedPosition >= 0 && reversedPosition < mList.size) {
+                    if (mList[reversedPosition].isSelected) {
+                        val drawable = context?.let { ContextCompat.getDrawable(it, R.drawable.selected_back) }
+                        imageHolder.imageView.foreground = drawable
                     } else {
-                        val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
-                        holder.imageView.foreground = drawable
-
-//                    val foregroundDrawable = ColorDrawable(Color.parseColor("#C9ACACAC"))
-//                    holder.imageView.foreground=foregroundDrawable
+                        imageHolder.imageView.foreground = null
+                    }
+                } else {
+                    // Handle the case where reversedPosition is out of bounds or selectedStatusList is empty.
+                    // You can log an error or perform appropriate error handling here.
+                }
+                imageHolder.imageView.setOnLongClickListener {
+                    if (!isMultiSelect) {
+                        isMultiSelect = true
                         savedSelectedVideoStatusList.add(itemsViewModel)
                         mList[reversedPosition].isSelected=true
+                        val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
+                        imageHolder.imageView.foreground = drawable
                         callBack.onMultiVideoSelectModeActivated()
                     }
-                    // notifyItemChanged(position)
-                } else {
-                    val i = Intent(context, FullScreenVideoActivity::class.java)
-                    ItemsViewModel = mList[reversedPosition]
-                    i.action = "sa"
-                    i.putExtra("is30Plus", true)
-                    i.putExtra("img_tag", holder.save.tag.toString())
-                    Log.e("img_tag", holder.save.tag.toString())
-                    context.startActivity(i)
+                    //     notifyItemChanged(position)
+                    true
                 }
-            }
+
+                imageHolder.imageView.setOnClickListener {
+                    if (isMultiSelect) {
+                        if (savedSelectedVideoStatusList.contains(itemsViewModel)) {
+                            savedSelectedVideoStatusList.remove(itemsViewModel)
+                            mList[reversedPosition].isSelected=false
+                            imageHolder.imageView.foreground=null
+                            callBack.onMultiVideoSelectModeActivated()
+                        } else {
+                            val drawable = ContextCompat.getDrawable(context, R.drawable.selected_back)
+                            imageHolder.imageView.foreground = drawable
+
+//                    val foregroundDrawable = ColorDrawable(Color.parseColor("#C9ACACAC"))
+//                    imageHolder.imageView.foreground=foregroundDrawable
+                            savedSelectedVideoStatusList.add(itemsViewModel)
+                            mList[reversedPosition].isSelected=true
+                            callBack.onMultiVideoSelectModeActivated()
+                        }
+                        // notifyItemChanged(position)
+                    } else {
+                        val i = Intent(context, FullScreenVideoActivity::class.java)
+                        ItemsViewModel = mList[reversedPosition]
+                        i.action = "sa"
+                        i.putExtra("is30Plus", true)
+                        i.putExtra("img_tag", imageHolder.save.tag.toString())
+                        Log.e("img_tag", imageHolder.save.tag.toString())
+                        context.startActivity(i)
+                    }
+                }
 
 
-            holder.save.setOnClickListener { v ->
-                if (holder.save.tag != "saved") {
+                imageHolder.save.setOnClickListener { v ->
+                    if (imageHolder.save.tag != "saved") {
 
                         if (reversedPosition < mList.size) {
                             try {
@@ -142,8 +157,8 @@ class VideoAdapter30plus(
                                     ItemsViewModel = mList[reversedPosition]
                                     i.action = "sa"
                                     i.putExtra("is30Plus", true)
-                                    i.putExtra("img_tag", holder.save.tag.toString())
-                                    Log.e("img_tag", holder.save.tag.toString())
+                                    i.putExtra("img_tag", imageHolder.save.tag.toString())
+                                    Log.e("img_tag", imageHolder.save.tag.toString())
                                     context.startActivity(i)
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -153,15 +168,44 @@ class VideoAdapter30plus(
                             }
                         }
 
+                    } else {
+                        context.showToast("Video Already Downloaded")
+                    }
+                }
+            } catch (exp: Exception) {
+                exp.printStackTrace()
+            }
+        }
+
+        else if (getItemViewType(position) == ITEM_TYPE_AD) {
+            val adHolder = holder as AdViewHolder
+
+            loadNativeAd(context,adHolder.frame!!,
+                RemoteDateConfig.remoteAdSettings.admob_native_dashboard_ad.value,context.layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
+
+        }
+
+    }
+    fun setLayoutManager() {
+        val layoutManager = GridLayoutManager(context, Common.GRID_COUNT)
+        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                return if (getItemViewType(position) == ITEM_TYPE_AD) {
+                    Common.GRID_COUNT // For ad items, span the entire row
                 } else {
-                    context.showToast("Video Already Downloaded")
+                    1 // For regular items, occupy one span
                 }
             }
-        } catch (exp: Exception) {
-            exp.printStackTrace()
+        }
+        recyclerView.layoutManager = layoutManager
+    }
+    override fun getItemViewType(position: Int): Int {
+        return if (position == 2) {
+            ITEM_TYPE_AD
+        } else {
+            ITEM_TYPE_IMAGE
         }
     }
-
     // return the number of the items in the list
     override fun getItemCount(): Int {
         return mList.size
