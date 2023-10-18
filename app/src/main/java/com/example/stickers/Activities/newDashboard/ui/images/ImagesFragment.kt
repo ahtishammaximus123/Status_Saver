@@ -41,6 +41,7 @@ import com.example.stickers.Activities.SplashActivity
 import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Activities.newDashboard.MainDashActivity.Companion.downloadClicked
 import com.example.stickers.Activities.newDashboard.base.BaseLiveStatusFragment
+import com.example.stickers.Activities.newDashboard.ui.videodownloader.VideoDownloaderMainFragment
 import com.example.stickers.Activities.repositories.Coroutines
 import com.example.stickers.Adapter.ImageAdapter
 import com.example.stickers.Adapter.ImageAdapter30plus
@@ -134,7 +135,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiSele
         selectTabCustom(0)
         loadingDialog = ProgressDialog(requireActivity(), "Loading...")
         Log.e("atg**, ", "Img")
-
+      //  VideoDownloaderMainFragment.hideMenuItemButton.invoke(false)
         return root
     }
 
@@ -875,7 +876,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiSele
             {
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 val link =
-                    "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+                    "http://play.google.com/store/apps/details?id=" + requireContext().packageName
                 shareIntent.putExtra(
                     Intent.EXTRA_TEXT,
                     "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
@@ -892,7 +893,7 @@ class ImagesFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiSele
             {
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 val link =
-                    "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+                    "http://play.google.com/store/apps/details?id=" + requireContext().packageName
                 shareIntent.putExtra(
                     Intent.EXTRA_TEXT,
                     "You can save all WhatsApp Status for free and fast. \n Download it here: $link"

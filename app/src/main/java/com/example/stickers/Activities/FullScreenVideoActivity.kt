@@ -413,118 +413,25 @@ class FullScreenVideoActivity() : BillingBaseActivity() {
                     val currentOrientation = resources.configuration.orientation
                     if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                        binding?.bannerAdview?.visibility=View.GONE
+                        binding?.fullScreenVideoNative?.visibility=View.GONE
                     } else {
                         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                        binding?.bannerAdview?.visibility=View.VISIBLE
+                        binding?.fullScreenVideoNative?.visibility=View.VISIBLE
                     }
                 } else {
-                    lockButton.imageTintList =
-                        ColorStateList.valueOf(resources.getColor(R.color.black, theme))
+                    lockButton.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.black, theme))
                     window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_USER
-                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+//                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_USER
+//                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                 }
             }
         })
-        //        ArrayList<String> list = new ArrayList<>();
-//        if( AppClass.Companion.getFileList() != null && !AppClass.Companion.getFileList().isEmpty()){
-//            for(Status a: AppClass.Companion.getFileList()){
-//                list.add(Uri.fromFile(a.getFile()).toString());
-//            }
-//        }
-//        else if( AppClass.Companion.getFile30List() != null && !AppClass.Companion.getFile30List().isEmpty()){
-//            for(StatusDocFile a: AppClass.Companion.getFile30List()){
-//
-////                String[] listt = a.getFile().getUri().getPath().split("/document/primary:");
-////
-////                String toUse = listt[1];
-////                Log.e("tree", "read30SDKWithUri: toUse : " + toUse);
-////
-////                toUse = "/storage/emulated/0/" + toUse;
-////                File f = new File(toUse);
-//
-//                list.add(a.getFile().getUri().toString());
-//            }
-//        }
 
-//        binding.imageView23.setOnClickListener(
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        if(list.size() > position+1) {
-//                            position = position + 1;
-//
-//                            binding.videoFull.setMediaController(mediaController);
-//                            binding.videoFull.setVideoURI(Uri.parse(list.get(position)));
-//                        }
-//                    }
-//                }
-//        );
-//        binding.imageView24.setOnClickListener(
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        if(position-1 >= 0){
-//                            position = position - 1;
-//
-//                            binding.videoFull.setMediaController(mediaController);
-//                            binding.videoFull.setVideoURI(Uri.parse(list.get(position)));
-//                        }
-//                    }
-//                }
-//        );
-//        list.add("https://res.cloudinary.com/kartiksaraf/video/upload/v1564516308/github_MediaSliderView/demo_videos/video1_jetay3.mp4");
-//        list.add("https://res.cloudinary.com/kartiksaraf/video/upload/v1564516308/github_MediaSliderView/demo_videos/video2_sn3sek.mp4");
-//        list.add("https://res.cloudinary.com/kartiksaraf/video/upload/v1564516308/github_MediaSliderView/demo_videos/video3_jcrsb3.mp4");
-//
-        //  loadMediaSliderView(list,"video",false,true,false,"Video-Slider","#000000",null,0);
-
-//        final MediaController mediaController = new MediaController(FullScreenVideoActivity.this, true);
-//
-//        binding.videoFull.setOnPreparedListener(mp -> {
-//            mp.start();
-//            mediaController.show(0);
-//            //mp.setLooping(true);
-//        });
-//
-//        binding.videoFull.setMediaController(mediaController);
-//        mediaController.setMediaPlayer(binding.videoFull);
-//        binding.videoFull.setVideoURI(Uri.fromFile(status.getFile()));
-//        binding.videoFull.requestFocus();
-//
-//        ((ViewGroup) mediaController.getParent()).removeView(mediaController);
-//
-//        if (FullScreenVideoActivity.this.binding.videoViewWrapper.getParent() != null) {
-//            FullScreenVideoActivity.this.binding.videoViewWrapper.removeView(mediaController);
-//        }
-//
-//        FullScreenVideoActivity.this.binding.videoViewWrapper.addView(mediaController);
     }
 
-    //    public static Uri getImageContentUri(Context context, File imageFile) {
-    //        String filePath = imageFile.getAbsolutePath();
-    //        Cursor cursor = context.getContentResolver().query(
-    //                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-    //                new String[] { MediaStore.Video.Media._ID },
-    //                MediaStore.Video.Media.DATA + "=? ",
-    //                new String[] { filePath }, null);
-    //        if (cursor != null && cursor.moveToFirst()) {
-    //            int a = cursor.getColumnIndex(MediaStore.MediaColumns._ID);
-    //            if(a >= 0) {
-    //                int id = cursor.getInt(a);
-    //                cursor.close();
-    //                return Uri.withAppendedPath(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "" + id);
-    //            } else return null;
-    //        } else {
-    //            if (imageFile.exists()) {
-    //                ContentValues values = new ContentValues();
-    //                values.put(MediaStore.Video.Media.DATA, filePath);
-    //                return context.getContentResolver().insert(
-    //                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
-    //            } else {
-    //                return null;
-    //            }
-    //        }
-    //    }
+
     fun adjustFontScale(configuration: Configuration) {
         configuration.fontScale = 1.0.toFloat()
         val metrics = resources.displayMetrics

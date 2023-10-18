@@ -159,6 +159,7 @@
                         android:layout_width="35dp"
                         android:layout_height="35dp"
                         android:layout_marginTop="@dimen/_10sdp"
+                        android:visibility="gone"
                         android:layout_gravity="center"
                         android:padding="8dp"
                         android:src="@drawable/ic_collage_ic__2_"
@@ -174,6 +175,7 @@
                         android:fontFamily="@font/poppins_light"
                         android:padding="5dp"
                         android:text="Collage Files"
+                        android:visibility="gone"
                         android:textColor="@color/white"
                         android:textSize="@dimen/_12sdp"
                         app:layout_constraintBottom_toBottomOf="@+id/imageView13"
@@ -185,12 +187,12 @@
                         android:id="@+id/imageView16"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginTop="@dimen/_10sdp"
                         android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/_10sdp"
                         android:padding="8dp"
                         android:src="@drawable/ic_feedback_sidebar"
                         app:layout_constraintEnd_toStartOf="@+id/guideline16"
-                        app:layout_constraintStart_toStartOf="@+id/imageView13"
+                        app:layout_constraintStart_toStartOf="@+id/imageView4"
                         app:layout_constraintTop_toBottomOf="@+id/imageView13" />
 
                     <TextView

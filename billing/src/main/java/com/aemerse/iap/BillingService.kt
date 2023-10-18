@@ -127,7 +127,7 @@ class BillingService(
         try {
             val intent = Intent()
             intent.action = Intent.ACTION_VIEW
-            val subscriptionUrl = ("http://play.googlee.com/store/account/subscriptions"
+            val subscriptionUrl = ("http://play.google.com/store/account/subscriptions"
                     + "?package=" + activity.packageName
                     + "&sku=" + sku)
             intent.data = Uri.parse(subscriptionUrl)

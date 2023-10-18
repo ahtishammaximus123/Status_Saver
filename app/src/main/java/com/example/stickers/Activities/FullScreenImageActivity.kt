@@ -1,5 +1,6 @@
 package com.example.stickers.Activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
@@ -24,7 +25,6 @@ import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.example.stickers.Activities.newDashboard.MainDashActivity
 import com.example.stickers.Activities.newDashboard.MainDashActivity.Companion.downloadClicked
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.ItemsViewModel
@@ -37,16 +37,13 @@ import com.example.stickers.Utils.AppCommons.Companion.ShowWAppDialog
 import com.example.stickers.Utils.Common
 import com.example.stickers.Utils.saveInToPath
 import com.example.stickers.Utils.showSnackBar
-import com.example.stickers.ads.AdmobCollapsibleBanner
 import com.example.stickers.ads.InterAdsClass
 import com.example.stickers.ads.loadAdaptiveBanner
 import com.example.stickers.ads.loadNativeAd
-
 import com.example.stickers.app.AppClass.Companion.file30List
 import com.example.stickers.app.AppClass.Companion.fileList
 import com.example.stickers.app.BillingBaseActivity
 import com.example.stickers.app.RemoteDateConfig
-import com.example.stickers.app.getUriPath
 import com.example.stickers.app.shareFile
 import com.example.stickers.databinding.ActivityFullScreenImageBinding
 import com.example.stickers.dialog.ProgressDialog
@@ -66,58 +63,68 @@ class FullScreenImageActivity : BillingBaseActivity() {
     private val savedStatusList = mutableListOf<Boolean>()
 
     private val savedStatusListFiles = mutableListOf<StatusDocFile>()
-    companion object{
-         val savedStatusListFiles29 = mutableListOf<Status>()
+
+    companion object {
+        val savedStatusListFiles29 = mutableListOf<Status>()
         val savedVideoStatusListFiles29 = mutableListOf<Status>()
     }
+
     private var adisready = "notshowed"
     var isActivityRunning = false
     var loadingDialog: ProgressDialog? = null
 
     override fun onPause() {
         super.onPause()
-        isActivityRunning=false
+        isActivityRunning = false
     }
+
     override fun onResume() {
         super.onResume()
-        isActivityRunning=true
+        isActivityRunning = true
 
-        showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_download_btn_inter_ad.value){   }
+        showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_download_btn_inter_ad.value) { }
         val frame = findViewById<FrameLayout>(R.id.full_screen_image_native)
-       loadNativeAd(this,frame!!,
-            RemoteDateConfig.remoteAdSettings.admob_native_full_screen_image_ad.value,layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
+        loadNativeAd(this,
+            frame!!,
+            RemoteDateConfig.remoteAdSettings.admob_native_full_screen_image_ad.value,
+            layoutInflater,
+            R.layout.gnt_medium_template_without_media_view,
+            { },
+            {})
         val frameBanner = findViewById<FrameLayout>(R.id.banner_adview)
-     loadAdaptiveBanner(
+        loadAdaptiveBanner(
             this,
             frameBanner,
             RemoteDateConfig.remoteAdSettings.admob_adaptive_image_full_scr_banner_ad.value
         )
     }
-    private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
 
-        if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null && downloadClicked) {
+    private fun showInterAd(activity: Activity, status: String, functionalityListener: () -> Unit) {
+
+        if (status == "on" && adisready == "notshowed" && InterAdsClass.currentInterAd != null && downloadClicked) {
 
             loadingDialog?.dialogShow()
             Handler(Looper.getMainLooper()).postDelayed({
-                if(isActivityRunning)
-                {
-                    downloadClicked=false
+                if (isActivityRunning) {
+                    downloadClicked = false
                     InterAdsClass.getInstance().showInterAd123(activity,
-                        { functionalityListener.invoke()
+                        {
+                            functionalityListener.invoke()
                         }, {}, {
 
-                            adisready="showed"
+                            adisready = "showed"
                             loadingDialog?.dismiss()
                         })
                 }
 
 
             }, 900)
-        }
-        else{
+        } else {
             functionalityListener.invoke()
         }
     }
+
+    @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adjustFontScale(resources.configuration)
@@ -148,7 +155,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
                 savedStatusList.add(Common.getSavedFile(savedFileName))
                 if (savedFileName != null && Common.getSavedFile(savedFileName)) {
                     if (!savedStatusListFiles29.contains(image)) {
-                    //    savedStatusListFiles29.add(image)
+                        //    savedStatusListFiles29.add(image)
                     }
                 }
             }
@@ -224,30 +231,32 @@ class FullScreenImageActivity : BillingBaseActivity() {
         )
 
         binding.imgPost.setOnClickListener(View.OnClickListener {
-          //  Log.e("WhatsAppicon", "onCreate: Clicked" )
+            //  Log.e("WhatsAppicon", "onCreate: Clicked" )
 
             val uri: Uri?
-                if (openSaved)
-            {
+            if (openSaved) {
                 if (is30Plus) {
 //                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
-                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
-                  uri=imageUrl
+                    val imageUrl =
+                        savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    uri = imageUrl
                 } else {
-                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
-                    Log.e("share303", "$imageUrl: " )
-                    uri=imageUrl
+                    val imageUrl =
+                        savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    Log.e("share303", "$imageUrl: ")
+                    uri = imageUrl
                 }
-            }
-            else{
+            } else {
                 if (is30Plus) {
 //                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
-                    val imageUrl = ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file.uri
-                    uri=imageUrl
+                    val imageUrl =
+                        ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file.uri
+                    uri = imageUrl
                 } else {
-                    val imageUrl = ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.toUri()
-                    Log.e("share303", "$imageUrl: " )
-                    uri=imageUrl
+                    val imageUrl =
+                        ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    Log.e("share303", "$imageUrl: ")
+                    uri = imageUrl
 
                 }
             }
@@ -277,34 +286,37 @@ class FullScreenImageActivity : BillingBaseActivity() {
         binding.imgBackFullScreen.setOnClickListener { onBackPressed() }
 
         binding.imgShare.setOnClickListener {
-            if (openSaved)
-            {
+            if (openSaved) {
                 if (is30Plus) {
 //                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
-                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    val imageUrl =
+                        savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
                     shareFile(imageUrl, supportFragmentManager)
                 } else {
-                    val imageUrl = savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
-                    Log.e("share303", "$imageUrl: " )
-                    shareFile(imageUrl,supportFragmentManager)
+                    val imageUrl =
+                        savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.toUri()
+                    Log.e("share303", "$imageUrl: ")
+                    shareFile(imageUrl, supportFragmentManager)
 
                 }
-            }
-            else{
+            } else {
                 if (is30Plus) {
 //                ItemsViewModel?.file?.uri?.let { it1 -> shareFile(it1) }
-                    val imageUrl = ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file.uri
+                    val imageUrl =
+                        ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file.uri
                     shareFile(imageUrl, supportFragmentManager)
                 } else {
-                    val imageUrl = ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file
-                    Log.e("share303", "$imageUrl: " )
-                    shareFile(ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.toUri(),
+                    val imageUrl =
+                        ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file
+                    Log.e("share303", "$imageUrl: ")
+                    shareFile(
+                        ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file.toUri(),
                         supportFragmentManager
                     )
 
                 }
             }
-            }
+        }
 
 
     }
@@ -320,8 +332,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
         okButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 Common.deleteSavedFile(savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.name)
-            }
-            else{
+            } else {
                 Common.deleteSavedFile(savedStatusListFiles29.reversed()[binding.viewPager.currentItem].file.name)
             }
             finish()
@@ -336,27 +347,37 @@ class FullScreenImageActivity : BillingBaseActivity() {
     private fun setupViewPager() {
         val adapter = FullScreenImagePagerAdapter()
         binding.viewPager.adapter = adapter
-        binding.viewPager.offscreenPageLimit=0
+        binding.viewPager.offscreenPageLimit = 0
         binding.viewPager.currentItem = clickedPosition
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (binding.viewPager.currentItem >= 0&& ImagesFragment.imagesList.isNotEmpty()) {
+            if (binding.viewPager.currentItem >= 0 && ImagesFragment.imagesList.isNotEmpty()) {
                 Handler(Looper.getMainLooper()).postDelayed({
                     val currentImage =
                         ImagesFragment.imagesList.reversed()[binding.viewPager.currentItem].file?.name.toString()
                     if (Common.getSavedFile(currentImage)) {
-                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+
+                        if (openSaved) {
+                            binding!!.imgDownload.setImageResource(R.drawable.ic_delete_ic)
+                        } else {
+                            binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                        }
                     } else {
                         binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
                     }
                 }, 50)
             }
-        }else{
+        } else {
             if (binding.viewPager.currentItem >= 0 && ImagesFragment.imagesList29.isNotEmpty()) {
                 Handler(Looper.getMainLooper()).postDelayed({
                     val currentImage =
                         ImagesFragment.imagesList29.reversed()[binding.viewPager.currentItem].file?.name.toString()
                     if (Common.getSavedFile(currentImage)) {
-                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                        if (openSaved) {
+                            binding!!.imgDownload.setImageResource(R.drawable.ic_delete_ic)
+                        } else {
+                            binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                        }
+
                     } else {
                         binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
                     }
@@ -364,7 +385,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
             }
         }
         binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            var currentImage=""
+            var currentImage = ""
             override fun onPageScrolled(
                 position: Int,
                 positionOffset: Float,
@@ -375,21 +396,22 @@ class FullScreenImageActivity : BillingBaseActivity() {
 
             override fun onPageSelected(position: Int) {
 
-                var savedImageName =""
-                if(!openSaved)
-                {
+                var savedImageName = ""
+                if (!openSaved) {
 
                     savedImageName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                         currentImage = ImagesFragment.imagesList.reversed()[position].file?.name.toString()
+                        currentImage =
+                            ImagesFragment.imagesList.reversed()[position].file?.name.toString()
                         currentImage
-                    } else{
-                         currentImage = ImagesFragment.imagesList29.reversed()[position].file?.name.toString()
+                    } else {
+                        currentImage =
+                            ImagesFragment.imagesList29.reversed()[position].file?.name.toString()
                         currentImage
                     }
                     Common.getSavedFile(savedImageName)
                     if (!imgTag.isNullOrEmpty()) {
 
-                        if ( Common.getSavedFile(currentImage)) {
+                        if (Common.getSavedFile(currentImage)) {
                             binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
                         } else {
                             binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
@@ -397,13 +419,12 @@ class FullScreenImageActivity : BillingBaseActivity() {
                     } else {
                         binding!!.imgDownload.setImageResource(R.drawable.ic_delete_ic)
                     }
-                }
-                else{
+                } else {
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         val currentImage = savedStatusListFiles.reversed()[position]
                         currentImage.file?.name.toString()
-                    } else{
+                    } else {
                         val currentImage = savedStatusListFiles29.reversed()[position]
                         currentImage.file?.name.toString()
                     }
@@ -421,7 +442,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
     override fun onBackPressed() {
         file30List = null
         fileList = null
-            super.onBackPressed()
+        super.onBackPressed()
     }
 
     fun adjustFontScale(configuration: Configuration) {
@@ -452,6 +473,7 @@ class FullScreenImageActivity : BillingBaseActivity() {
 
         }
     }
+
     private fun saveStatusFromViewPager29(currentImage: Status) {
         if (Common.getSavedFile(currentImage.file.name)) {
             binding!!.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
@@ -479,37 +501,33 @@ class FullScreenImageActivity : BillingBaseActivity() {
             val imageView = view.findViewById<ZoomageView>(R.id.img_full)
             var imageUrl = ""
 
-            if(!openSaved)
-            {
+            if (!openSaved) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 
-                        val imageList = ImagesFragment.imagesList.reversed()
-                        val currentImage = imageList[position]
-                        imageUrl = currentImage.file?.uri.toString()
-                   /* if ( Common.getSavedFile(imageList[position].file.name)) {
-                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
-                    } else {
-                        binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
-                    }*/
-                }
-
-                else {
+                    val imageList = ImagesFragment.imagesList.reversed()
+                    val currentImage = imageList[position]
+                    imageUrl = currentImage.file?.uri.toString()
+                    /* if ( Common.getSavedFile(imageList[position].file.name)) {
+                         binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                     } else {
+                         binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
+                     }*/
+                } else {
                     val imageList = ImagesFragment.imagesList29.reversed()
                     val currentImage = imageList[position]
                     imageUrl = currentImage.file?.toUri().toString()
-                   /* if ( Common.getSavedFile(imageList[position].file.name)) {
-                        binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
-                    } else {
-                        binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
-                    }*/
+                    /* if ( Common.getSavedFile(imageList[position].file.name)) {
+                         binding.imgDownload.setImageResource(R.drawable.ic_download_ic__1_)
+                     } else {
+                         binding.imgDownload.setImageResource(R.drawable.ic_download__1_)
+                     }*/
                 }
 
-            }
-            else{
+            } else {
 
-                    val imageList =savedStatusListFiles29
-                    val currentImage = imageList.reversed()[position]
-                    imageUrl = currentImage.file.toUri().toString()
+                val imageList = savedStatusListFiles29
+                val currentImage = imageList.reversed()[position]
+                imageUrl = currentImage.file.toUri().toString()
 
             }
 

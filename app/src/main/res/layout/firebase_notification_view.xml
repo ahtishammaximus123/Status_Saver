@@ -35,8 +35,6 @@
                 android:lines="1"
                 android:textColor="@color/black"
                 android:textStyle="bold" />
-
-
             <TextView
                 android:id="@+id/tv_short_desc"
                 style="Custom Notification Text"
@@ -45,7 +43,6 @@
                 android:layout_below="@+id/tv_title"
                 android:maxLines="2"
                 android:textColor="@color/black" />
-
             <TextView
                 android:id="@+id/tv_ad"
                 android:layout_width="wrap_content"
@@ -53,7 +50,7 @@
                 android:layout_alignParentEnd="true"
                 android:background="@color/colorPrimary"
                 android:paddingHorizontal="2dp"
-                android:text="@string/ad"
+                android:text="@string/AD"
                 android:textColor="@color/white"
                 android:textSize="12dp" />
         </RelativeLayout>

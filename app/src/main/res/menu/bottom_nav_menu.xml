@@ -8,12 +8,9 @@
 
     <item
         android:id="@+id/sticker_maker"
-        android:icon="@drawable/ic_sticker_ic__2_"
-        android:title="@string/title_sticker_maker" />
+        android:icon="@drawable/download_icon"
+        android:title="@string/video_downloader" />
 
-    <item
-        android:id="@+id/photo_collage"
-        android:icon="@drawable/ic_collage_ic__2_"
-        android:title="@string/title_photo_collage" />
+
 
 </menu>

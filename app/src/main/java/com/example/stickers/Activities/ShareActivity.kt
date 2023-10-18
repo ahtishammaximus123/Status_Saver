@@ -23,7 +23,7 @@ class ShareActivity : BillingBaseActivity() {
         val view: View = binding!!.root
         setContentView(view)
         if (fbAnalytics != null) fbAnalytics!!.sendEvent("SharedActivity: Open")
-        val link = "http://play.googlee.com/store/apps/details?id=$packageName"
+        val link = "http://play.google.com/store/apps/details?id=$packageName"
         binding!!.shareback.setOnClickListener { onBackPressed() }
         binding!!.imgGmailShare.setOnClickListener { shareURL("com.google.android.gm") }
         binding!!.imgSkypeShare.setOnClickListener { shareURL("com.skype.raider") }
@@ -45,7 +45,7 @@ class ShareActivity : BillingBaseActivity() {
         intent.type = "text/plain"
         intent.setPackage(packageName)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val link = "http://play.googlee.com/store/apps/details?id=" + getPackageName()
+        val link = "http://play.google.com/store/apps/details?id=" + getPackageName()
         intent.putExtra(
             Intent.EXTRA_TEXT,
             "You can save all WhatsApp Status for free and fast. \n Download it here: $link"

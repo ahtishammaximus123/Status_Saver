@@ -19,6 +19,7 @@ import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.airbnb.lottie.LottieAnimationView
 import com.example.stickers.Activities.newDashboard.MainDashActivity
+import com.example.stickers.Activities.newDashboard.ui.videodownloader.DownloadService
 import com.example.stickers.Activities.sticker.LoadSticker
 import com.example.stickers.R
 import com.example.stickers.Utils.FirebaseAnalytics
@@ -31,6 +32,7 @@ import com.example.stickers.fcm.FcmLib
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.gson.Gson
+import java.lang.IllegalStateException
 import java.util.*
 
 @SuppressLint("CustomSplashScreen")
@@ -45,8 +47,6 @@ class SplashActivity : BillingBaseActivity() {
         var isNativeAdLoaded1 = false
         var splashAdLoaded = ""
         var appOpenClass: AppOpenClass? = null
-
-
     }
 
 
@@ -86,7 +86,10 @@ class SplashActivity : BillingBaseActivity() {
 //            AppLovinSdk.getInstance(this).showMediationDebugger()
         }
 
-
+        try {
+         this.startService(Intent(this, DownloadService::class.java))
+        } catch (ex: IllegalStateException) {
+        }
 
 
        // Ads.loadBannerAd(applicationContext)

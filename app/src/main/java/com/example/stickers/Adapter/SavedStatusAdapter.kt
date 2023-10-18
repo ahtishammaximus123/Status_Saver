@@ -194,10 +194,7 @@ class SavedStatusAdapter(
                 RemoteDateConfig.remoteAdSettings.admob_native_dashboard_ad.value,context!!.layoutInflater,R.layout.gnt_medium_template_without_media_view,{ },{})
         }
 
-
-
     }
-
 
     fun setLayoutManager() {
         val layoutManager = GridLayoutManager(StickerPackListActivity.context, Common.GRID_COUNT)

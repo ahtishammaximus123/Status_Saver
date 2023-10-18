@@ -92,6 +92,8 @@ class InterAdsClass {
                 })
 
         } else {
+            mInterstitialAd1=null
+            counter++
             failListener.invoke()
             isInterstitialShown = false
         }
@@ -143,6 +145,8 @@ class InterAdsClass {
                 })
 
         } else {
+            mInterstitialAd2=null
+            counter++
             failListener.invoke()
             isInterstitialShown = false
         }
@@ -195,6 +199,9 @@ class InterAdsClass {
                 })
 
         } else {
+
+            mInterstitialAd3=null
+            counter++
             failListener.invoke()
             isInterstitialShown = false
         }

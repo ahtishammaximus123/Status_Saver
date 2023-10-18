@@ -41,10 +41,10 @@ class NativeAdmobClass {
          var isNativeAdShowed1 = false
          var isNativeAdLoaded1 = false
         var splashNativeAd: NativeAd? = null
-        var dashboardNativeAd: NativeAd? = null
-        var innerNativeAd: NativeAd? = null
+        var alreadyRequested = false
+        var firstPirorityNativeAd: NativeAd? = null
 
-
+        var secondPiroritySecondAd: NativeAd? = null
         @Volatile
         private var instance: NativeAdmobClass? = null
         fun getInstance() = instance ?: synchronized(this)
@@ -151,7 +151,7 @@ class NativeAdmobClass {
         builder.forNativeAd {
             splashNativeAd?.destroy()
             splashNativeAd = it
-            Log.e("NativeAd", "loadAdNative: $it")
+            Log.e("NativeAd", "SplashloadAdNative: $it")
         }
         val videoOptions = VideoOptions.Builder()
             .build()
@@ -215,16 +215,16 @@ class NativeAdmobClass {
     ) {
 
 
-        val nativeAdId = RemoteDateConfig.remoteAdSettings.admob_dash_native_id.value
+        val nativeAdId = RemoteDateConfig.remoteAdSettings.admob_first_piroity_native_id.value
         if (nativeAdId.isEmpty()) {
             failedListener.invoke()
             return
         }
         val builder = AdLoader.Builder(activity, nativeAdId)
         builder.forNativeAd {
-            dashboardNativeAd?.destroy()
-            dashboardNativeAd = it
-            Log.e("NativeAd", "loadAdNative: $it")
+            firstPirorityNativeAd?.destroy()
+            firstPirorityNativeAd = it
+            Log.e("NativeAd", "1stPirorityloadAdNative: $it")
         }
         val videoOptions = VideoOptions.Builder()
             .build()
@@ -235,10 +235,10 @@ class NativeAdmobClass {
         val adLoader = builder.withAdListener(object : AdListener() {
             override fun onAdClicked() {
                 super.onAdClicked()
-                dashboardNativeAd = null
+                firstPirorityNativeAd = null
                 if (!isAdClicked) {
                     isAdClicked = true
-                    showToastInter("ad clicked loadDashboardNative", activity)
+                    showToastInter("ad clicked load1stPirorityNative", activity)
                     //firebaseAnalytic?.sendEventAnalytic("QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobClick1", "onAdClicked:")
                     loadDashboardNative(
                         activity,
@@ -253,15 +253,15 @@ class NativeAdmobClass {
             override fun onAdLoaded() {
                 super.onAdLoaded()
                 isNativeAdLoaded1 = true
-                dashboardNativeAd?.let { showListener.invoke(it) }
-                showToastInter("ad loaded loadDashboardNative", activity)
+                firstPirorityNativeAd?.let { showListener.invoke(it) }
+                showToastInter("ad loaded 1stPirorityNative", activity)
                 //firebaseAnalytic?.sendEventAnalytic( "QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobLoad1","onAdLoaded:" )
             }
 
             override fun onAdImpression() {
                 super.onAdImpression()
                 isAdClicked = false
-                showToastInter("ad impression loadDashboardNative", activity)
+                showToastInter("ad impression 1stPirorityNative", activity)
 
                 //firebaseAnalytic?.sendEventAnalytic( "QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobImpression1","onAdImpression:")
                 isNativeAdShowed1 = true
@@ -270,8 +270,7 @@ class NativeAdmobClass {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 val error =
                     "domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}"
-                Log.e("NativeAd", "failAdNative: $error")
-                //firebaseAnalytic?.sendEventAnalytic( "QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobFailed1","onAdFailedToLoad:")
+                Log.e("NativeAd", "1stPirority failAdNative: $error")
                 isNativeAdLoaded1 = false
                 failedListener.invoke()
             }
@@ -279,6 +278,77 @@ class NativeAdmobClass {
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
+
+    @SuppressLint("InflateParams")
+    fun loadSecondPirorityNativeAd(
+        activity: Activity,
+        showListener: (NativeAd) -> Unit,
+        failedListener: () -> Unit
+    ) {
+
+
+        val nativeAdId = RemoteDateConfig.remoteAdSettings.admob_second_piroity_native_id.value
+        if (nativeAdId.isEmpty()) {
+            failedListener.invoke()
+            return
+        }
+        val builder = AdLoader.Builder(activity, nativeAdId)
+        builder.forNativeAd {
+            secondPiroritySecondAd?.destroy()
+            secondPiroritySecondAd = it
+            Log.e("NativeAd", "2ndPirorityloadAdNative: $it")
+        }
+        val videoOptions = VideoOptions.Builder()
+            .build()
+        val adOptions = NativeAdOptions.Builder()
+            .setVideoOptions(videoOptions)
+            .build()
+        builder.withNativeAdOptions(adOptions)
+        val adLoader = builder.withAdListener(object : AdListener() {
+            override fun onAdClicked() {
+                super.onAdClicked()
+                secondPiroritySecondAd = null
+                if (!isAdClicked) {
+                    isAdClicked = true
+                    showToastInter("ad clicked 2ndPirorityNative", activity)
+                    //firebaseAnalytic?.sendEventAnalytic("QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobClick1", "onAdClicked:")
+                    loadSecondPirorityNativeAd(
+                        activity,
+                        {
+                            showListener.invoke(it)
+                        },
+                        failedListener
+                    )
+                }
+            }
+
+            override fun onAdLoaded() {
+                super.onAdLoaded()
+                isNativeAdLoaded1 = true
+                secondPiroritySecondAd?.let { showListener.invoke(it) }
+                showToastInter("ad loaded 2ndPirorityNative", activity)
+                //firebaseAnalytic?.sendEventAnalytic( "QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobLoad1","onAdLoaded:" )
+            }
+
+            override fun onAdImpression() {
+                super.onAdImpression()
+                isAdClicked = false
+                showToastInter("ad impression 2ndPirorityNative", activity)
+                //firebaseAnalytic?.sendEventAnalytic( "QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobImpression1","onAdImpression:")
+                isNativeAdShowed1 = true
+            }
+
+            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                val error =
+                    "domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}"
+                Log.e("NativeAd", "2ndPirorityfailAdNative: $error")
+                //firebaseAnalytic?.sendEventAnalytic( "QRS_${BuildConfig.VERSION_CODE}_${activity::class.java.simpleName}_NativeAdmobFailed1","onAdFailedToLoad:")
+                isNativeAdLoaded1 = false
+                failedListener.invoke()
+            }
+        }).build()
+        adLoader.loadAd(AdRequest.Builder().build())
+    }
 
     fun showNative(
         nativeAd: NativeAd,

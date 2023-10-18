@@ -55,29 +55,11 @@
         android:layout_height="0dp"
         app:defaultNavHost="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toTopOf="@+id/main_dash_native"
+        app:layout_constraintBottom_toTopOf="@+id/nav_view_bottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/banner_adview"
         app:navGraph="@navigation/nav_graph" />
-
-
-    <FrameLayout
-        android:id="@+id/main_dash_native"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_105sdp"
-        android:layout_marginStart="@dimen/_4sdp"
-        android:layout_marginEnd="@dimen/_4sdp"
-        android:layout_marginBottom="2dp"
-        android:background="@drawable/round_bg"
-        android:elevation="3dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view_bottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <include layout="@layout/shimmer" />
-    </FrameLayout>
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -101,7 +83,7 @@
         android:id="@+id/multiselect_lay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-       android:visibility="gone"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/_1sdp"
         android:background="@color/accentColor_pressed"
         app:layout_constraintEnd_toEndOf="parent"
@@ -119,7 +101,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/share_btn"
             app:layout_constraintTop_toTopOf="parent">
-
         </ImageView>
 
         <ImageView
@@ -131,7 +112,6 @@
             app:layout_constraintBottom_toBottomOf="@+id/downloadbtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/downloadbtn">
-
         </ImageView>
 
         <ImageView
@@ -145,10 +125,10 @@
             android:textColor="@color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
         </ImageView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <FrameLayout
         android:id="@+id/collapse_able_banner"
         android:layout_width="match_parent"
@@ -157,7 +137,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-
     </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 

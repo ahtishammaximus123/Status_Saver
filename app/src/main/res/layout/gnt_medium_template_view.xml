@@ -133,13 +133,15 @@
                   android:layout_marginEnd="@dimen/gnt_default_margin"
                   android:background="@color/grey"
                   android:gravity="center"
-                  android:text="Ad"
+                  android:text="AD"
                   android:textColor="@color/white"
                   android:textSize="@dimen/gnt_ad_indicator_text_size"
                   android:textStyle="bold"
                   app:layout_constraintBottom_toBottomOf="parent"
                   app:layout_constraintStart_toStartOf="parent"
-                  app:layout_constraintTop_toTopOf="parent"></TextView>
+                  app:layout_constraintTop_toTopOf="parent">
+
+              </TextView>
 
               <RatingBar
                   android:id="@+id/ad_stars"

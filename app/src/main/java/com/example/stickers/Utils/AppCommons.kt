@@ -26,7 +26,7 @@ class AppCommons {
             val wrapper: Context = ContextThemeWrapper(this, R.style.PopupMenu2)
         val popupMenu = PopupMenu(wrapper, view)
         popupMenu.inflate(R.menu.status_menu_inside)
-            val link = "http://play.googlee.com/store/apps/details?id=$packageName"
+            val link = "http://play.google.com/store/apps/details?id=$packageName"
             val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
         popupMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
             when (item.itemId) {

@@ -2,17 +2,14 @@ package com.example.stickers.ads
 
 
 import android.app.Activity
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.LayoutRes
-import com.example.stickers.R
-import com.example.stickers.ads.InterAdsClass.Companion.currentInterAd
-import com.example.stickers.ads.NativeAdmobClass.Companion.dashboardNativeAd
+import com.example.stickers.ads.NativeAdmobClass.Companion.alreadyRequested
+import com.example.stickers.ads.NativeAdmobClass.Companion.secondPiroritySecondAd
+import com.example.stickers.ads.NativeAdmobClass.Companion.firstPirorityNativeAd
 import com.example.stickers.ads.NativeAdmobClass.Companion.splashNativeAd
-import com.example.stickers.dialog.ProgressDialog
 import com.google.android.gms.ads.nativead.NativeAd
 
 
@@ -36,19 +33,61 @@ import com.google.android.gms.ads.nativead.NativeAd
         {
             frameLayout.visibility=View.VISIBLE
             when {
-                dashboardNativeAd==null -> {
+                firstPirorityNativeAd==null -> {
+                    if(!alreadyRequested)
+                    {
+                        alreadyRequested=true
                     NativeAdmobClass.getInstance().loadDashboardNative(activity,
                         {
-                            showNativeAd(frameLayout,it,status,layoutInflater,layoutRes,{loadListener.invoke()},{failedListener.invoke()})
+                            showNativeAd(frameLayout,it,status,layoutInflater,layoutRes,{loadListener.invoke()},{  frameLayout.visibility=View.GONE
+                                failedListener.invoke()})
 
+                          //  alreadyRequested=false
                         },{
-                            failedListener.invoke()
+                            NativeAdmobClass.getInstance().loadSecondPirorityNativeAd(activity,
+                                {
+                                    showNativeAd(frameLayout,it,status,layoutInflater,layoutRes,{loadListener.invoke()},{
+                                        frameLayout.visibility=View.GONE
+                                        failedListener.invoke()})
 
+                                },{
+                                    frameLayout.visibility=View.GONE
+                                    failedListener.invoke()
+
+                                })
                         })
+                    }
+                    else if( firstPirorityNativeAd!=null)
+                    {  showNativeAd(frameLayout,
+                        firstPirorityNativeAd!!,status,layoutInflater,layoutRes,{loadListener.invoke()},{
+                            frameLayout.visibility=View.GONE
+                            failedListener.invoke()})
+
+                    }
+                    else if( secondPiroritySecondAd!=null && firstPirorityNativeAd==null)
+                    {  showNativeAd(frameLayout,
+                        secondPiroritySecondAd!!,status,layoutInflater,layoutRes,{loadListener.invoke()},{
+                            frameLayout.visibility=View.GONE
+                            failedListener.invoke()})
+
+                    }
+                    else{
+                        failedListener.invoke()
+                        frameLayout.visibility=View.GONE
+                    }
                 }
-                dashboardNativeAd!=null -> {
+                firstPirorityNativeAd!=null -> {
                     showNativeAd(frameLayout,
-                        dashboardNativeAd!!,status,layoutInflater,layoutRes,{loadListener.invoke()},{failedListener.invoke()})
+                        firstPirorityNativeAd!!,status,layoutInflater,layoutRes,{loadListener.invoke()},{
+                            frameLayout.visibility=View.GONE
+                            failedListener.invoke()})
+                }
+
+                (secondPiroritySecondAd!=null && firstPirorityNativeAd==null) -> {
+                    showNativeAd(frameLayout,
+                        secondPiroritySecondAd!!,status,layoutInflater,layoutRes,{loadListener.invoke()},{
+                            frameLayout.visibility=View.GONE
+                            failedListener.invoke()})
                 }
                 else -> {
                     frameLayout.visibility=View.GONE
@@ -62,6 +101,8 @@ import com.google.android.gms.ads.nativead.NativeAd
 
 
     }
+
+
 
 fun loadSplashNativeAd(
     activity:Activity,
@@ -81,16 +122,22 @@ fun loadSplashNativeAd(
             splashNativeAd==null -> {
                 NativeAdmobClass.getInstance().loadSplashNative(activity,
                     {
-                        showNativeAd(frameLayout,it,status,layoutInflater,layoutRes,{loadListener.invoke()},{failedListener.invoke()})
+                        showNativeAd(frameLayout,it,status,layoutInflater,layoutRes,{loadListener.invoke()},{
+                            frameLayout.visibility=View.GONE
+                            failedListener.invoke()})
+
 
                     },{
+                        frameLayout.visibility=View.GONE
                         failedListener.invoke()
 
                     })
             }
             splashNativeAd!=null -> {
                 showNativeAd(frameLayout,
-                    splashNativeAd!!,status,layoutInflater,layoutRes,{loadListener.invoke()},{failedListener.invoke()})
+                    splashNativeAd!!,status,layoutInflater,layoutRes,{loadListener.invoke()},{
+                        frameLayout.visibility=View.GONE
+                        failedListener.invoke()})
             }
             else -> {
                 frameLayout.visibility=View.GONE

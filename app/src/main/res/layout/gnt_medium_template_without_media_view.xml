@@ -132,7 +132,7 @@
                   android:layout_marginEnd="@dimen/gnt_default_margin"
                   android:background="@color/grey"
                   android:gravity="center"
-                  android:text="Ad"
+                  android:text="AD"
                   android:textColor="@color/white"
                   android:textSize="@dimen/gnt_ad_indicator_text_size"
                   android:textStyle="bold"
@@ -155,7 +155,7 @@
                   android:lines="1"
                   android:numStars="5"
                   android:stepSize="0.1"
-
+                  android:progressTint="@color/yellowColor"
                   android:textColor="@color/black"
                   android:textSize="@dimen/gnt_text_size_small"
                   app:layout_constraintBottom_toBottomOf="parent"

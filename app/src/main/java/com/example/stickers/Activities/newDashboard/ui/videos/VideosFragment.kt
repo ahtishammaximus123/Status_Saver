@@ -776,7 +776,7 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
         var exitDialogFragment: ShareFragment? = null
         exitDialogFragment = ShareFragment(null, {
             val shareIntent = Intent(Intent.ACTION_SEND)
-            val link = "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+            val link = "http://play.google.com/store/apps/details?id=" + requireContext().packageName
             shareIntent.putExtra(
                 Intent.EXTRA_TEXT,
                 "You can save all WhatsApp Status for free and fast. \n Download it here: $link"
@@ -787,7 +787,7 @@ class VideosFragment : BaseLiveStatusFragment(), ImageAdapterCallBack, MultiVide
             startActivity(shareIntent)},
 
             {val shareIntent = Intent(Intent.ACTION_SEND)
-            val link = "http://play.googlee.com/store/apps/details?id=" + requireContext().packageName
+            val link = "http://play.google.com/store/apps/details?id=" + requireContext().packageName
             shareIntent.putExtra(
                 Intent.EXTRA_TEXT,
                 "You can save all WhatsApp Status for free and fast. \n Download it here: $link"

@@ -2,6 +2,8 @@ package com.example.stickers.Activities.newDashboard
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -10,7 +12,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment
 import com.example.stickers.Activities.newDashboard.ui.savedstatuses.SavedStatusesFragment
+import com.example.stickers.Activities.newDashboard.ui.videodownloader.VideoDownloaderMainFragment
 import com.example.stickers.Activities.newDashboard.ui.videos.VideosFragment
+import com.example.stickers.R
 import com.example.stickers.databinding.FragmentStatusMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -48,6 +52,7 @@ class StatusMainFragment : Fragment() {
         TabLayoutMediator(binding.tabLayout.tabLayoutNav, binding.viewPager) { tab, position ->
             tab.text = fragmentList[position].name
         }.attach()
+
     }
 
     inner class StatusPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :

@@ -30,7 +30,7 @@ class ShareFragment(val path: Uri?,  val whatsapps: () -> Unit,val others: () ->
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val link = "http://play.googlee.com/store/apps/details?id=${requireActivity().packageName}"
+        val link = "http://play.google.com/store/apps/details?id=${requireActivity().packageName}"
         val shareMessage =
             "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
         // Find views and set click listeners

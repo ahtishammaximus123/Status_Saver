@@ -2,12 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/_125sdp"
+    android:layout_height="wrap_content"
     android:layout_margin="1dp"
     android:elevation="@dimen/_2sdp"
     app:cardCornerRadius="@dimen/_2sdp"
     app:cardUseCompatPadding="true">
-
 
     <FrameLayout
         android:id="@+id/main_dash_native"
@@ -17,7 +16,8 @@
         android:layout_marginEnd="@dimen/_4sdp"
         android:background="@drawable/round_bg"
         android:elevation="3dp"
-        android:visibility="visible"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginBottom="@dimen/_5sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -51,7 +51,6 @@ import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Com
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesFragment.Companion.selectedStatusList29
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModel
 import com.example.stickers.Activities.newDashboard.ui.images.ImagesViewModelFactory
-import com.example.stickers.Adapter.ImageAdapter30plus
 import com.example.stickers.BuildConfig
 import com.example.stickers.Models.Status
 import com.example.stickers.Models.StatusDocFile
@@ -74,7 +73,6 @@ import com.example.stickers.dialog.ExitDialogFragment
 import com.example.stickers.dialog.ProgressDialog
 import com.example.stickers.dialog.SelectWhatsAppFragment
 import com.example.stickers.dialog.ShareFragment
-import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import java.io.File
@@ -89,26 +87,25 @@ class MainDashActivity : BillingBaseActivity() {
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE = 5544
     private val REQUEST_ACTION_OPEN_DOCUMENT_TREE_2 = 55442
     private var dialog: ProgressDialog? = null
-    private var imageAdapter30plus: ImageAdapter30plus? = null
     private lateinit var openWhat: ImageView
     private var exitDialogFragment: ExitDialogFragment? = null
     private var adisready = "notshowed"
     var isActivityRunning = false
     var loadingDialog: ProgressDialog? = null
-    private lateinit var nativeFrame: FrameLayout
+
 
     companion object {
         var isStoragePermissionDeny = true
         var isInterShown = false
         var isActivityShown = true
         var downloadClicked = false
+        var playerActivityBack=false
+        var downloadInProcessActivityBack=false
         const val REQUEST_PERMISSIONS = 1234
         val PERMISSIONS = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-        var nativeAdNew1: NativeAd? = null
-        var nativeAdNew2: NativeAd? = null
 
 
         val storagePermissions = arrayOf(
@@ -147,8 +144,7 @@ class MainDashActivity : BillingBaseActivity() {
         binding.textView10.text = "Version " + BuildConfig.VERSION_NAME
         initDrawer()
         openWhat = findViewById<ImageView>(R.id.open_whatsApp_icon)
-        nativeFrame = findViewById<FrameLayout>(R.id.main_dash_native)
-        nativeFrame.visibility = View.GONE
+
         var whatsAppType = SharedPreferenceData(this).getString("apppackage")
         if (whatsAppType == "com.whatsapp") {
             openWhat.setBackgroundResource(R.drawable.whats_app_icon)
@@ -249,15 +245,9 @@ class MainDashActivity : BillingBaseActivity() {
             if (/*nd.id == R.id.LiveVideosFragment
                 || nd.id == R.id.SavedStatusesFragment
                || nd.id == R.id.LiveImagesFragment
-               || */nd.id == R.id.photoCollageFragment || nd.id == R.id.stickerMakerFragment
+               || */nd.id == R.id.photoCollageFragment || nd.id == R.id.stickerMakerFragment|| nd.id == R.id.video_downloader
             ) {
                 openWhat.visibility = View.GONE
-                if (adViewCollapsible == null) {
-                    nativeFrame.visibility = View.VISIBLE
-                }
-                else{
-                    nativeFrame.visibility = View.GONE
-                }
 
                 val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
                 multiSelectLay?.visibility = View.GONE
@@ -275,12 +265,12 @@ class MainDashActivity : BillingBaseActivity() {
             } else if (nd.id == R.id.galleryItemFragment || nd.id == R.id.galleryFragment
             ) {
                 openWhat.visibility = View.VISIBLE
-                nativeFrame.visibility = View.GONE
+
                 hideSelectorLayout()
                 supportActionBar?.hide()
             } else {
                 openWhat.visibility = View.VISIBLE
-                nativeFrame.visibility = View.GONE
+
                 Log.e("atg**2", "$nd")
             }
             Log.e("atg**2", "$nd")
@@ -354,13 +344,6 @@ class MainDashActivity : BillingBaseActivity() {
         isActivityRunning = true
         val frame = findViewById<FrameLayout>(R.id.main_dash_native)
         loadCollapsableBannerAd()
-        loadNativeAd(this,
-            frame!!,
-            RemoteDateConfig.remoteAdSettings.admob_native_dashboard_ad.value,
-            layoutInflater,
-            R.layout.gnt_medium_template_without_media_view,
-            { },
-            {})
         showInterAd(this, RemoteDateConfig.remoteAdSettings.admob_splash_inter_ad.value) {}
     }
 
@@ -375,7 +358,6 @@ class MainDashActivity : BillingBaseActivity() {
                         binding.content.collapseAbleBanner,
                         {
                             //load listener
-
                             AdmobCollapsibleBanner.getInstance()
                                 .showCollapsibleAd(
                                     binding.content.collapseAbleBanner
@@ -452,7 +434,7 @@ class MainDashActivity : BillingBaseActivity() {
                 try {
                     val intent = Intent(
                         Intent.ACTION_VIEW, Uri.parse(
-                            "http://play.googlee.com/store/apps/details?id="
+                            "http://play.google.com/store/apps/details?id="
                                     + applicationContext.packageName
                         )
                     )
@@ -827,6 +809,7 @@ class MainDashActivity : BillingBaseActivity() {
     var myMenu: Menu? = null
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.status_menu, menu)
+
         if (WAoptions.appPackage == "com.whatsapp.w4b") {
             menu.getItem(1).isChecked = true
         }
@@ -930,7 +913,14 @@ class MainDashActivity : BillingBaseActivity() {
                     WAoptions.appPackage = "com.whatsapp.w4b"
                     SharedPreferenceData(this).putString("apppackage", "com.whatsapp.w4b")
                     myMenu?.getItem(1)?.isChecked = true
-                    navController?.navigate(R.id.status)
+                    try {
+                        navController?.navigate(R.id.status)
+
+                    }
+                    catch (e:Exception)
+                    {
+                        e.printStackTrace()
+                    }
 
                     val whatsAppType = SharedPreferenceData(this).getString("apppackage")
                     if (whatsAppType == "com.whatsapp") {
@@ -952,7 +942,13 @@ class MainDashActivity : BillingBaseActivity() {
                     WAoptions.appPackage = "com.whatsapp"
                     SharedPreferenceData(this).putString("apppackage", "com.whatsapp")
                     myMenu?.getItem(0)?.isChecked = true
-                    navController?.navigate(R.id.status)
+                    try {
+                        navController?.navigate(R.id.status)
+                    }
+                    catch (e:Exception)
+                    {
+                        e.printStackTrace()
+                    }
 
                     val whatsAppType = SharedPreferenceData(this).getString("apppackage")
                     if (whatsAppType == "com.whatsapp") {
@@ -979,25 +975,23 @@ class MainDashActivity : BillingBaseActivity() {
     }
 
     override fun onBackPressed() {
-        Log.e(
-            "atg**",
-            "${navController?.currentDestination}"
-        )
+
         when (navController?.currentDestination?.id) {
             R.id.status -> {
                 exitDialogFragment = ExitDialogFragment()
                 exitDialogFragment!!.show(supportFragmentManager, "exit_dialog_tag")
             }
+
             /*R.id.LiveVideosFragment, R.id.SavedStatusesFragment,
                 //R.id.stickerMakerFragment, R.id.photoCollageFragment
             -> {
                 navController?.navigate(R.id.LiveImagesFragment)
 //                navController?.popBackStack(R.id.LiveImagesFragment, true)
             }*/
+
             R.id.galleryFragment -> {
                 navController?.navigate(R.id.photoCollageFragment)
             }
-
             else -> super.onBackPressed()
         }
     }
@@ -1007,7 +1001,6 @@ class MainDashActivity : BillingBaseActivity() {
         deleteListener: () -> Unit,
         shareListener: () -> Unit
     ) {
-
         openWhat.visibility = View.GONE
         val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
         val closeAction = findViewById<ImageView>(R.id.close_action)
@@ -1015,12 +1008,10 @@ class MainDashActivity : BillingBaseActivity() {
         val download = findViewById<ImageView>(R.id.downloadbtn)
         download.setBackgroundResource(R.drawable.ic_download__1_)
         multiSelectLay.visibility = View.VISIBLE
-
         closeAction.setOnClickListener {
             hideSelectorLayout()
             notifyAdapter.invoke()
         }
-
         shareBtn.setOnClickListener {
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -1028,10 +1019,8 @@ class MainDashActivity : BillingBaseActivity() {
             } else {
                 shareImagesToOtherApps(this, selectedStatusList)
             }
-
             hideSelectorLayout()
             notifyAdapter.invoke()
-
         }
         download.setOnClickListener {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -1042,7 +1031,6 @@ class MainDashActivity : BillingBaseActivity() {
             hideSelectorLayout()
             notifyAdapter.invoke()
         }
-
     }
 
     fun onMultiVideoSelectMode(
@@ -1050,7 +1038,6 @@ class MainDashActivity : BillingBaseActivity() {
         deleteListener: () -> Unit,
         shareListener: () -> Unit
     ) {
-
         openWhat.visibility = View.GONE
         val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
         val closeAction = findViewById<ImageView>(R.id.close_action)
@@ -1058,12 +1045,10 @@ class MainDashActivity : BillingBaseActivity() {
         val download = findViewById<ImageView>(R.id.downloadbtn)
         download.setBackgroundResource(R.drawable.ic_download__1_)
         multiSelectLay.visibility = View.VISIBLE
-
         closeAction.setOnClickListener {
             hideSelectorLayout()
             notifyAdapter.invoke()
         }
-
         shareBtn.setOnClickListener {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 shareVideosToOtherApps29(this,savedSelectedVideoStatusList29)
@@ -1072,7 +1057,6 @@ class MainDashActivity : BillingBaseActivity() {
             }
             hideSelectorLayout()
             notifyAdapter.invoke()
-
         }
         download.setOnClickListener {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -1083,22 +1067,17 @@ class MainDashActivity : BillingBaseActivity() {
             hideSelectorLayout()
             notifyAdapter.invoke()
         }
-
-
     }
-
     fun hideSelectorLayout() {
         val multiSelectLay = findViewById<ConstraintLayout>(R.id.multiselect_lay)
         multiSelectLay?.visibility = View.GONE
         isMultiSelect = false
         isSavedMultiSelect = false
-
         openWhat.visibility = View.VISIBLE
         selectedStatusList.clear()
         savedSelectedStatusList.clear()
         savedSelectedVideoStatusList.clear()
     }
-
     fun onSavedMultiSelectMode(
         notifyAdapter: () -> Unit,
         deleteListener: () -> Unit,
@@ -1114,7 +1093,6 @@ class MainDashActivity : BillingBaseActivity() {
 
         closeAction.setOnClickListener {
             hideSelectorLayout()
-
             notifyAdapter.invoke()
         }
 
@@ -1145,7 +1123,6 @@ class MainDashActivity : BillingBaseActivity() {
 
         }
     }
-
     private fun shareSavedImagesToOtherApps(
         context: Context,
         selectedStatusList: MutableList<Status?>
@@ -1155,7 +1132,7 @@ class MainDashActivity : BillingBaseActivity() {
             it?.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> imageUris.add(it2) }
         }
 
-        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val link = "http://play.google.com/store/apps/details?id=${packageName}"
         val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
 
         var exitDialogFragment: ShareFragment? = null
@@ -1196,15 +1173,13 @@ class MainDashActivity : BillingBaseActivity() {
         updateRecycler.invoke()
         hideSelectorLayout()
     }
-
-
     private fun shareImagesToOtherApps29(context: Context, selectedStatusList: List<Status>) {
         val imageUris = ArrayList<Uri>()
         selectedStatusList.forEach {
             it.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> imageUris.add(it2) }
         }
 
-        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val link = "http://play.google.com/store/apps/details?id=${packageName}"
         val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
 
         var exitDialogFragment: ShareFragment? = null
@@ -1230,7 +1205,7 @@ class MainDashActivity : BillingBaseActivity() {
     }
 
     private fun shareImagesToOtherApps(context: Context, selectedStatusList: List<StatusDocFile>) {
-        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val link = "http://play.google.com/store/apps/details?id=${packageName}"
         val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
         val imageUris = ArrayList<Uri>()
         selectedStatusList.forEach {
@@ -1265,7 +1240,7 @@ class MainDashActivity : BillingBaseActivity() {
             it.path?.let { it1 -> getUriPath(it1) }?.let { it2 -> videoUri.add(it2) }
         }
 
-        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val link = "http://play.google.com/store/apps/details?id=${packageName}"
         val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
 
         var exitDialogFragment: ShareFragment? = null
@@ -1291,7 +1266,7 @@ class MainDashActivity : BillingBaseActivity() {
     }
 
     private fun shareVideosToOtherApps(context: Context, selectedStatusList: List<StatusDocFile>) {
-        val link = "http://play.googlee.com/store/apps/details?id=${packageName}"
+        val link = "http://play.google.com/store/apps/details?id=${packageName}"
         val shareMessage = "You can save all WhatsApp Status for free and fast. \n Download it here: $link".trimIndent()
         val videosUri = ArrayList<Uri>()
         selectedStatusList.forEach {

@@ -42,6 +42,7 @@ import com.example.stickers.Utils.WAoptions
 import com.example.stickers.app.AppClass
 import com.example.stickers.app.AppClass.Companion.file30List
 import com.example.stickers.app.AppClass.Companion.fileList
+import com.example.stickers.app.RemoteDateConfig
 import com.example.stickers.databinding.FragmentSavedStatusesBinding
 import java.io.File
 import java.text.SimpleDateFormat
@@ -437,16 +438,20 @@ class SavedStatusesFragment : BaseLiveStatusFragment(), DeletedCallback,SavedMul
                     }
                 }
                 savedFilesList.reverse()
-                val updatedSavedFilesList = mutableListOf<Status>()
-
-                for (i in 0 until savedFilesList.size) {
-                    updatedSavedFilesList.add(savedFilesList[i])
-                    if (i == 2 && savedFilesList.size >= 3) {
+                if(RemoteDateConfig.remoteAdSettings.admob_native_dashboard_ad.value=="on")
+                {
+                    val updatedSavedFilesList = mutableListOf<Status>()
+                    for (i in 0 until savedFilesList.size) {
                         updatedSavedFilesList.add(savedFilesList[i])
+                        if (i == 2 && savedFilesList.size >= 3) {
+                            updatedSavedFilesList.add(savedFilesList[i])
+                        }
                     }
+                    savedFilesList.clear()
+                    savedFilesList.addAll(updatedSavedFilesList)
                 }
-                savedFilesList.clear()
-                savedFilesList.addAll(updatedSavedFilesList)
+
+
                 filesAdapter = SavedStatusAdapter(savedFilesList, this, this,requireActivity(),binding.recyclerViewImage,requireActivity().supportFragmentManager)
                 recyclerView!!.adapter = filesAdapter
                 val g = GridLayoutManager(activity, Common.GRID_COUNT)

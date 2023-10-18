@@ -544,8 +544,6 @@ class CollageProcessActivity : BillingBaseActivity(), StickerImageCollage,
 
     }
     private fun showInterAd(activity: Activity, status:String, functionalityListener: () -> Unit) {
-
-
         if (status=="on"&& adisready=="notshowed"&& InterAdsClass.currentInterAd !=null ) {
 
             loadingDialog?.dialogShow()
